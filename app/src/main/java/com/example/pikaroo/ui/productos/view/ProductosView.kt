@@ -26,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.pikaroo.ui.productos.model.Product
 import com.example.pikaroo.ui.productos.viewmodel.ProductosViewModel
+import com.example.pikaroo.ui.theme.PikarooBackground
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
 
@@ -38,7 +39,8 @@ fun ProductosView(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFBFBFB))
+            // APLICANDO DRY: Usamos PikarooBackground en lugar de Color(0xFFFBFBFB)
+            .background(PikarooBackground)
             .padding(horizontal = 16.dp)
     ) {
         Spacer(modifier = Modifier.height(24.dp))
@@ -70,7 +72,8 @@ fun ProductosView(
                 Surface(
                     modifier = Modifier.clickable { viewModel.selectCategory(category) },
                     shape = RoundedCornerShape(24.dp),
-                    color = if (isSelected) Color(0xFFFF5722) else Color.White,
+                    // APLICANDO DRY: Usamos PikarooOrange en lugar de un Color manual
+                    color = if (isSelected) PikarooOrange else Color.White,
                     shadowElevation = if (isSelected) 4.dp else 1.dp
                 ) {
                     Text(
@@ -165,7 +168,7 @@ fun ProductCard(product: Product) {
                 }
             }
 
-            // Add Button
+            // Add Button (YA USA DRY)
             IconButton(
                 onClick = { /* Add to cart */ },
                 modifier = Modifier
