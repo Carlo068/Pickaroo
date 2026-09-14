@@ -1,4 +1,4 @@
-package com.example.pikaroo.ui.login.view
+package com.example.pikaroo.ui.auth.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,6 +10,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,9 +24,19 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.pikaroo.ui.login.viewmodel.LoginViewModel
+import com.example.pikaroo.ui.auth.viewmodel.LoginViewModel
 import com.example.pikaroo.ui.theme.*
 
+/**
+ * Pantalla de inicio de sesión. Solo dibuja: el estado (carga, error, sesión
+ * iniciada) y la lógica viven en [LoginViewModel].
+ *
+ * Cuando el login es correcto, [LoginViewModel] pone isLoggedIn = true y esta
+ * vista dispara [onLoginSuccess] para que quien la use decida a dónde navegar.
+ *
+ * La pestaña "Registrarse" sigue siendo solo de UI: la API no expone registro,
+ * así que ese botón navega directo como lo hacía antes.
+ */
 @Composable
 fun LoginView(
     onLoginSuccess: () -> Unit,
@@ -32,6 +45,11 @@ fun LoginView(
     val isLogin = viewModel.isLoginTab
     val loginState = viewModel.loginState
     val registerState = viewModel.registerState
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(uiState.isLoggedIn) {
+        if (uiState.isLoggedIn) onLoginSuccess()
+    }
 
     Column(
         modifier = Modifier
@@ -113,12 +131,13 @@ fun LoginView(
             }
 
             LoginTextField(
-                value = if (isLogin) loginState.email else registerState.email,
-                onValueChange = { if (isLogin) viewModel.onLoginEmailChange(it) else viewModel.onRegisterEmailChange(it) },
-                label = "Correo electrónico",
-                placeholder = "correo@ejemplo.com",
-                icon = Icons.Default.Email,
-                keyboardType = KeyboardType.Email
+                value = if (isLogin) loginState.username else registerState.email,
+                onValueChange = { if (isLogin) viewModel.onLoginUsernameChange(it) else viewModel.onRegisterEmailChange(it) },
+                label = if (isLogin) "Usuario" else "Correo electrónico o numero telefonico",
+                placeholder = if (isLogin) "tu_usuario" else "correo@ejemplo.com",
+                icon = if (isLogin) Icons.Default.Person else Icons.Default.Email,
+                keyboardType = if (isLogin) KeyboardType.Text else KeyboardType.Email,
+                enabled = !uiState.isLoading
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -131,7 +150,8 @@ fun LoginView(
                 icon = Icons.Default.Lock,
                 isPassword = true,
                 isPasswordVisible = if (isLogin) loginState.isPasswordVisible else registerState.isPasswordVisible,
-                onPasswordToggle = { if (isLogin) viewModel.toggleLoginPasswordVisibility() else viewModel.toggleRegisterPasswordVisibility() }
+                onPasswordToggle = { if (isLogin) viewModel.toggleLoginPasswordVisibility() else viewModel.toggleRegisterPasswordVisibility() },
+                enabled = !uiState.isLoading
             )
 
             if (!isLogin) {
@@ -160,31 +180,59 @@ fun LoginView(
                 )
             }
 
+            if (isLogin && uiState.error != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = uiState.error!!,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 14.sp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
 
             // Action Button
             Button(
-                onClick = onLoginSuccess,
+                onClick = { if (isLogin) viewModel.login() else onLoginSuccess() },
+                enabled = !uiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = PikarooOrange),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = if (isLogin) "Iniciar Sesión" else "Crear Cuenta",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp),
+                        strokeWidth = 2.dp,
                         color = Color.White
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = if (isLogin) "Iniciar Sesión" else "Crear Cuenta",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                    }
                 }
+            }
+
+            if (uiState.isLoading) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Conectando… la primera vez puede tardar unos segundos.",
+                    color = PikarooTextGray,
+                    fontSize = 12.sp
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -269,7 +317,8 @@ fun LoginTextField(
     isPassword: Boolean = false,
     isPasswordVisible: Boolean = false,
     onPasswordToggle: () -> Unit = {},
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    enabled: Boolean = true
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -282,6 +331,7 @@ fun LoginTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
             placeholder = { Text(text = placeholder, color = Color.LightGray) },
             leadingIcon = { Icon(imageVector = icon, contentDescription = null, tint = PikarooTextGray) },
             trailingIcon = {

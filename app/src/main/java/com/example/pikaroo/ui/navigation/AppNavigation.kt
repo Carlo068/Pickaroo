@@ -3,10 +3,13 @@ package com.example.pikaroo.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.pikaroo.ui.login.view.LoginView
+import com.example.pikaroo.ui.auth.data.SessionPreferences
+import com.example.pikaroo.ui.auth.view.LoginView
+import com.example.pikaroo.ui.auth.viewmodel.LogoutViewModel
 import com.example.pikaroo.ui.onboarding.data.OnboardingPreferences
 import com.example.pikaroo.ui.onboarding.view.OnboardingView
 
@@ -16,10 +19,10 @@ fun AppNavigation() {
     val context = LocalContext.current
 
     val startDestination = remember {
-        if (OnboardingPreferences(context).hasCompletedOnboarding()) {
-            AppRoute.Login.route
-        } else {
-            "onboarding"
+        when {
+            SessionPreferences(context).isLoggedIn() -> AppRoute.Tabs.route
+            OnboardingPreferences(context).hasCompletedOnboarding() -> AppRoute.Login.route
+            else -> "onboarding"
         }
     }
 
@@ -53,7 +56,18 @@ fun AppNavigation() {
         }
 
         composable(AppRoute.Tabs.route) {
-            TabsScaffold()
+            val logoutViewModel: LogoutViewModel = viewModel()
+            TabsScaffold(
+                onLogout = {
+                    logoutViewModel.logout {
+                        rootNavController.navigate(AppRoute.Login.route) {
+                            popUpTo(AppRoute.Tabs.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                }
+            )
         }
     }
 }
