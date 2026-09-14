@@ -28,7 +28,7 @@ import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
 
 @Composable
-fun TabsScaffold() {
+fun TabsScaffold(onLogout: () -> Unit = {}) {
     val nestedNavController = rememberNavController()
     
     Scaffold(
@@ -45,7 +45,7 @@ fun TabsScaffold() {
             composable(AppRoute.Ofertas.route) { OfertasView() }
             composable(AppRoute.Ordenar.route) { OrdenarView() }
             composable(AppRoute.Productos.route) { ProductosView() }
-            composable(AppRoute.Usuario.route) { UsuarioView() }
+            composable(AppRoute.Usuario.route) { UsuarioView(onLogout = onLogout) }
         }
     }
 }

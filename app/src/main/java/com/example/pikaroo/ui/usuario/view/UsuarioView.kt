@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.ShoppingBag
@@ -28,6 +29,7 @@ import com.example.pikaroo.ui.usuario.viewmodel.UsuarioViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UsuarioView(
+    onLogout: () -> Unit = {},
     viewModel: UsuarioViewModel = viewModel()
 ) {
     Scaffold(
@@ -233,6 +235,21 @@ fun UsuarioView(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            OutlinedButton(
+                onClick = onLogout,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFF15A24)),
+                contentPadding = PaddingValues(vertical = 12.dp)
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Cerrar sesión", fontWeight = FontWeight.Medium)
+            }
+
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
