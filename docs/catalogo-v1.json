@@ -1,526 +1,103 @@
 {
-  "categories": [
-    {
-      "id": "category_1",
-      "name": "Frutas",
-      "emoji_code": "U+1F34E",
-      "image_url": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=1200&h=720&fit=crop"
-    },
-    {
-      "id": "category_2",
-      "name": "Panadería",
-      "emoji_code": "U+1F35E",
-      "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&h=720&fit=crop"
-    },
-    {
-      "id": "category_3",
-      "name": "Lácteos",
-      "emoji_code": "U+1F95B",
-      "image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=1200&h=720&fit=crop"
-    },
-    {
-      "id": "category_4",
-      "name": "Bebidas",
-      "emoji_code": "U+2615",
-      "image_url": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=1200&h=720&fit=crop"
-    },
-    {
-      "id": "category_5",
-      "name": "Despensa",
-      "emoji_code": "U+1F96B",
-      "image_url": "https://images.unsplash.com/photo-1551462147-37e10abaa4e1?w=1200&h=720&fit=crop"
-    },
-    {
-      "id": "category_6",
-      "name": "Verduras",
-      "emoji_code": "U+1F966",
-      "image_url": "https://images.unsplash.com/photo-1546470427-227e99fd2fd7?w=1200&h=720&fit=crop"
-    },
-    {
-      "id": "category_7",
-      "name": "Portafolios",
-      "emoji_code": "U+1F9FA",
-      "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&h=720&fit=crop"
-    }
-  ],
-  "groups": [
-    {
-      "id": "group_5",
-      "name": "Parrilladas",
-      "type": "items",
-      "priority": 200,
-      "position": 2,
-      "starts_at": "2026-09-01T00:00:00Z",
-      "ends_at": "2026-10-01T00:00:00Z",
-      "product_ids": [
-        "7",
-        "8",
-        "9"
-      ],
-      "image_url": "https://images.unsplash.com/photo-1546470427-227e99fd2fd7?w=1200&h=720&fit=crop",
-      "description": "Ingredientes y acompañamientos para preparar tus parrilladas."
-    },
-    {
-      "id": "group_1",
-      "name": "Compra Semanal",
-      "type": "portfolios",
-      "priority": 100,
-      "position": 1,
-      "starts_at": null,
-      "ends_at": null,
-      "product_ids": [
-        "11",
-        "13"
-      ],
-      "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&h=720&fit=crop",
-      "description": "Portafolios para completar tus compras de la semana."
-    },
-    {
-      "id": "group_4",
-      "name": "Frescos del Día",
-      "type": "items",
-      "priority": 90,
-      "position": 1,
-      "starts_at": null,
-      "ends_at": null,
-      "product_ids": [
-        "1",
-        "5",
-        "8",
-        "9",
-        "10"
-      ],
-      "image_url": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=1200&h=720&fit=crop",
-      "description": "Frutas, verduras y lácteos para tus comidas de cada día."
-    },
-    {
-      "id": "group_2",
-      "name": "Para Compartir",
-      "type": "portfolios",
-      "priority": 80,
-      "position": 2,
-      "starts_at": null,
-      "ends_at": null,
-      "product_ids": [
-        "12"
-      ],
-      "image_url": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=1200&h=720&fit=crop",
-      "description": "Portafolios para preparar y disfrutar comidas en compañía."
-    },
-    {
-      "id": "group_3",
-      "name": "Holiday party",
-      "type": "portfolios",
-      "priority": 70,
-      "position": 3,
-      "starts_at": "2026-12-01T00:00:00Z",
-      "ends_at": "2027-01-01T00:00:00Z",
-      "product_ids": [
-        "11",
-        "12"
-      ],
-      "image_url": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=1200&h=720&fit=crop",
-      "description": "Portafolios para compartir durante las celebraciones de fin de año."
-    }
-  ],
   "products": [
     {
       "id": "1",
-      "type": "item",
       "name": "Manzanas Rojas",
       "price": 3.49,
-      "image_url": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=1200&h=720&fit=crop",
+      "category": "Frutas",
+      "image_url": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
       "stock": 90,
-      "availability": "available",
       "description": "Manzanas rojas frescas de temporada.",
       "discount": {
         "percentage": 10
-      },
-      "items": [
-        {
-          "item_id": "item_1",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_1"
+      }
     },
     {
       "id": "2",
-      "type": "item",
       "name": "Pan Integral",
       "price": 3.5,
-      "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&h=720&fit=crop",
+      "category": "Panadería",
+      "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop",
       "stock": 50,
-      "availability": "available",
-      "description": "Pan integral artesanal horneado a diario.",
-      "discount": null,
-      "items": [
-        {
-          "item_id": "item_2",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_2"
+      "description": "Pan integral artesanal horneado a diario."
     },
     {
       "id": "3",
-      "type": "item",
       "name": "Leche Entera",
       "price": 1.99,
-      "image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=1200&h=720&fit=crop",
+      "category": "Lácteos",
+      "image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=300&fit=crop",
       "stock": 200,
-      "availability": "available",
       "description": "Leche entera pasteurizada, 1 litro.",
       "discount": {
         "percentage": 15
-      },
-      "items": [
-        {
-          "item_id": "item_3",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_3"
+      }
     },
     {
       "id": "4",
-      "type": "item",
       "name": "Café Premium",
       "price": 8.99,
-      "image_url": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=1200&h=720&fit=crop",
+      "category": "Bebidas",
+      "image_url": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop",
       "stock": 55,
-      "availability": "available",
-      "description": "Café de especialidad tostado medio, 250g.",
-      "discount": null,
-      "items": [
-        {
-          "item_id": "item_4",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_4"
+      "description": "Café de especialidad tostado medio, 250g."
     },
     {
       "id": "5",
-      "type": "item",
       "name": "Yogurt Natural",
       "price": 4.5,
-      "image_url": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=1200&h=720&fit=crop",
+      "category": "Lácteos",
+      "image_url": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop",
       "stock": 3,
-      "availability": "available",
-      "description": "Yogurt natural sin azúcar agregada, 500g.",
-      "discount": null,
-      "items": [
-        {
-          "item_id": "item_5",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_3"
+      "description": "Yogurt natural sin azúcar agregada, 500g."
     },
     {
       "id": "6",
-      "type": "item",
       "name": "Pasta Italiana",
       "price": 2.25,
-      "image_url": "https://images.unsplash.com/photo-1551462147-37e10abaa4e1?w=1200&h=720&fit=crop",
+      "category": "Despensa",
+      "image_url": "https://images.unsplash.com/photo-1551462147-37e10abaa4e1?w=400&h=300&fit=crop",
       "stock": 150,
-      "availability": "available",
       "description": "Pasta de semola de trigo duro, 500g.",
       "discount": {
         "percentage": 30
-      },
-      "items": [
-        {
-          "item_id": "item_6",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_5"
+      }
     },
     {
       "id": "7",
-      "type": "item",
       "name": "Aceite de Oliva",
       "price": 12.99,
-      "image_url": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&h=720&fit=crop",
+      "category": "Despensa",
+      "image_url": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=300&fit=crop",
       "stock": 70,
-      "availability": "available",
-      "description": "Aceite de oliva virgen extra, 500ml.",
-      "discount": null,
-      "items": [
-        {
-          "item_id": "item_7",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_5"
+      "description": "Aceite de oliva virgen extra, 500ml."
     },
     {
       "id": "8",
-      "type": "item",
       "name": "Tomates Frescos",
       "price": 3.75,
-      "image_url": "https://images.unsplash.com/photo-1546470427-227e99fd2fd7?w=1200&h=720&fit=crop",
+      "category": "Verduras",
+      "image_url": "https://images.unsplash.com/photo-1546470427-227e99fd2fd7?w=400&h=300&fit=crop",
       "stock": 15,
-      "availability": "available",
-      "description": "Tomates rojos maduros de primera calidad.",
-      "discount": null,
-      "items": [
-        {
-          "item_id": "item_8",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_6"
+      "description": "Tomates rojos maduros de primera calidad."
     },
     {
       "id": "9",
-      "type": "item",
       "name": "Queso Mozzarella",
       "price": 6.5,
-      "image_url": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=1200&h=720&fit=crop",
+      "category": "Lácteos",
+      "image_url": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&h=300&fit=crop",
       "stock": 60,
-      "availability": "available",
-      "description": "Queso mozzarella fresco en bloque, 250g.",
-      "discount": null,
-      "items": [
-        {
-          "item_id": "item_9",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_3"
+      "description": "Queso mozzarella fresco en bloque, 250g."
     },
     {
       "id": "10",
-      "type": "item",
       "name": "Naranjas",
       "price": 4.2,
-      "image_url": "https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=1200&h=720&fit=crop",
-      "stock": 80,
-      "availability": "available",
-      "description": "Naranjas jugosas ideales para jugo.",
-      "discount": null,
-      "items": [
-        {
-          "item_id": "item_10",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_1"
-    },
-    {
-      "id": "11",
-      "type": "portfolio",
-      "name": "Portafolio Desayuno",
-      "price": 13.99,
-      "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&h=720&fit=crop",
-      "stock": 50,
-      "availability": "available",
-      "description": "Incluye un pan integral, una leche entera y un café premium.",
-      "discount": {
-        "percentage": 10
-      },
-      "items": [
-        {
-          "item_id": "item_2",
-          "quantity": 1
-        },
-        {
-          "item_id": "item_3",
-          "quantity": 1
-        },
-        {
-          "item_id": "item_4",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_7"
-    },
-    {
-      "id": "12",
-      "type": "portfolio",
-      "name": "Portafolio Italiano",
-      "price": 22.99,
-      "image_url": "https://images.unsplash.com/photo-1551462147-37e10abaa4e1?w=1200&h=720&fit=crop",
-      "stock": 15,
-      "availability": "available",
-      "description": "Incluye una pasta, un aceite de oliva, unos tomates y un queso mozzarella.",
-      "discount": null,
-      "items": [
-        {
-          "item_id": "item_6",
-          "quantity": 1
-        },
-        {
-          "item_id": "item_7",
-          "quantity": 1
-        },
-        {
-          "item_id": "item_8",
-          "quantity": 1
-        },
-        {
-          "item_id": "item_9",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_7"
-    },
-    {
-      "id": "13",
-      "type": "portfolio",
-      "name": "Portafolio Frutas y Yogurt",
-      "price": 10.99,
-      "image_url": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=1200&h=720&fit=crop",
-      "stock": 3,
-      "availability": "available",
-      "description": "Incluye una unidad de manzanas rojas, una de naranjas y un yogurt natural.",
-      "discount": null,
-      "items": [
-        {
-          "item_id": "item_1",
-          "quantity": 1
-        },
-        {
-          "item_id": "item_10",
-          "quantity": 1
-        },
-        {
-          "item_id": "item_5",
-          "quantity": 1
-        }
-      ],
-      "category_id": "category_7"
-    }
-  ],
-  "items": [
-    {
-      "id": "item_1",
-      "product_id": "1",
-      "name": "Manzanas Rojas",
-      "sku": "ITEM-001",
-      "image_url": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
-      "price": 3.49,
-      "stock": 90,
-      "availability": "available",
-      "description": "Manzanas rojas frescas de temporada.",
-      "discount": {
-        "percentage": 10
-      }
-    },
-    {
-      "id": "item_2",
-      "product_id": "2",
-      "name": "Pan Integral",
-      "sku": "ITEM-002",
-      "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop",
-      "price": 3.5,
-      "stock": 50,
-      "availability": "available",
-      "description": "Pan integral artesanal horneado a diario.",
-      "discount": null
-    },
-    {
-      "id": "item_3",
-      "product_id": "3",
-      "name": "Leche Entera",
-      "sku": "ITEM-003",
-      "image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=300&fit=crop",
-      "price": 1.99,
-      "stock": 200,
-      "availability": "available",
-      "description": "Leche entera pasteurizada, 1 litro.",
-      "discount": {
-        "percentage": 15
-      }
-    },
-    {
-      "id": "item_4",
-      "product_id": "4",
-      "name": "Café Premium",
-      "sku": "ITEM-004",
-      "image_url": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop",
-      "price": 8.99,
-      "stock": 55,
-      "availability": "available",
-      "description": "Café de especialidad tostado medio, 250g.",
-      "discount": null
-    },
-    {
-      "id": "item_5",
-      "product_id": "5",
-      "name": "Yogurt Natural",
-      "sku": "ITEM-005",
-      "image_url": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop",
-      "price": 4.5,
-      "stock": 3,
-      "availability": "available",
-      "description": "Yogurt natural sin azúcar agregada, 500g.",
-      "discount": null
-    },
-    {
-      "id": "item_6",
-      "product_id": "6",
-      "name": "Pasta Italiana",
-      "sku": "ITEM-006",
-      "image_url": "https://images.unsplash.com/photo-1551462147-37e10abaa4e1?w=400&h=300&fit=crop",
-      "price": 2.25,
-      "stock": 150,
-      "availability": "available",
-      "description": "Pasta de semola de trigo duro, 500g.",
-      "discount": {
-        "percentage": 30
-      }
-    },
-    {
-      "id": "item_7",
-      "product_id": "7",
-      "name": "Aceite de Oliva",
-      "sku": "ITEM-007",
-      "image_url": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=300&fit=crop",
-      "price": 12.99,
-      "stock": 70,
-      "availability": "available",
-      "description": "Aceite de oliva virgen extra, 500ml.",
-      "discount": null
-    },
-    {
-      "id": "item_8",
-      "product_id": "8",
-      "name": "Tomates Frescos",
-      "sku": "ITEM-008",
-      "image_url": "https://images.unsplash.com/photo-1546470427-227e99fd2fd7?w=400&h=300&fit=crop",
-      "price": 3.75,
-      "stock": 15,
-      "availability": "available",
-      "description": "Tomates rojos maduros de primera calidad.",
-      "discount": null
-    },
-    {
-      "id": "item_9",
-      "product_id": "9",
-      "name": "Queso Mozzarella",
-      "sku": "ITEM-009",
-      "image_url": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&h=300&fit=crop",
-      "price": 6.5,
-      "stock": 60,
-      "availability": "available",
-      "description": "Queso mozzarella fresco en bloque, 250g.",
-      "discount": null
-    },
-    {
-      "id": "item_10",
-      "product_id": "10",
-      "name": "Naranjas",
-      "sku": "ITEM-010",
+      "category": "Frutas",
       "image_url": "https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=400&h=300&fit=crop",
-      "price": 4.2,
       "stock": 80,
-      "availability": "available",
-      "description": "Naranjas jugosas ideales para jugo.",
-      "discount": null
+      "description": "Naranjas jugosas ideales para jugo."
     }
   ]
 }
