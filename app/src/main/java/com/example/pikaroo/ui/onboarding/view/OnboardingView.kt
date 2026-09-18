@@ -242,6 +242,7 @@ fun OnboardingView(
                 Spacer(modifier = Modifier.weight(1f))
 
                 Button(
+
                     onClick = {
                         if (uiState.isLastPage) {
                             finishOnboarding()

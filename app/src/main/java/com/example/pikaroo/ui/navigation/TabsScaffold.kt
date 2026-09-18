@@ -26,14 +26,21 @@ import com.example.pikaroo.ui.productos.view.ProductosView
 import com.example.pikaroo.ui.usuario.view.UsuarioView
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.pikaroo.ui.productos.viewmodel.ProductosViewModel
 
 @Composable
 fun TabsScaffold(onLogout: () -> Unit = {}) {
     val nestedNavController = rememberNavController()
-    
+
+    // Compartido para enviar el filtro de Inicio a Productos.
+    val productosViewModel: ProductosViewModel = viewModel()
+
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = nestedNavController)
+            BottomNavigationBar(
+                navController = nestedNavController
+            )
         }
     ) { innerPadding ->
         NavHost(
@@ -41,11 +48,42 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
             startDestination = AppRoute.Inicio.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(AppRoute.Inicio.route) { InicioView() }
-            composable(AppRoute.Ofertas.route) { OfertasView() }
-            composable(AppRoute.Ordenar.route) { OrdenarView() }
-            composable(AppRoute.Productos.route) { ProductosView() }
-            composable(AppRoute.Usuario.route) { UsuarioView(onLogout = onLogout) }
+            composable(AppRoute.Inicio.route) {
+                InicioView(
+                    viewModel = productosViewModel,
+                    onOpenProducts = { category ->
+                        productosViewModel.selectCategory(category)
+
+                        nestedNavController.navigate(
+                            AppRoute.Productos.route
+                        ) {
+                            popUpTo(
+                                nestedNavController.graph.startDestinationId
+                            ) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+
+            composable(AppRoute.Ofertas.route) {
+                OfertasView()
+            }
+
+            composable(AppRoute.Ordenar.route) {
+                OrdenarView()
+            }
+
+            composable(AppRoute.Productos.route) {
+                ProductosView(viewModel = productosViewModel)
+            }
+
+            composable(AppRoute.Usuario.route) {
+                UsuarioView(onLogout = onLogout)
+            }
         }
     }
 }
