@@ -1,0 +1,103 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "Manzanas Rojas",
+      "price": 3.49,
+      "category": "Frutas",
+      "image_url": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
+      "stock": 90,
+      "description": "Manzanas rojas frescas de temporada.",
+      "discount": {
+        "percentage": 10
+      }
+    },
+    {
+      "id": "2",
+      "name": "Pan Integral",
+      "price": 3.5,
+      "category": "Panadería",
+      "image_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop",
+      "stock": 50,
+      "description": "Pan integral artesanal horneado a diario."
+    },
+    {
+      "id": "3",
+      "name": "Leche Entera",
+      "price": 1.99,
+      "category": "Lácteos",
+      "image_url": "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=300&fit=crop",
+      "stock": 200,
+      "description": "Leche entera pasteurizada, 1 litro.",
+      "discount": {
+        "percentage": 15
+      }
+    },
+    {
+      "id": "4",
+      "name": "Café Premium",
+      "price": 8.99,
+      "category": "Bebidas",
+      "image_url": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=300&fit=crop",
+      "stock": 55,
+      "description": "Café de especialidad tostado medio, 250g."
+    },
+    {
+      "id": "5",
+      "name": "Yogurt Natural",
+      "price": 4.5,
+      "category": "Lácteos",
+      "image_url": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop",
+      "stock": 3,
+      "description": "Yogurt natural sin azúcar agregada, 500g."
+    },
+    {
+      "id": "6",
+      "name": "Pasta Italiana",
+      "price": 2.25,
+      "category": "Despensa",
+      "image_url": "https://images.unsplash.com/photo-1551462147-37e10abaa4e1?w=400&h=300&fit=crop",
+      "stock": 150,
+      "description": "Pasta de semola de trigo duro, 500g.",
+      "discount": {
+        "percentage": 30
+      }
+    },
+    {
+      "id": "7",
+      "name": "Aceite de Oliva",
+      "price": 12.99,
+      "category": "Despensa",
+      "image_url": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=300&fit=crop",
+      "stock": 70,
+      "description": "Aceite de oliva virgen extra, 500ml."
+    },
+    {
+      "id": "8",
+      "name": "Tomates Frescos",
+      "price": 3.75,
+      "category": "Verduras",
+      "image_url": "https://images.unsplash.com/photo-1546470427-227e99fd2fd7?w=400&h=300&fit=crop",
+      "stock": 15,
+      "description": "Tomates rojos maduros de primera calidad."
+    },
+    {
+      "id": "9",
+      "name": "Queso Mozzarella",
+      "price": 6.5,
+      "category": "Lácteos",
+      "image_url": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&h=300&fit=crop",
+      "stock": 60,
+      "description": "Queso mozzarella fresco en bloque, 250g."
+    },
+    {
+      "id": "10",
+      "name": "Naranjas",
+      "price": 4.2,
+      "category": "Frutas",
+      "image_url": "https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=400&h=300&fit=crop",
+      "stock": 80,
+      "description": "Naranjas jugosas ideales para jugo."
+    }
+  ]
+}

@@ -1,10 +1,12 @@
 package com.example.pikaroo.ui.inicio.view
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
@@ -15,73 +17,81 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.pikaroo.ui.productos.model.Product
 import com.example.pikaroo.ui.productos.viewmodel.ProductosViewModel
-import com.example.pikaroo.ui.theme.PikarooBackground
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
+import java.text.Normalizer
+import java.util.Locale
 
 @Composable
 fun InicioView(
-    viewModel: ProductosViewModel = viewModel()
+    viewModel: ProductosViewModel = viewModel(),
+    onOpenProducts: (String) -> Unit
 ) {
     val state = viewModel.state
     var searchQuery by rememberSaveable { mutableStateOf("") }
 
+    // Inicio usa el catálogo completo, sin heredar el filtro de Productos.
     val query = searchQuery.trim()
-    val visibleProducts = state.filteredProducts.filter { product ->
+    val visibleProducts = state.products.filter { product ->
         query.isEmpty() ||
                 product.name.contains(query, ignoreCase = true) ||
                 product.category.contains(query, ignoreCase = true)
     }
 
+    val categories = state.products
+        .map { it.category }
+        .distinct()
+        .sorted()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(PikarooBackground)
+            .background(Color.White)
     ) {
-        // Barra de búsqueda y carrito
+        // Barra superior fija
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(56.dp),
-                placeholder = { Text("Buscar...") },
+                modifier = Modifier.weight(1f),
+                placeholder = {
+                    Text(
+                        text = "Buscar productos...",
+                        maxLines = 1
+                    )
+                },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = PikarooTextGray
                     )
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(32.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFF5F5F5),
-                    unfocusedContainerColor = Color(0xFFF5F5F5),
+                    focusedContainerColor = Color(0xFFF8F8F8),
+                    unfocusedContainerColor = Color(0xFFF8F8F8),
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent
                 )
@@ -91,161 +101,135 @@ fun InicioView(
 
             IconButton(
                 onClick = {
-                    // Pendiente: abrir el carrito.
+                    // Pendiente: conectar con el carrito.
                 }
             ) {
                 Icon(
                     imageVector = Icons.Outlined.ShoppingBag,
                     contentDescription = "Carrito",
-                    tint = Color.Black
+                    tint = Color.Black,
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
 
-        // Encabezado con degradado
-        Box(
+        HorizontalDivider(color = Color(0xFFF0F0F0))
+
+        // Todo el contenido inferior se desplaza junto.
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFFFF7F2),
-                            Color.White
-                        )
-                    )
-                )
-                .padding(24.dp)
+                .weight(1f),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 20.dp,
+                bottom = 24.dp
+            ),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
-                    text = "Inicio",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = "Portafolios",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = Color.Black
                 )
-
-                Text(
-                    text = "Encuentra todo lo que necesitas",
-                    color = Color.Gray,
-                    fontSize = 16.sp
-                )
             }
-        }
 
-        // Filtros y catálogo
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 16.dp)
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
-                items(state.categories) { category ->
-                    val isSelected = state.selectedCategory == category
-
-                    Surface(
-                        modifier = Modifier.clickable {
-                            viewModel.selectCategory(category)
-                        },
-                        shape = RoundedCornerShape(24.dp),
-                        color = if (isSelected) {
-                            PikarooOrange
-                        } else {
-                            Color.White
-                        },
-                        shadowElevation = if (isSelected) 4.dp else 1.dp
-                    ) {
-                        Text(
-                            text = category,
-                            modifier = Modifier.padding(
-                                horizontal = 20.dp,
-                                vertical = 10.dp
-                            ),
-                            color = if (isSelected) {
-                                Color.White
-                            } else {
-                                Color.Black
-                            },
-                            fontWeight = if (isSelected) {
-                                FontWeight.Bold
-                            } else {
-                                FontWeight.Normal
-                            },
-                            fontSize = 14.sp
-                        )
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 8.dp)
+                ) {
+                    items(inicioPortafolios) { portfolio ->
+                        InicioPortfolioCard(portfolio)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                InicioSectionHeader(
+                    title = "Categorías",
+                    action = "Ver todas",
+                    onClick = { onOpenProducts("Todos") }
+                )
+            }
 
-            Text(
-                text = "${visibleProducts.size} productos",
-                fontSize = 14.sp,
-                color = PikarooTextGray,
-                fontWeight = FontWeight.Medium
-            )
+            // Tres categorías por fila, sin una cuadrícula vertical anidada.
+            items(categories.chunked(3)) { categoryRow ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    categoryRow.forEach { category ->
+                        InicioCategoryCard(
+                            category = category,
+                            modifier = Modifier.weight(1f),
+                            onClick = { onOpenProducts(category) }
+                        )
+                    }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    repeat(3 - categoryRow.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                InicioSectionHeader(
+                    title = "Productos",
+                    action = "Ver todos",
+                    onClick = { onOpenProducts("Todos") }
+                )
+            }
 
             when {
                 state.isLoading -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = PikarooOrange)
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = PikarooOrange
+                            )
+                        }
                     }
                 }
 
                 state.error != null -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
-                            text = "Error: ${state.error}",
-                            color = Color.Red
+                            text = "No se pudieron cargar los productos: ${state.error}",
+                            modifier = Modifier.padding(vertical = 16.dp),
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                 }
 
                 visibleProducts.isEmpty() -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
-                            text = "No se encontraron productos",
+                            text = if (query.isEmpty()) {
+                                "No hay productos disponibles"
+                            } else {
+                                "No se encontraron productos"
+                            },
+                            modifier = Modifier.padding(vertical = 24.dp),
                             color = PikarooTextGray
                         )
                     }
                 }
 
                 else -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(bottom = 24.dp)
-                    ) {
-                        items(visibleProducts) { product ->
-                            InicioProductCard(product = product)
-                        }
+                    items(visibleProducts) { product ->
+                        InicioProductCard(product = product)
                     }
                 }
             }
@@ -254,83 +238,258 @@ fun InicioView(
 }
 
 @Composable
-fun InicioProductCard(product: Product) {
+private fun InicioSectionHeader(
+    title: String,
+    action: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = title,
+            modifier = Modifier.weight(1f),
+            fontSize = 22.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Black
+        )
+
+        TextButton(onClick = onClick) {
+            Text(
+                text = action,
+                color = PikarooOrange
+            )
+        }
+    }
+}
+
+@Composable
+private fun InicioCategoryCard(
+    category: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        color = Color.White,
+        border = BorderStroke(1.dp, Color(0xFFE6E6E6))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 132.dp)
+                .padding(horizontal = 6.dp, vertical = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(58.dp)
+                    .background(
+                        color = Color(0xFFFFF1E9),
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = inicioCategoryEmoji(category),
+                    fontSize = 28.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = category,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
+    }
+}
+
+private fun inicioCategoryEmoji(category: String): String {
+    val normalized = Normalizer
+        .normalize(category, Normalizer.Form.NFD)
+        .replace("\\p{M}+".toRegex(), "")
+        .lowercase(Locale.ROOT)
+
+    return when {
+        "fruta" in normalized -> "🍎"
+        "verdura" in normalized || "vegetal" in normalized -> "🥬"
+        "lacteo" in normalized || "leche" in normalized -> "🥛"
+        "carne" in normalized -> "🥩"
+        "pan" in normalized -> "🍞"
+        "bebida" in normalized -> "☕"
+        "limpieza" in normalized -> "🧼"
+        "snack" in normalized || "botana" in normalized -> "🍿"
+        "dulce" in normalized -> "🍬"
+        "congelado" in normalized -> "🧊"
+        "mascota" in normalized -> "🐾"
+        else -> "🛍️"
+    }
+}
+
+// Contenido de ejemplo: reemplaza estos textos por tus portafolios.
+private data class InicioPortfolio(
+    val title: String,
+    val description: String,
+    val emoji: String,
+    val startColor: Color,
+    val endColor: Color
+)
+
+private val inicioPortafolios = listOf(
+    InicioPortfolio(
+        title = "Compra semanal",
+        description = "Ideas para llenar tu despensa",
+        emoji = "🛒",
+        startColor = Color(0xFFFF6200),
+        endColor = Color(0xFFFF9800)
+    ),
+    InicioPortfolio(
+        title = "Frescos del día",
+        description = "Color y variedad para tu mesa",
+        emoji = "🥑",
+        startColor = Color(0xFF159957),
+        endColor = Color(0xFF41BB79)
+    ),
+    InicioPortfolio(
+        title = "Para compartir",
+        description = "Ideas para cada ocasión",
+        emoji = "🥐",
+        startColor = Color(0xFF7953C3),
+        endColor = Color(0xFFA47BE0)
+    )
+)
+
+@Composable
+private fun InicioPortfolioCard(portfolio: InicioPortfolio) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.width(280.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            portfolio.startColor,
+                            portfolio.endColor
+                        )
+                    )
+                )
+                .padding(24.dp)
+        ) {
+            Text(
+                text = portfolio.emoji,
+                fontSize = 36.sp
+            )
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Text(
+                text = portfolio.title,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 23.sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = portfolio.description,
+                color = Color.White,
+                fontSize = 15.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun InicioProductCard(product: Product) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(260.dp),
-        shape = RoundedCornerShape(20.dp),
+            .height(270.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
+        border = BorderStroke(1.dp, Color(0xFFEEEEEE))
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                AsyncImage(
-                    model = product.imageUrl,
-                    contentDescription = product.name,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = 20.dp,
-                                topEnd = 20.dp
-                            )
-                        ),
-                    contentScale = ContentScale.Crop
+        Column(modifier = Modifier.fillMaxSize()) {
+            AsyncImage(
+                model = product.imageUrl,
+                contentDescription = product.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp),
+                contentScale = ContentScale.Crop
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = product.name,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(12.dp)
+                Text(
+                    text = product.category,
+                    fontSize = 12.sp,
+                    color = PikarooTextGray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = product.name,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        maxLines = 1,
-                        color = Color.Black
-                    )
-
-                    Text(
-                        text = product.category,
-                        fontSize = 12.sp,
-                        color = PikarooTextGray
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Text(
                         text = "$${product.price}",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        color = Color.Black
+                        modifier = Modifier.weight(1f),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-                }
-            }
 
-            IconButton(
-                onClick = {
-                    // Pendiente: agregar el producto al carrito.
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(8.dp)
-                    .size(36.dp)
-                    .background(PikarooOrange, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Añadir ${product.name} al carrito",
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
+                    IconButton(
+                        onClick = {
+                            // Pendiente: agregar al carrito.
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(PikarooOrange, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Añadir ${product.name}",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
         }
     }
