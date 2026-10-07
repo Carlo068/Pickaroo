@@ -19,22 +19,22 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.pikaroo.ui.inicio.view.InicioView
-import com.example.pikaroo.ui.ofertas.view.OfertasView
-import com.example.pikaroo.ui.ordenar.view.OrdenarView
-import com.example.pikaroo.ui.productos.view.ProductosView
-import com.example.pikaroo.ui.usuario.view.UsuarioView
+import com.example.pikaroo.ui.home.view.HomeView
+import com.example.pikaroo.ui.offers.view.OffersView
+import com.example.pikaroo.ui.order.view.OrderView
+import com.example.pikaroo.ui.products.view.ProductsView
+import com.example.pikaroo.ui.user.view.UserView
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.pikaroo.ui.productos.viewmodel.ProductosViewModel
+import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
 
 @Composable
 fun TabsScaffold(onLogout: () -> Unit = {}) {
     val nestedNavController = rememberNavController()
 
     // Compartido para enviar el filtro de Inicio a Productos.
-    val productosViewModel: ProductosViewModel = viewModel()
+    val productosViewModel: ProductsViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -45,17 +45,17 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
     ) { innerPadding ->
         NavHost(
             navController = nestedNavController,
-            startDestination = AppRoute.Inicio.route,
+            startDestination = AppRoute.Home.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(AppRoute.Inicio.route) {
-                InicioView(
+            composable(AppRoute.Home.route) {
+                HomeView(
                     viewModel = productosViewModel,
                     onOpenProducts = { category ->
                         productosViewModel.selectCategory(category)
 
                         nestedNavController.navigate(
-                            AppRoute.Productos.route
+                            AppRoute.Products.route
                         ) {
                             popUpTo(
                                 nestedNavController.graph.startDestinationId
@@ -69,20 +69,20 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
                 )
             }
 
-            composable(AppRoute.Ofertas.route) {
-                OfertasView()
+            composable(AppRoute.Offers.route) {
+                OffersView()
             }
 
-            composable(AppRoute.Ordenar.route) {
-                OrdenarView()
+            composable(AppRoute.Order.route) {
+                OrderView()
             }
 
-            composable(AppRoute.Productos.route) {
-                ProductosView(viewModel = productosViewModel)
+            composable(AppRoute.Products.route) {
+                ProductsView(viewModel = productosViewModel)
             }
 
-            composable(AppRoute.Usuario.route) {
-                UsuarioView(onLogout = onLogout)
+            composable(AppRoute.User.route) {
+                UserView(onLogout = onLogout)
             }
         }
     }
@@ -97,11 +97,11 @@ data class NavigationItem(
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
-        NavigationItem(AppRoute.Inicio, Icons.Outlined.Home, "Inicio"),
-        NavigationItem(AppRoute.Ofertas, Icons.Outlined.LocalOffer, "Ofertas"),
-        NavigationItem(AppRoute.Ordenar, Icons.Outlined.ShoppingCart, "Ordenar"),
-        NavigationItem(AppRoute.Productos, Icons.Outlined.Inventory2, "Productos"),
-        NavigationItem(AppRoute.Usuario, Icons.Outlined.Person, "Usuario")
+        NavigationItem(AppRoute.Home, Icons.Outlined.Home, "Inicio"),
+        NavigationItem(AppRoute.Offers, Icons.Outlined.LocalOffer, "Ofertas"),
+        NavigationItem(AppRoute.Order, Icons.Outlined.ShoppingCart, "Ordenar"),
+        NavigationItem(AppRoute.Products, Icons.Outlined.Inventory2, "Productos"),
+        NavigationItem(AppRoute.User, Icons.Outlined.Person, "Usuario")
     )
     
     NavigationBar(

@@ -1,4 +1,4 @@
-package com.example.pikaroo.ui.ordenar.view
+package com.example.pikaroo.ui.order.view
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -23,12 +23,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.theme.PikarooTheme
-import com.example.pikaroo.ui.ordenar.viewmodel.OrdenarViewModel
+import com.example.pikaroo.ui.order.viewmodel.OrderViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrdenarView(
-    viewModel: OrdenarViewModel = viewModel()
+fun OrderView(
+    viewModel: OrderViewModel = viewModel()
 ) {
     Scaffold(
         topBar = {
@@ -182,8 +182,8 @@ fun DeliveryMethodCard(
 
 @Preview(showBackground = true)
 @Composable
-fun OrdenarViewPreview() {
+fun OrderViewPreview() {
     PikarooTheme {
-        OrdenarView()
+        OrderView()
     }
 }

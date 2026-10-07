@@ -1,6 +1,6 @@
-package com.example.pikaroo.ui.usuario.model
+package com.example.pikaroo.ui.user.model
 
-data class UsuarioState(
+data class UserState(
     val title: String = "Usuario",
     val isLoading: Boolean = false
 )

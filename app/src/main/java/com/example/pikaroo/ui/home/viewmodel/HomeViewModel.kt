@@ -1,12 +1,12 @@
-package com.example.pikaroo.ui.inicio.viewmodel
+package com.example.pikaroo.ui.home.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.pikaroo.ui.inicio.model.InicioState
+import com.example.pikaroo.ui.home.model.HomeState
 
-class InicioViewModel : ViewModel() {
-    var state by mutableStateOf(InicioState())
+class HomeViewModel : ViewModel() {
+    var state by mutableStateOf(HomeState())
         private set
 }

@@ -1,6 +1,6 @@
-package com.example.pikaroo.ui.ordenar.model
+package com.example.pikaroo.ui.order.model
 
-data class OrdenarState(
+data class OrderState(
     val title: String = "Ordenar",
     val isLoading: Boolean = false
 )

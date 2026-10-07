@@ -1,6 +1,6 @@
-package com.example.pikaroo.ui.productos.network
+package com.example.pikaroo.ui.products.network
 
-import com.example.pikaroo.ui.productos.model.ProductResponse
+import com.example.pikaroo.ui.products.model.ProductResponse
 import retrofit2.http.GET
 
 interface GistService {

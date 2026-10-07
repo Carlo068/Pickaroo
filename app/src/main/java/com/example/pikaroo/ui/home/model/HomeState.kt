@@ -1,6 +1,6 @@
-package com.example.pikaroo.ui.inicio.model
+package com.example.pikaroo.ui.home.model
 
-data class InicioState(
+data class HomeState(
     val title: String = "Pantalla de Inicio",
     val isLoading: Boolean = false
 )

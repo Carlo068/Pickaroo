@@ -1,4 +1,4 @@
-package com.example.pikaroo.ui.productos.model
+package com.example.pikaroo.ui.products.model
 
 import com.google.gson.annotations.SerializedName
 
@@ -16,7 +16,7 @@ data class ProductResponse(
     @SerializedName("products") val products: List<Product>
 )
 
-data class ProductosState(
+data class ProductsState(
     val products: List<Product> = emptyList(),
     val filteredProducts: List<Product> = emptyList(),
     val categories: List<String> = listOf("Todos"),

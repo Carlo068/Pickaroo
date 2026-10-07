@@ -1,6 +1,6 @@
-package com.example.pikaroo.ui.ofertas.model
+package com.example.pikaroo.ui.offers.model
 
-data class OfertasState(
+data class OffersState(
     val title: String = "Ofertas",
     val isLoading: Boolean = false
 )

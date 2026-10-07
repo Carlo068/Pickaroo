@@ -1,12 +1,12 @@
-package com.example.pikaroo.ui.ofertas.viewmodel
+package com.example.pikaroo.ui.offers.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.pikaroo.ui.ofertas.model.OfertasState
+import com.example.pikaroo.ui.offers.model.OffersState
 
-class OfertasViewModel : ViewModel() {
-    var state by mutableStateOf(OfertasState())
+class OffersViewModel : ViewModel() {
+    var state by mutableStateOf(OffersState())
         private set
 }

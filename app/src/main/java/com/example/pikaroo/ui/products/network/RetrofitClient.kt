@@ -1,4 +1,4 @@
-package com.example.pikaroo.ui.productos.network
+package com.example.pikaroo.ui.products.network
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

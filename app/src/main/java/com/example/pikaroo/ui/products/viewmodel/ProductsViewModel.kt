@@ -1,4 +1,4 @@
-package com.example.pikaroo.ui.productos.viewmodel
+package com.example.pikaroo.ui.products.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -6,16 +6,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pikaroo.ui.productos.model.ProductosState
-import com.example.pikaroo.ui.productos.network.RetrofitClient
+import com.example.pikaroo.ui.products.model.ProductsState
+import com.example.pikaroo.ui.products.network.RetrofitClient
 import kotlinx.coroutines.launch
 
-class ProductosViewModel : ViewModel() {
-    var state by mutableStateOf(ProductosState())
+class ProductsViewModel : ViewModel() {
+    var state by mutableStateOf(ProductsState())
         private set
 
     init {
-        Log.d("ProductosViewModel", "Iniciando fetchProducts con Retrofit...")
+        Log.d("ProductsViewModel", "Iniciando fetchProducts con Retrofit...")
         fetchProducts()
     }
 
@@ -27,7 +27,7 @@ class ProductosViewModel : ViewModel() {
                 val response = RetrofitClient.gistService.getProducts()
                 val products = response.products
                 
-                Log.d("ProductosViewModel", "Productos recibidos: ${products.size}")
+                Log.d("ProductsViewModel", "Productos recibidos: ${products.size}")
                 
                 val categories = listOf("Todos") + products.map { it.category }.distinct().sorted()
                 
@@ -39,7 +39,7 @@ class ProductosViewModel : ViewModel() {
                     error = null
                 )
             } catch (e: Exception) {
-                Log.e("ProductosViewModel", "Error cargando productos", e)
+                Log.e("ProductsViewModel", "Error cargando productos", e)
                 state = state.copy(
                     isLoading = false,
                     error = e.message ?: "Error desconocido"

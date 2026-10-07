@@ -1,4 +1,4 @@
-package com.example.pikaroo.ui.usuario.view
+package com.example.pikaroo.ui.user.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -24,13 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.theme.PikarooTheme
-import com.example.pikaroo.ui.usuario.viewmodel.UsuarioViewModel
+import com.example.pikaroo.ui.user.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UsuarioView(
+fun UserView(
     onLogout: () -> Unit = {},
-    viewModel: UsuarioViewModel = viewModel()
+    viewModel: UserViewModel = viewModel()
 ) {
     Scaffold(
         topBar = {
@@ -320,8 +320,8 @@ fun ShoppingListItem(name: String, category: String, price: String) {
 
 @Preview(showBackground = true)
 @Composable
-fun UsuarioViewPreview() {
+fun UserViewPreview() {
     PikarooTheme {
-        UsuarioView()
+        UserView()
     }
 }

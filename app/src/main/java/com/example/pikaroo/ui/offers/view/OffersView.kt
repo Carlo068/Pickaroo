@@ -1,4 +1,4 @@
-package com.example.pikaroo.ui.ofertas.view
+package com.example.pikaroo.ui.offers.view
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,11 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.pikaroo.ui.ofertas.viewmodel.OfertasViewModel
+import com.example.pikaroo.ui.offers.viewmodel.OffersViewModel
 
 @Composable
-fun OfertasView(
-    viewModel: OfertasViewModel = viewModel()
+fun OffersView(
+    viewModel: OffersViewModel = viewModel()
 ) {
     val state = viewModel.state
 

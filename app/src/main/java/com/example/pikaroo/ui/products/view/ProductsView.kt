@@ -1,4 +1,4 @@
-package com.example.pikaroo.ui.productos.view
+package com.example.pikaroo.ui.products.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,15 +24,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.pikaroo.ui.productos.model.Product
-import com.example.pikaroo.ui.productos.viewmodel.ProductosViewModel
+import com.example.pikaroo.ui.products.model.Product
+import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
 import com.example.pikaroo.ui.theme.PikarooBackground
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
 
 @Composable
-fun ProductosView(
-    viewModel: ProductosViewModel = viewModel()
+fun ProductsView(
+    viewModel: ProductsViewModel = viewModel()
 ) {
     val state = viewModel.state
 

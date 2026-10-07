@@ -1,4 +1,4 @@
-package com.example.pikaroo.ui.inicio.view
+package com.example.pikaroo.ui.home.view
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -30,16 +30,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.pikaroo.ui.productos.model.Product
-import com.example.pikaroo.ui.productos.viewmodel.ProductosViewModel
+import com.example.pikaroo.ui.products.model.Product
+import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
 import java.text.Normalizer
 import java.util.Locale
 
 @Composable
-fun InicioView(
-    viewModel: ProductosViewModel = viewModel(),
+fun HomeView(
+    viewModel: ProductsViewModel = viewModel(),
     onOpenProducts: (String) -> Unit
 ) {
     val state = viewModel.state
@@ -146,13 +146,13 @@ fun InicioView(
                     contentPadding = PaddingValues(bottom = 8.dp)
                 ) {
                     items(inicioPortafolios) { portfolio ->
-                        InicioPortfolioCard(portfolio)
+                        HomePortfolioCard(portfolio)
                     }
                 }
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
-                InicioSectionHeader(
+                HomeSectionHeader(
                     title = "Categorías",
                     action = "Ver todas",
                     onClick = { onOpenProducts("Todos") }
@@ -166,7 +166,7 @@ fun InicioView(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     categoryRow.forEach { category ->
-                        InicioCategoryCard(
+                        HomeCategoryCard(
                             category = category,
                             modifier = Modifier.weight(1f),
                             onClick = { onOpenProducts(category) }
@@ -180,7 +180,7 @@ fun InicioView(
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
-                InicioSectionHeader(
+                HomeSectionHeader(
                     title = "Productos",
                     action = "Ver todos",
                     onClick = { onOpenProducts("Todos") }
@@ -229,7 +229,7 @@ fun InicioView(
 
                 else -> {
                     items(visibleProducts) { product ->
-                        InicioProductCard(product = product)
+                        HomeProductCard(product = product)
                     }
                 }
             }
@@ -238,7 +238,7 @@ fun InicioView(
 }
 
 @Composable
-private fun InicioSectionHeader(
+private fun HomeSectionHeader(
     title: String,
     action: String,
     onClick: () -> Unit
@@ -266,7 +266,7 @@ private fun InicioSectionHeader(
 }
 
 @Composable
-private fun InicioCategoryCard(
+private fun HomeCategoryCard(
     category: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
@@ -338,7 +338,7 @@ private fun inicioCategoryEmoji(category: String): String {
 }
 
 // Contenido de ejemplo: reemplaza estos textos por tus portafolios.
-private data class InicioPortfolio(
+private data class HomePortfolio(
     val title: String,
     val description: String,
     val emoji: String,
@@ -347,21 +347,21 @@ private data class InicioPortfolio(
 )
 
 private val inicioPortafolios = listOf(
-    InicioPortfolio(
+    HomePortfolio(
         title = "Compra semanal",
         description = "Ideas para llenar tu despensa",
         emoji = "🛒",
         startColor = Color(0xFFFF6200),
         endColor = Color(0xFFFF9800)
     ),
-    InicioPortfolio(
+    HomePortfolio(
         title = "Frescos del día",
         description = "Color y variedad para tu mesa",
         emoji = "🥑",
         startColor = Color(0xFF159957),
         endColor = Color(0xFF41BB79)
     ),
-    InicioPortfolio(
+    HomePortfolio(
         title = "Para compartir",
         description = "Ideas para cada ocasión",
         emoji = "🥐",
@@ -371,7 +371,7 @@ private val inicioPortafolios = listOf(
 )
 
 @Composable
-private fun InicioPortfolioCard(portfolio: InicioPortfolio) {
+private fun HomePortfolioCard(portfolio: HomePortfolio) {
     Surface(
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier.width(280.dp)
@@ -414,7 +414,7 @@ private fun InicioPortfolioCard(portfolio: InicioPortfolio) {
 }
 
 @Composable
-private fun InicioProductCard(product: Product) {
+private fun HomeProductCard(product: Product) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
