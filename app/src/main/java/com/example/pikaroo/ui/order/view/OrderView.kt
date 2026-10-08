@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,12 +21,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.pikaroo.ui.cart.view.CartIconButton
 import com.example.pikaroo.ui.theme.PikarooTheme
 import com.example.pikaroo.ui.order.viewmodel.OrderViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderView(
+    cartItemCount: Int = 0,
+    onOpenCart: () -> Unit = {},
     viewModel: OrderViewModel = viewModel()
 ) {
     Scaffold(
@@ -55,9 +57,7 @@ fun OrderView(
                     )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(onClick = { }) {
-                    Icon(Icons.Outlined.ShoppingBag, contentDescription = null)
-                }
+                CartIconButton(itemCount = cartItemCount, onClick = onOpenCart)
             }
         }
     ) { paddingValues ->

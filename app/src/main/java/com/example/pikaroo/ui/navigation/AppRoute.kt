@@ -10,4 +10,5 @@ sealed class AppRoute(val route: String) {
     object Order : AppRoute("order")
     object Products : AppRoute("products")
     object User : AppRoute("user")
+    object Cart : AppRoute("cart")
 }

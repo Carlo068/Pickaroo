@@ -32,7 +32,8 @@ import com.example.pikaroo.ui.theme.PikarooTextGray
 
 @Composable
 fun ProductsView(
-    viewModel: ProductsViewModel = viewModel()
+    viewModel: ProductsViewModel = viewModel(),
+    onAddToCart: (Product) -> Unit = {}
 ) {
     val state = viewModel.state
 
@@ -116,7 +117,7 @@ fun ProductsView(
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(state.filteredProducts) { product ->
-                    ProductCard(product = product)
+                    ProductCard(product = product, onAdd = { onAddToCart(product) })
                 }
             }
         }
@@ -124,7 +125,7 @@ fun ProductsView(
 }
 
 @Composable
-fun ProductCard(product: Product) {
+fun ProductCard(product: Product, onAdd: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -170,7 +171,7 @@ fun ProductCard(product: Product) {
 
             // Add Button (YA USA DRY)
             IconButton(
-                onClick = { /* Add to cart */ },
+                onClick = onAdd,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(8.dp)
@@ -179,7 +180,7 @@ fun ProductCard(product: Product) {
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Añadir",
+                    contentDescription = "Añadir ${product.name}",
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )
