@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.pikaroo.ui.cart.view.CartIconButton
 import com.example.pikaroo.ui.products.model.Product
 import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
 import com.example.pikaroo.ui.theme.PikarooOrange
@@ -40,7 +40,10 @@ import java.util.Locale
 @Composable
 fun HomeView(
     viewModel: ProductsViewModel = viewModel(),
-    onOpenProducts: (String) -> Unit
+    onOpenProducts: (String) -> Unit,
+    cartItemCount: Int = 0,
+    onOpenCart: () -> Unit = {},
+    onAddToCart: (Product) -> Unit = {}
 ) {
     val state = viewModel.state
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -99,18 +102,11 @@ fun HomeView(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            IconButton(
-                onClick = {
-                    // Pendiente: conectar con el carrito.
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ShoppingBag,
-                    contentDescription = "Carrito",
-                    tint = Color.Black,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+            CartIconButton(
+                itemCount = cartItemCount,
+                onClick = onOpenCart,
+                iconSize = 28.dp
+            )
         }
 
         HorizontalDivider(color = Color(0xFFF0F0F0))
@@ -229,7 +225,7 @@ fun HomeView(
 
                 else -> {
                     items(visibleProducts) { product ->
-                        HomeProductCard(product = product)
+                        HomeProductCard(product = product, onAdd = { onAddToCart(product) })
                     }
                 }
             }
@@ -414,7 +410,7 @@ private fun HomePortfolioCard(portfolio: HomePortfolio) {
 }
 
 @Composable
-private fun HomeProductCard(product: Product) {
+private fun HomeProductCard(product: Product, onAdd: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -475,9 +471,7 @@ private fun HomeProductCard(product: Product) {
                     )
 
                     IconButton(
-                        onClick = {
-                            // Pendiente: agregar al carrito.
-                        },
+                        onClick = onAdd,
                         modifier = Modifier
                             .size(40.dp)
                             .background(PikarooOrange, CircleShape)

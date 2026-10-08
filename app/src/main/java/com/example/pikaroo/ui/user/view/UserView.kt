@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.pikaroo.ui.cart.view.CartIconButton
 import com.example.pikaroo.ui.theme.PikarooTheme
 import com.example.pikaroo.ui.user.viewmodel.UserViewModel
 
@@ -30,6 +30,8 @@ import com.example.pikaroo.ui.user.viewmodel.UserViewModel
 @Composable
 fun UserView(
     onLogout: () -> Unit = {},
+    cartItemCount: Int = 0,
+    onOpenCart: () -> Unit = {},
     viewModel: UserViewModel = viewModel()
 ) {
     Scaffold(
@@ -57,9 +59,7 @@ fun UserView(
                     )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(onClick = { }) {
-                    Icon(Icons.Outlined.ShoppingBag, contentDescription = null)
-                }
+                CartIconButton(itemCount = cartItemCount, onClick = onOpenCart)
             }
         }
     ) { paddingValues ->

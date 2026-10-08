@@ -28,6 +28,9 @@ import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
+import androidx.compose.ui.platform.LocalContext
+import com.example.pikaroo.ui.cart.view.CartView
+import com.example.pikaroo.ui.cart.viewmodel.CartViewModel
 
 @Composable
 fun TabsScaffold(onLogout: () -> Unit = {}) {
@@ -35,6 +38,12 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
 
     // Compartido para enviar el filtro de Inicio a Productos.
     val productosViewModel: ProductsViewModel = viewModel()
+
+    val context = LocalContext.current
+    val cartViewModel: CartViewModel = viewModel(factory = CartViewModel.factory(context))
+    val cartState by cartViewModel.uiState.collectAsState()
+
+    val openCart = { nestedNavController.navigate(AppRoute.Cart.route) { launchSingleTop = true } }
 
     Scaffold(
         bottomBar = {
@@ -53,19 +62,11 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
                     viewModel = productosViewModel,
                     onOpenProducts = { category ->
                         productosViewModel.selectCategory(category)
-
-                        nestedNavController.navigate(
-                            AppRoute.Products.route
-                        ) {
-                            popUpTo(
-                                nestedNavController.graph.startDestinationId
-                            ) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
+                        nestedNavController.navigateToTab(AppRoute.Products.route)
+                    },
+                    cartItemCount = cartState.itemCount,
+                    onOpenCart = openCart,
+                    onAddToCart = cartViewModel::add
                 )
             }
 
@@ -74,15 +75,33 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
             }
 
             composable(AppRoute.Order.route) {
-                OrderView()
+                OrderView(
+                    cartItemCount = cartState.itemCount,
+                    onOpenCart = openCart
+                )
             }
 
             composable(AppRoute.Products.route) {
-                ProductsView(viewModel = productosViewModel)
+                ProductsView(
+                    viewModel = productosViewModel,
+                    onAddToCart = cartViewModel::add
+                )
             }
 
             composable(AppRoute.User.route) {
-                UserView(onLogout = onLogout)
+                UserView(
+                    onLogout = onLogout,
+                    cartItemCount = cartState.itemCount,
+                    onOpenCart = openCart
+                )
+            }
+
+            composable(AppRoute.Cart.route) {
+                CartView(
+                    cartViewModel = cartViewModel,
+                    onBack = { nestedNavController.popBackStack() },
+                    onCheckout = { nestedNavController.navigateToTab(AppRoute.Order.route) }
+                )
             }
         }
     }
@@ -136,16 +155,23 @@ fun BottomNavigationBar(navController: NavHostController) {
                 ),
                 onClick = {
                     if (currentRoute != item.route.route) {
-                        navController.navigate(item.route.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                        navController.navigateToTab(item.route.route)
                     }
                 }
             )
         }
+    }
+}
+
+// El carrito no es una pestaña: se saca del back stack antes de cambiar de pestaña
+// para que no quede guardado y se restaure dentro de otra.
+fun NavHostController.navigateToTab(route: String) {
+    popBackStack(AppRoute.Cart.route, inclusive = true)
+    navigate(route) {
+        popUpTo(graph.startDestinationId) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }
