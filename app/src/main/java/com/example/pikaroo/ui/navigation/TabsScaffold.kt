@@ -76,6 +76,7 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
 
             composable(AppRoute.Order.route) {
                 OrderView(
+                    cart = cartState,
                     cartItemCount = cartState.itemCount,
                     onOpenCart = openCart
                 )
