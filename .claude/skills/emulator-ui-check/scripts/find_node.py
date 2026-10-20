@@ -8,7 +8,8 @@ import html
 import re
 import sys
 
-xml = sys.stdin.read()
+# The dump is UTF-8; Windows would otherwise decode stdin as cp1252 and accented texts would never match.
+xml = sys.stdin.buffer.read().decode("utf-8", errors="replace")
 wanted = sys.argv[1] if len(sys.argv) > 1 else None
 
 
