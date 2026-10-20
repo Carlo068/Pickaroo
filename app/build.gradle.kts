@@ -40,6 +40,12 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
+
+    sourceSets {
+        getByName("debug") {
+            assets.srcDir("../docs/mock")
+        }
+    }
 }
 
 dependencies {

@@ -1,0 +1,70 @@
+{
+  "users": [
+    {
+      "id": "user_1",
+      "username": "customer1",
+      "password_mock": "demo1234",
+      "name": "Cliente Demo",
+      "email": "customer1@pickaroo.test",
+      "roles": [
+        {
+          "role": "customer"
+        }
+      ]
+    },
+    {
+      "id": "user_2",
+      "username": "staff1",
+      "password_mock": "demo1234",
+      "name": "Personal Demo",
+      "email": "staff1@pickaroo.test",
+      "roles": [
+        {
+          "role": "staff",
+          "shop_id": "shop_1"
+        }
+      ]
+    },
+    {
+      "id": "user_3",
+      "username": "owner1",
+      "password_mock": "demo1234",
+      "name": "Dueño Demo Uno",
+      "email": "owner1@pickaroo.test",
+      "roles": [
+        {
+          "role": "owner",
+          "shop_id": "shop_1"
+        },
+        {
+          "role": "customer"
+        }
+      ]
+    },
+    {
+      "id": "user_4",
+      "username": "owner2",
+      "password_mock": "demo1234",
+      "name": "Dueño Demo Dos",
+      "email": "owner2@pickaroo.test",
+      "roles": [
+        {
+          "role": "owner",
+          "shop_id": "shop_2"
+        }
+      ]
+    },
+    {
+      "id": "user_5",
+      "username": "driver1",
+      "password_mock": "demo1234",
+      "name": "Repartidor Demo",
+      "email": "driver1@pickaroo.test",
+      "roles": [
+        {
+          "role": "driver"
+        }
+      ]
+    }
+  ]
+}
