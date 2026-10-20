@@ -53,7 +53,7 @@ view (Compose) ─▶ viewmodel (StateFlow<UiState>) ─▶ repository (interfac
 
 | Kind | Source | Notes |
 |---|---|---|
-| **Read-only seed data** | JSON files in the repo under `docs/mock/`, each also published as a **GitHub gist** and read through Retrofit (like `GistService`) | The repo copy is the editable source. The gist is what the app downloads. A raw URL pinned to a commit never changes; a `raw/<file>` URL without the commit always returns the latest version but is cached for about 5 minutes. **Use pinned URLs** so builds are reproducible. |
+| **Read-only seed data** | JSON files in the repo under `docs/mock/`, each also published as a **GitHub gist** and read through Retrofit (like `GistService`) | The repo copy is the editable source. The gist is what the app downloads. A raw URL pinned to a commit never changes; a `raw/<file>` URL without the commit always returns the latest version but is cached for about 5 minutes. **Use pinned URLs** so builds are reproducible. Debug builds also package the repo files as assets (`assets.srcDir("../docs/mock")`), so the app can read them offline. |
 | **Writes** (register, orders, status changes, stock edits, slot bookings, driver actions) | `MockPickarooApi`, an in-app class that implements the same Retrofit interfaces | It starts from the seed data and saves changes as JSON in `AppPreferences`, like `CartStorage` does. It simulates latency (300–600 ms), and can optionally inject errors to test error states. It returns `HttpException` 401/403/404/409 exactly as the real API would. |
 
 The mock enforces permissions (it returns 403), so permission bugs show up before the real backend exists.
@@ -137,8 +137,8 @@ Each transition is recorded as an event (ScyllaDB in the real backend, a list on
 
 | File | Contents | Built from |
 |---|---|---|
-| `catalog.json` | v3 = `catalogo-v2.json` + `shop_id` on every product and group, **re-saved as valid UTF-8** (v2 has `�` instead of accents, e.g. `acompa�amientos`) | `docs/catalogo-v2.json` |
-| `shops.json` | 3 shops: `id, name, address, lat, lng, logo_url, hours[], pickup: {slot_minutes, capacity_per_slot, lead_minutes}, delivery: {enabled, radius_km, fee}` | new |
+| `catalog.json` | v3 = `catalogo-v2.json` + `shop_id` on every product and group. `shop_1` keeps the v2 catalog; `shop_2` (bakery) and `shop_3` (greengrocer, pickup-only, with an unavailable product) get small catalogs | `docs/catalogo-v2.json` |
+| `shops.json` | 3 shops: `id, name, address, lat, lng, timezone, logo_url, hours[], pickup: {slot_minutes, capacity_per_slot, lead_minutes}, delivery: {enabled, radius_km, fee}` | new |
 | `users.json` | 5 users: customer, staff (shop_1), owner (shop_1, also a customer), owner (shop_2), driver. Fields: `id, username, password_mock, name, email, roles: [{role, shop_id?}]` | new |
 | `roles.json` | role → permissions (section 4.2), mirroring Neo4J | new |
 | `orders.seed.json` | About 10 past orders in different statuses, so dashboards, sales stats and history aren't empty | new |
@@ -153,7 +153,7 @@ Each task becomes **one staged change set and one commit** (see CLAUDE.md). Ever
 
 ### E0. Foundation: data layer and mock API *(blocks everything)*
 1. `AppContainer`, `BuildConfig.USE_MOCK_API`, and the repository interface pattern.
-2. `docs/mock/` files (section 6), with the UTF-8 fix and catalog v3; published as gists.
+2. `docs/mock/` files (section 6), loaded from the repo in debug builds (publishing them as gists is optional).
 3. `MockPickarooApi` core: seed loading, persisted write store, latency, error injection, 403/404/409 helpers.
 4. Money as cents (`Money` value class) across catalog and cart. This also fixes the review finding left open on the cart.
 5. Shared `LoadingState` / `ErrorState` / empty-state composables and the error-code → message mapper.

@@ -1,0 +1,50 @@
+{
+  "roles": [
+    {
+      "id": "customer",
+      "name": "Cliente",
+      "permissions": [
+        "catalog:read",
+        "cart:use",
+        "order:create",
+        "order:read:own",
+        "order:cancel:own"
+      ]
+    },
+    {
+      "id": "staff",
+      "name": "Personal de tienda",
+      "permissions": [
+        "catalog:read",
+        "shop:orders:read",
+        "order:status:update",
+        "product:stock:update"
+      ]
+    },
+    {
+      "id": "owner",
+      "name": "Dueño de tienda",
+      "permissions": [
+        "catalog:read",
+        "shop:orders:read",
+        "order:status:update",
+        "product:stock:update",
+        "product:manage",
+        "slots:manage",
+        "staff:manage",
+        "shop:stats:read"
+      ]
+    },
+    {
+      "id": "driver",
+      "name": "Repartidor",
+      "permissions": [
+        "catalog:read",
+        "delivery:read:available",
+        "delivery:accept",
+        "delivery:update",
+        "location:write"
+      ]
+    }
+  ]
+}
