@@ -12,8 +12,10 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pikaroo.appContainer
+import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.common.preferences.AppPreferences
 import com.example.pikaroo.ui.auth.model.LoginRequest
+import com.example.pikaroo.ui.auth.model.LogoutRequest
 import com.example.pikaroo.ui.auth.model.Permission
 import com.example.pikaroo.ui.auth.model.RoleMode
 import kotlinx.coroutines.runBlocking
@@ -158,6 +160,21 @@ class RoleNavigationTest {
         waitForTag("login_submit")
         assertOnlyHome("none")
         composeRule.waitUntil(5_000) { !container.sessionRepository.isLoggedIn() }
+        assertFalse(container.sessionRepository.isLoggedIn())
+    }
+
+    @Test
+    fun aSessionThatCannotBeRefreshedSendsTheUserBackToLogin() {
+        relaunchAs("driver1", NavTestTags.DRIVER_HOME)
+
+        runBlocking {
+            val current = container.sessionRepository.session()!!
+            container.authApi.logout("Bearer ${current.accessToken}", LogoutRequest(current.refreshToken))
+            runCatching { container.authorizedCalls.call<Unit> { throw MockErrors.unauthorized() } }
+        }
+
+        waitForTag("login_submit")
+        assertOnlyHome("none")
         assertFalse(container.sessionRepository.isLoggedIn())
     }
 

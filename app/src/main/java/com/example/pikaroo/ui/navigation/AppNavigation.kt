@@ -3,6 +3,7 @@ package com.example.pikaroo.ui.navigation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +21,8 @@ import com.example.pikaroo.ui.driver.view.DriverHomeView
 import com.example.pikaroo.ui.onboarding.data.OnboardingPreferences
 import com.example.pikaroo.ui.onboarding.view.OnboardingView
 import com.example.pikaroo.ui.shop.view.ShopHomeView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun AppNavigation() {
@@ -52,6 +55,18 @@ fun AppNavigation() {
     }
 
     fun otherModes(current: RoleMode) = session.availableModes().filter { it != current }
+
+    // Si la sesión ya no se puede renovar, todo vuelve al login.
+    LaunchedEffect(Unit) {
+        context.appContainer().authorizedCalls.sessionExpired.collect {
+            withContext(Dispatchers.Main.immediate) {
+                rootNavController.navigate(AppRoute.Login.route) {
+                    popUpTo(rootNavController.graph.id) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
 
     NavHost(
         navController = rootNavController,

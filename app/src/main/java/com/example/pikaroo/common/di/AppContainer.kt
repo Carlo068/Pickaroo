@@ -3,6 +3,7 @@ package com.example.pikaroo.common.di
 import com.example.pikaroo.BuildConfig
 import com.example.pikaroo.common.mock.MockPickarooApi
 import com.example.pikaroo.common.preferences.StringStore
+import com.example.pikaroo.ui.auth.data.AuthorizedCalls
 import com.example.pikaroo.ui.auth.data.SessionRepository
 import com.example.pikaroo.ui.auth.network.AuthApi
 import com.example.pikaroo.ui.auth.network.MockAuthService
@@ -24,6 +25,8 @@ class AppContainer(
     val sessionRepository: SessionRepository by lazy { SessionRepository(sessionStore) }
 
     private val mockApi: MockPickarooApi by lazy(mockApiFactory)
+
+    val authorizedCalls: AuthorizedCalls by lazy { AuthorizedCalls(sessionRepository, authApi) }
 
     val authApi: AuthApi by lazy {
         if (useMockApi) MockAuthService(mockApi) else RemoteAuthApi()

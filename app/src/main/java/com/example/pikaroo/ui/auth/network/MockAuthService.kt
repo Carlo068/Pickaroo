@@ -153,6 +153,7 @@ class MockAuthService(
         }
         val payload = JsonObject().apply {
             addProperty("sub", user.string("id"))
+            addProperty("jti", newToken())
             add("roles", JsonArray().apply { user.roleAssignments().forEach { add(it.role) } })
             addProperty("iat", now)
             addProperty("exp", now + ACCESS_TTL_SECONDS)
