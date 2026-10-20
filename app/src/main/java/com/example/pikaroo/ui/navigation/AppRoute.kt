@@ -15,6 +15,10 @@ sealed class AppRoute(val route: String) {
     object Products : AppRoute("products")
     object User : AppRoute("user")
     object Cart : AppRoute("cart")
+    object Orders : AppRoute("orders")
+    object Tracking : AppRoute("tracking/{orderId}") {
+        fun create(orderId: String) = "tracking/$orderId"
+    }
 }
 
 /** Pantalla de inicio de cada modo; sin modo válido se vuelve al login. */

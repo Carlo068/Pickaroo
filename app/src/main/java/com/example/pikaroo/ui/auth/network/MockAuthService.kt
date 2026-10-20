@@ -30,6 +30,8 @@ class MockAuthService(
     private val newToken: () -> String = { UUID.randomUUID().toString() }
 ) : AuthApi {
 
+    private val authenticator = MockAuthenticator(nowSeconds)
+
     override suspend fun register(body: RegisterRequest): LoginResponse = api.call {
         val name = body.name.trim()
         val username = body.username.trim()
@@ -132,19 +134,7 @@ class MockAuthService(
         )
     }
 
-    private fun MockStore.authenticate(bearer: String): JsonObject {
-        val token = bearer.removePrefix("Bearer ").takeIf { bearer.startsWith("Bearer ") }
-            ?: throw MockErrors.unauthorized()
-        val payload = JwtPayload.decode(token)
-        if (payload == null || token.substringAfterLast('.') != SIGNATURE) {
-            throw MockErrors.unauthorized("INVALID_TOKEN", "Access token is not valid")
-        }
-        if (payload.isExpired(nowSeconds())) {
-            throw MockErrors.unauthorized("TOKEN_EXPIRED", "Access token has expired")
-        }
-        return find(USERS, payload.subject)
-            ?: throw MockErrors.unauthorized("INVALID_TOKEN", "Access token is not valid")
-    }
+    private fun MockStore.authenticate(bearer: String): JsonObject = authenticator.authenticate(this, bearer).user
 
     private fun signAccessToken(user: JsonObject, now: Long): String {
         val header = JsonObject().apply {
@@ -163,22 +153,10 @@ class MockAuthService(
         } + ".$SIGNATURE"
     }
 
-    private fun MockStore.permissionsFor(user: JsonObject): List<String> {
-        val roleIds = user.roleAssignments().map { it.role }.toSet()
-        return all(ROLES)
-            .filter { it.string("id") in roleIds }
-            .flatMap { role -> role.getAsJsonArray("permissions").map { it.asString } }
-            .distinct()
-    }
+    private fun MockStore.permissionsFor(user: JsonObject): List<String> =
+        authenticator.permissionsFor(this, user.roleAssignments())
 
-    private fun JsonObject.roleAssignments(): List<RoleAssignment> =
-        getAsJsonArray("roles").map { element ->
-            val assignment = element.asJsonObject
-            RoleAssignment(
-                role = assignment.string("role"),
-                shopId = assignment.get("shop_id")?.takeIf { !it.isJsonNull }?.asString
-            )
-        }
+    private fun JsonObject.roleAssignments(): List<RoleAssignment> = authenticator.roleAssignmentsOf(this)
 
     private fun JsonObject.toDto() = UserDto(
         id = string("id"),
@@ -193,7 +171,7 @@ class MockAuthService(
         const val ACCESS_TTL_SECONDS = 15 * 60L
         const val REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60L
         const val MIN_PASSWORD_LENGTH = 6
-        private const val SIGNATURE = "mock"
+        private const val SIGNATURE = MockAuthenticator.SIGNATURE
         private val EMAIL = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
     }
 }
