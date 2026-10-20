@@ -158,8 +158,24 @@ fun OrderView(
                     Text("Pago en tienda · pendiente")
                 } else if (state.method == DeliveryMethod.DELIVERY) {
                     Text("Pago contra entrega · pendiente")
-                    // PIC-40 integra aquí la captura de dirección.
-                    if (state.address.isBlank()) Text("Agrega una dirección para continuar")
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = state.address,
+                        onValueChange = viewModel::updateAddress,
+                        label = { Text("Dirección de entrega") },
+                        placeholder = { Text("Calle, número, colonia y ciudad") },
+                        supportingText = {
+                            Text(if (state.address.isBlank()) {
+                                "Agrega una dirección para continuar"
+                            } else {
+                                "Incluye número interior si corresponde"
+                            })
+                        },
+                        isError = state.address.isNotEmpty() && state.address.isBlank(),
+                        minLines = 2,
+                        maxLines = 4,
+                        modifier = Modifier.fillMaxWidth().testTag("checkout_address")
+                    )
                 }
                 Spacer(Modifier.height(20.dp))
                 Text("Resumen del pedido", style = MaterialTheme.typography.titleLarge)
