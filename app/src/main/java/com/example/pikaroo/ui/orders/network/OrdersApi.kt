@@ -1,5 +1,6 @@
 package com.example.pikaroo.ui.orders.network
 
+import com.example.pikaroo.ui.orders.model.DriverLocationDto
 import com.example.pikaroo.ui.orders.model.OrderDto
 import com.example.pikaroo.ui.orders.model.OrderEventDto
 import com.example.pikaroo.ui.orders.model.CreateOrderRequest
@@ -21,6 +22,9 @@ interface OrdersApi {
     @GET("orders/{id}")
     suspend fun get(@Header("Authorization") bearer: String, @Path("id") id: String): OrderDto
 
+    @GET("orders/{id}/driver-location")
+    suspend fun driverLocation(@Header("Authorization") bearer: String, @Path("id") id: String): DriverLocationDto
+
     @GET("orders/{id}/events")
     suspend fun events(@Header("Authorization") bearer: String, @Path("id") id: String): List<OrderEventDto>
 }
@@ -34,4 +38,5 @@ class RemoteOrdersApi : OrdersApi {
     override suspend fun listMine(bearer: String) = notConnected()
     override suspend fun get(bearer: String, id: String) = notConnected()
     override suspend fun events(bearer: String, id: String) = notConnected()
+    override suspend fun driverLocation(bearer: String, id: String) = notConnected()
 }

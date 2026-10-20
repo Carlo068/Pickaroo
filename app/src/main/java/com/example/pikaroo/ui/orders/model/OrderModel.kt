@@ -34,6 +34,22 @@ data class DeliveryDto(
     @SerializedName("driver_id") val driverId: String?
 )
 
+data class ShopSummaryDto(
+    val id: String,
+    val name: String,
+    val address: String,
+    val lat: Double,
+    val lng: Double
+)
+
+data class DriverLocationDto(
+    val lat: Double,
+    val lng: Double,
+    @SerializedName("updated_at") val updatedAt: String
+)
+
+data class MapPoint(val lat: Double, val lng: Double)
+
 data class OrderDto(
     val id: String,
     @SerializedName("shop_id") val shopId: String,
@@ -47,10 +63,16 @@ data class OrderDto(
     val pickup: PickupDto?,
     val delivery: DeliveryDto?,
     @SerializedName("created_at") val createdAt: String,
+    val shop: ShopSummaryDto? = null,
     @SerializedName("payment_status") val paymentStatus: String? = null
 ) {
     /** Número que ve el cliente: order_1004 -> 1004. */
     val number: String get() = id.removePrefix("order_")
+
+    /** Entrega con repartidor en camino: el cliente puede ver su ubicación. */
+    val tracksDriver: Boolean
+        get() = fulfilment == Fulfilment.DELIVERY &&
+            (status == OrderStatus.DRIVER_ASSIGNED || status == OrderStatus.OUT_FOR_DELIVERY)
 }
 
 data class OrderEventDto(

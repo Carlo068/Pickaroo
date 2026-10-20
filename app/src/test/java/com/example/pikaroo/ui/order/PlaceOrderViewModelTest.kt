@@ -20,6 +20,7 @@ private class CreationRepository : OrdersRepository {
     val requests = mutableListOf<CreateOrderRequest>()
     var result = CompletableDeferred<OrderDto>()
     override suspend fun create(request: CreateOrderRequest): OrderDto { requests += request; return result.await() }
+    override suspend fun driverLocation(id: String): DriverLocationDto? = null
     override suspend fun get(id: String): OrderDto = error("Unexpected get")
     override suspend fun listMine(): List<OrderDto> = error("Unexpected list")
     override suspend fun events(id: String): List<OrderEventDto> = error("Unexpected events")

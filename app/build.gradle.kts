@@ -67,6 +67,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // OpenStreetMap
+    implementation(libs.osmdroid.android)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

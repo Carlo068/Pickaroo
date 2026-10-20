@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.pikaroo.appContainer
 import com.example.pikaroo.ui.auth.data.SessionExpiredException
 import com.example.pikaroo.ui.orders.data.OrdersRepository
+import com.example.pikaroo.ui.orders.model.DriverLocationDto
 import com.example.pikaroo.ui.orders.model.OrderDto
 import com.example.pikaroo.ui.orders.model.OrderEventDto
 import com.example.pikaroo.ui.orders.model.OrderStatus
@@ -23,6 +24,7 @@ data class TrackingUiState(
     val order: OrderDto? = null,
     val events: List<OrderEventDto> = emptyList(),
     val timeline: List<TimelineStep> = emptyList(),
+    val driverLocation: DriverLocationDto? = null,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -59,6 +61,7 @@ class TrackingViewModel(
             order = order,
             events = events,
             timeline = buildTimeline(order, events),
+            driverLocation = fetchDriverLocation(order),
             isLoading = false
         )
         !order.status.isFinal
@@ -78,6 +81,20 @@ class TrackingViewModel(
     } catch (_: Exception) {
         fail("Sin conexión. Reintentando…")
         true
+    }
+
+    /** La ubicación es un extra: si falla se conserva la anterior y el pedido sigue actualizándose. */
+    private suspend fun fetchDriverLocation(order: OrderDto): DriverLocationDto? {
+        if (!order.tracksDriver) return null
+        return try {
+            repository.driverLocation(order.id)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: SessionExpiredException) {
+            throw e
+        } catch (_: Exception) {
+            _state.value.driverLocation
+        }
     }
 
     private fun fail(message: String) {

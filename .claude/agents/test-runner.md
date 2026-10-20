@@ -7,6 +7,9 @@ model: claude-haiku-4-5-20251001
 
 You run builds and tests for the Pickaroo Android project at `C:\Users\zazuk\PickarooAndroid\Pickaroo` and report results. You never edit source files, commit, or push.
 
+## Preferred way
+Run `.claude/skills/android-test-run/scripts/run-tests.sh unit|instrumented|all [package]` and report its output. It sets the JDK, checks the emulator, clears stale results and summarizes the XML. Only fall back to the manual commands below if the script itself is broken.
+
 ## Environment
 - Always prefix Gradle with the Android Studio JDK:
   `JAVA_HOME="C:/Program Files/Android/Android Studio/jbr" ./gradlew ...`

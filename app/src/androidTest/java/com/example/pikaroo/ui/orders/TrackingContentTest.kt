@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.example.pikaroo.ui.orders.model.DeliveryDto
+import com.example.pikaroo.ui.orders.model.DriverLocationDto
 import com.example.pikaroo.ui.orders.model.Fulfilment
 import com.example.pikaroo.ui.orders.model.OrderDto
 import com.example.pikaroo.ui.orders.model.OrderEventDto
@@ -24,8 +25,10 @@ import com.example.pikaroo.ui.orders.model.OrderStatus.PLACED
 import com.example.pikaroo.ui.orders.model.OrderStatus.PREPARING
 import com.example.pikaroo.ui.orders.model.OrderStatus.READY
 import com.example.pikaroo.ui.orders.model.PickupDto
+import com.example.pikaroo.ui.orders.model.ShopSummaryDto
 import com.example.pikaroo.ui.orders.model.StepState
 import com.example.pikaroo.ui.orders.model.buildTimeline
+import com.example.pikaroo.ui.orders.view.OSM_MAP_TAG
 import com.example.pikaroo.ui.orders.view.TrackingContent
 import com.example.pikaroo.ui.orders.view.TrackingTestTags
 import com.example.pikaroo.ui.orders.viewmodel.TrackingUiState
@@ -49,17 +52,24 @@ class TrackingContentTest {
     private fun deliveryOrder(status: OrderStatus) = OrderDto(
         id = "order_1009", shopId = "shop_1", customerId = "user_1", fulfilment = Fulfilment.DELIVERY, status = status,
         items = listOf(line), subtotal = 6.28, deliveryFee = 2.99, total = 9.27,
-        pickup = null, delivery = DeliveryDto("Avenida Demo 310", 19.418, -99.145, "user_5"), createdAt = "2026-10-20T14:50:00Z"
+        pickup = null, delivery = DeliveryDto("Avenida Demo 310", 19.418, -99.145, "user_5"), createdAt = "2026-10-20T14:50:00Z",
+        shop = ShopSummaryDto("shop_1", "Pickaroo Centro", "Calle Ejemplo 120", 19.4326, -99.1332)
     )
 
     private fun events(vararg statuses: OrderStatus) = statuses.mapIndexed { i, s ->
         OrderEventDto(s, "2026-10-20T14:0$i:00Z", "user_1")
     }
 
-    private fun show(order: OrderDto, events: List<OrderEventDto>, error: String? = null, onBack: () -> Unit = {}) {
+    private fun show(
+        order: OrderDto,
+        events: List<OrderEventDto>,
+        error: String? = null,
+        driverLocation: DriverLocationDto? = null,
+        onBack: () -> Unit = {}
+    ) {
         composeRule.setContent {
             TrackingContent(
-                state = TrackingUiState(order, events, buildTimeline(order, events), isLoading = false, error = error),
+                state = TrackingUiState(order, events, buildTimeline(order, events), driverLocation, isLoading = false, error = error),
                 onBack = onBack
             )
         }
@@ -154,7 +164,7 @@ class TrackingContentTest {
     fun aTemporaryErrorKeepsTheOrderOnScreen() {
         show(pickupOrder(READY), events(PLACED, ACCEPTED, PREPARING, READY), error = "Sin conexión. Reintentando…")
 
-        composeRule.onNodeWithTag(TrackingTestTags.ERROR).assertTextContains("Sin conexión")
+        composeRule.onNodeWithTag(TrackingTestTags.ERROR).assertTextContains("Sin conexión", substring = true)
         assertStep(READY, StepState.CURRENT)
     }
 
@@ -176,5 +186,56 @@ class TrackingContentTest {
         composeRule.onNodeWithContentDescription("Regresar").performClick()
 
         assertEquals(1, backs)
+    }
+
+    private val onTheWay = arrayOf(PLACED, ACCEPTED, PREPARING, READY, DRIVER_ASSIGNED, OUT_FOR_DELIVERY)
+
+    @Test
+    fun theLiveMapShowsWhileTheDriverIsOnTheWay() {
+        show(deliveryOrder(OUT_FOR_DELIVERY), events(*onTheWay), driverLocation = DriverLocationDto(19.423, -99.142, "2026-10-20T15:05:00Z"))
+
+        composeRule.onNodeWithTag(OSM_MAP_TAG).assertExists()
+        composeRule.onNodeWithText("Tienda").assertExists()
+        composeRule.onNodeWithText("Destino").assertExists()
+        composeRule.onNodeWithText("Repartidor").assertExists()
+        composeRule.onNodeWithText("Ubicación actualizada", substring = true).assertExists()
+    }
+
+    @Test
+    fun theMapExplainsWhenTheDriverHasNotReportedALocation() {
+        show(deliveryOrder(DRIVER_ASSIGNED), events(PLACED, ACCEPTED, PREPARING, READY, DRIVER_ASSIGNED))
+
+        composeRule.onNodeWithTag(OSM_MAP_TAG).assertExists()
+        composeRule.onNodeWithText("Esperando la ubicación del repartidor…").assertExists()
+    }
+
+    @Test
+    fun noMapForPickupOrdersOrDeliveriesWithoutADriverYetOrFinishedOnes() {
+        show(pickupOrder(READY), events(PLACED, ACCEPTED, PREPARING, READY))
+        composeRule.onNodeWithTag(OSM_MAP_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun noMapWhileTheDeliveryIsStillWaitingForADriver() {
+        show(deliveryOrder(READY), events(PLACED, ACCEPTED, PREPARING, READY))
+
+        composeRule.onNodeWithTag(OSM_MAP_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun noMapOnceTheOrderWasDelivered() {
+        show(deliveryOrder(DELIVERED), events(*onTheWay, DELIVERED))
+
+        composeRule.onNodeWithTag(OSM_MAP_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun addressOnlyDeliveryDoesNotTryToRenderAMapWithMissingCoordinates() {
+        val order = deliveryOrder(OUT_FOR_DELIVERY).copy(
+            delivery = DeliveryDto(address = "Calle Primera 123", driverId = "user_5")
+        )
+        show(order, events(*onTheWay))
+        composeRule.onNodeWithTag(OSM_MAP_TAG).assertDoesNotExist()
+        composeRule.onNodeWithText("Calle Primera 123").assertExists()
     }
 }
