@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName
  * (JWT: access corto + refresh rotativo, roles y permisos).
  *
  * Solo contiene datos: ni lógica de red ni de UI. La lógica vive en los ViewModel
- * de ui/auth/viewmodel/ y la persistencia en ui/auth/data/SessionPreferences.
+ * de ui/auth/viewmodel/ y la persistencia en ui/auth/data/SessionRepository.
  */
 
 /** Cuerpo del POST auth/register. */

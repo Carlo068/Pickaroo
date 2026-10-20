@@ -1,5 +1,6 @@
 package com.example.pikaroo.common.mock
 
+import com.example.pikaroo.common.preferences.StringStore
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser

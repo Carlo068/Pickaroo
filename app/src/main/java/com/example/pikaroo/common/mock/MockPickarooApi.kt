@@ -1,6 +1,7 @@
 package com.example.pikaroo.common.mock
 
 import android.content.Context
+import com.example.pikaroo.common.preferences.PreferencesStringStore
 import kotlinx.coroutines.delay
 import retrofit2.HttpException
 import kotlin.random.Random

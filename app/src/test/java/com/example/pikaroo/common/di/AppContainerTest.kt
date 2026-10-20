@@ -16,6 +16,7 @@ class AppContainerTest {
 
     private fun container(useMockApi: Boolean) = AppContainer(
         useMockApi = useMockApi,
+        sessionStore = InMemoryStringStore(),
         mockApiFactory = { MockPickarooApi(MockStore(FileSeedSource(), InMemoryStringStore())) }
     )
 

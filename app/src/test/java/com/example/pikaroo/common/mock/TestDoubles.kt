@@ -1,5 +1,6 @@
 package com.example.pikaroo.common.mock
 
+import com.example.pikaroo.common.preferences.StringStore
 import java.io.File
 
 class FileSeedSource(private val dir: File = defaultDir()) : SeedSource {

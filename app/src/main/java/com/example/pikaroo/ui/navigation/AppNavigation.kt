@@ -7,7 +7,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.pikaroo.ui.auth.data.SessionPreferences
+import com.example.pikaroo.appContainer
 import com.example.pikaroo.ui.auth.view.LoginView
 import com.example.pikaroo.ui.auth.viewmodel.LogoutViewModel
 import com.example.pikaroo.ui.onboarding.data.OnboardingPreferences
@@ -20,7 +20,7 @@ fun AppNavigation() {
 
     val startDestination = remember {
         when {
-            SessionPreferences(context).isLoggedIn() -> AppRoute.Tabs.route
+            context.appContainer().sessionRepository.isLoggedIn() -> AppRoute.Tabs.route
             OnboardingPreferences(context).hasCompletedOnboarding() -> AppRoute.Login.route
             else -> "onboarding"
         }
