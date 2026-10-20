@@ -9,7 +9,16 @@ shift 2
 [ "$#" -ge 1 ] || { echo "list the paths to stage (never use git add . or -A)"; exit 64; }
 cd "$(git rev-parse --show-toplevel)"
 
-echo "branch: $(git branch --show-current)"
+branch="$(git branch --show-current)"
+echo "branch: $branch"
+case "$branch" in
+  "feature/$key-"*) ;;
+  *) if [ "${ALLOW_BRANCH:-0}" != "1" ]; then
+       echo "STOP: expected a branch named feature/$key-*, but this checkout is on $branch."
+       echo "Someone (another Claude session?) may have switched branches. Do not commit; check with the user. ALLOW_BRANCH=1 overrides."
+       exit 1
+     fi ;;
+esac
 echo "recent commits (look for ones you did not make; the user sometimes commits from Android Studio):"
 git log --oneline -4
 
