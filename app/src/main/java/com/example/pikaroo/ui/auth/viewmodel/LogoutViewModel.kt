@@ -2,9 +2,8 @@ package com.example.pikaroo.ui.auth.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.example.pikaroo.ui.auth.data.SessionPreferences
 import com.example.pikaroo.ui.auth.model.LogoutRequest
-import com.example.pikaroo.ui.auth.network.AuthRetrofitClient
+import com.example.pikaroo.PikarooApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,8 +28,8 @@ private val logoutScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
  */
 class LogoutViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val session = SessionPreferences(application)
-    private val authService = AuthRetrofitClient.authService
+    private val session = (application as PikarooApp).container.sessionRepository
+    private val authService = (application as PikarooApp).container.authApi
 
     /**
      * Cierra la sesión local al instante e invoca [onLoggedOut] (para navegar a
@@ -40,7 +39,7 @@ class LogoutViewModel(application: Application) : AndroidViewModel(application) 
         val access = session.accessToken()
         val refresh = session.refreshToken()
 
-        session.clearSession()
+        session.clear()
         onLoggedOut()
 
         if (access.isNotBlank() && refresh.isNotBlank()) {

@@ -29,11 +29,20 @@ import com.example.pikaroo.ui.theme.PikarooTextGray
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
 import androidx.compose.ui.platform.LocalContext
+import com.example.pikaroo.ui.auth.model.RoleMode
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.pikaroo.ui.cart.view.CartView
+import com.example.pikaroo.ui.orders.view.OrdersView
+import com.example.pikaroo.ui.orders.view.TrackingView
 import com.example.pikaroo.ui.cart.viewmodel.CartViewModel
 
 @Composable
-fun TabsScaffold(onLogout: () -> Unit = {}) {
+fun TabsScaffold(
+    onLogout: () -> Unit = {},
+    otherModes: List<RoleMode> = emptyList(),
+    onSwitchMode: (RoleMode) -> Unit = {}
+) {
     val nestedNavController = rememberNavController()
 
     // Compartido para enviar el filtro de Inicio a Productos.
@@ -91,8 +100,28 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
             composable(AppRoute.User.route) {
                 UserView(
                     onLogout = onLogout,
+                    otherModes = otherModes,
+                    onSwitchMode = onSwitchMode,
+                    onOpenOrders = { nestedNavController.navigate(AppRoute.Orders.route) { launchSingleTop = true } },
                     cartItemCount = cartState.itemCount,
                     onOpenCart = openCart
+                )
+            }
+
+            composable(AppRoute.Orders.route) {
+                OrdersView(
+                    onBack = { nestedNavController.popBackStack() },
+                    onOpenOrder = { orderId -> nestedNavController.navigate(AppRoute.Tracking.create(orderId)) }
+                )
+            }
+
+            composable(
+                route = AppRoute.Tracking.route,
+                arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+            ) { entry ->
+                TrackingView(
+                    orderId = entry.arguments?.getString("orderId").orEmpty(),
+                    onBack = { nestedNavController.popBackStack() }
                 )
             }
 
@@ -167,6 +196,8 @@ fun BottomNavigationBar(navController: NavHostController) {
 // para que no quede guardado y se restaure dentro de otra.
 fun NavHostController.navigateToTab(route: String) {
     popBackStack(AppRoute.Cart.route, inclusive = true)
+    popBackStack(AppRoute.Orders.route, inclusive = true)
+    popBackStack(AppRoute.Tracking.route, inclusive = true)
     navigate(route) {
         popUpTo(graph.startDestinationId) {
             saveState = true

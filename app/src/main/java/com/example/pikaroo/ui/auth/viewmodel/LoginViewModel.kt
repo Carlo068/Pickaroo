@@ -6,13 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pikaroo.ui.auth.data.SessionPreferences
 import com.example.pikaroo.ui.auth.model.LoginRequest
 import com.example.pikaroo.ui.auth.model.LoginResponse
 import com.example.pikaroo.ui.auth.model.LoginState
 import com.example.pikaroo.ui.auth.model.LoginUiState
 import com.example.pikaroo.ui.auth.model.RegisterState
-import com.example.pikaroo.ui.auth.network.AuthRetrofitClient
+import com.example.pikaroo.PikarooApp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,13 +24,13 @@ import java.net.SocketTimeoutException
  * ViewModel de la pantalla de login. Dueño del estado ([LoginUiState]) y de la
  * lógica: llamar a la API, guardar la sesión y traducir los errores a mensajes.
  *
- * Extiende [AndroidViewModel] para pasarle el Context a [SessionPreferences]
+ * Extiende [AndroidViewModel] para pasarle el Context al contenedor de dependencias
  * sin arriesgar fugas de memoria (mismo criterio que OnboardingViewModel).
  */
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val session = SessionPreferences(application)
-    private val authService = AuthRetrofitClient.authService
+    private val session = (application as PikarooApp).container.sessionRepository
+    private val authService = (application as PikarooApp).container.authApi
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -105,7 +104,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val response = loginWithRetry(LoginRequest(username, password))
-                session.saveSession(response.access, response.refresh, response.user)
+                session.save(response)
                 _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
             } catch (e: HttpException) {
                 _uiState.update { it.copy(isLoading = false, error = messageForHttp(e.code())) }

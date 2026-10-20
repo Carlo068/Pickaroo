@@ -1,6 +1,7 @@
 package com.example.pikaroo.ui.user.view
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -17,11 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.pikaroo.ui.auth.model.RoleMode
+import com.example.pikaroo.ui.auth.view.ModeSwitchButtons
 import com.example.pikaroo.ui.cart.view.CartIconButton
 import com.example.pikaroo.ui.theme.PikarooTheme
 import com.example.pikaroo.ui.user.viewmodel.UserViewModel
@@ -30,6 +34,9 @@ import com.example.pikaroo.ui.user.viewmodel.UserViewModel
 @Composable
 fun UserView(
     onLogout: () -> Unit = {},
+    otherModes: List<RoleMode> = emptyList(),
+    onSwitchMode: (RoleMode) -> Unit = {},
+    onOpenOrders: () -> Unit = {},
     cartItemCount: Int = 0,
     onOpenCart: () -> Unit = {},
     viewModel: UserViewModel = viewModel()
@@ -124,6 +131,15 @@ fun UserView(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Action Cards
+            ProfileActionCard(
+                icon = Icons.Default.Receipt,
+                iconTint = Color(0xFFF15A24),
+                title = "Mis pedidos",
+                subtitle = "Sigue el estado de tus pedidos",
+                onClick = onOpenOrders,
+                modifier = Modifier.testTag("user_orders")
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             ProfileActionCard(
                 icon = Icons.Default.Person,
                 iconTint = Color(0xFFF15A24),
@@ -238,6 +254,11 @@ fun UserView(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            if (otherModes.isNotEmpty()) {
+                ModeSwitchButtons(modes = otherModes, onSwitch = onSwitchMode)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             OutlinedButton(
                 onClick = onLogout,
                 modifier = Modifier.fillMaxWidth(),
@@ -260,10 +281,14 @@ fun ProfileActionCard(
     icon: ImageVector,
     iconTint: Color,
     title: String,
-    subtitle: String
+    subtitle: String,
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)

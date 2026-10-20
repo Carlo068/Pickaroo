@@ -2,7 +2,7 @@ package com.example.pikaroo.ui.cart.data
 
 import android.content.Context
 import com.example.pikaroo.common.preferences.AppPreferences
-import com.example.pikaroo.ui.auth.data.SessionPreferences
+import com.example.pikaroo.ui.auth.data.SessionRepository
 import com.example.pikaroo.ui.cart.model.CartItem
 import com.google.gson.Gson
 import com.google.gson.JsonParseException
@@ -53,7 +53,7 @@ object CartJson {
  */
 class CartPreferences(
     context: Context,
-    username: String = SessionPreferences(context).username()
+    username: String = SessionRepository.create(context).username()
 ) : CartStorage {
 
     private val preferences = AppPreferences(context)
