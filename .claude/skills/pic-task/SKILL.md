@@ -7,6 +7,9 @@ description: Work one Jira task of the Pickaroo project (keys PIC-n) from start 
 
 Rules come from `CLAUDE.md`: never push, one task = one branch = one commit, commit messages start with the key, no co-author or "Generated with" line.
 
+## 0. Before touching anything: are you alone?
+The checkout and the emulator are shared. If another Claude session is busy in this folder (use `ListAgents`), your branch can be switched, your app reinstalled or wiped (`pm clear`, `installDebug`, test runs all do it) and your Gradle runs blocked by its file locks. Check `git branch --show-current` and `git log --oneline -3` before committing, and when something unexplained happens (branch changed, processes you did not start, an app state you did not set up) stop and ask the user which session owns the working tree and the emulator. Never stop a process you cannot prove is yours.
+
 ## 1. Start
 ```bash
 .claude/skills/pic-task/scripts/start-task.sh PIC-45 live-driver-map
