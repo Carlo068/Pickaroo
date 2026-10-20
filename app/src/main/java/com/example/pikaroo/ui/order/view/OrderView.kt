@@ -39,6 +39,7 @@ fun OrderView(
     cart: CartUiState = CartUiState(),
     isSaving: Boolean = false,
     saveError: String? = null,
+    onLookupOrder: (() -> Unit)? = null,
     onOpenLastOrder: (() -> Unit)? = null,
     onConfirmOrder: ((OrderState) -> Unit)? = null,
     onOpenCart: () -> Unit = {},
@@ -96,6 +97,7 @@ fun OrderView(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
         ) {
             // Header with Gradient Background
@@ -200,6 +202,9 @@ fun OrderView(
                         .testTag("checkout_review")
                 ) { Text(if (isSaving) "Guardando pedido…" else "Revisar pedido") }
                 saveError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                onLookupOrder?.let { open ->
+                    TextButton(onClick = open, enabled = !isSaving) { Text("Consultar QR") }
+                }
                 onOpenLastOrder?.let { open ->
                     TextButton(onClick = open, enabled = !isSaving) { Text("Último pedido") }
                 }

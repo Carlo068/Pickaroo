@@ -34,6 +34,7 @@ import com.example.pikaroo.ui.auth.model.RoleMode
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.pikaroo.ui.cart.view.CartView
+import com.example.pikaroo.ui.orders.view.OrderLookupView
 import com.example.pikaroo.ui.orders.view.ReceiptView
 import com.example.pikaroo.ui.orders.view.OrdersView
 import com.example.pikaroo.ui.orders.view.TrackingView
@@ -90,6 +91,7 @@ fun TabsScaffold(
             composable(AppRoute.Order.route) {
                 OrderView(
                     cart = cartState,
+                    onLookupOrder = { nestedNavController.navigate(AppRoute.OrderLookup.route) { launchSingleTop = true } },
                     onOpenLastOrder = { nestedNavController.navigate(AppRoute.Receipt.create("latest")) { launchSingleTop = true } },
                     isSaving = placeState.isSaving,
                     saveError = placeState.error,
@@ -127,6 +129,17 @@ fun TabsScaffold(
                 OrdersView(
                     onBack = { nestedNavController.popBackStack() },
                     onOpenOrder = { orderId -> nestedNavController.navigate(AppRoute.Tracking.create(orderId)) }
+                )
+            }
+
+            composable(AppRoute.OrderLookup.route) {
+                OrderLookupView(
+                    onBack = { nestedNavController.popBackStack() },
+                    onFound = { id ->
+                        nestedNavController.navigate(AppRoute.Receipt.create(id)) {
+                            popUpTo(AppRoute.OrderLookup.route) { inclusive = true }
+                        }
+                    }
                 )
             }
 
@@ -223,6 +236,7 @@ fun BottomNavigationBar(navController: NavHostController) {
 // para que no quede guardado y se restaure dentro de otra.
 fun NavHostController.navigateToTab(route: String) {
     popBackStack(AppRoute.Cart.route, inclusive = true)
+    popBackStack(AppRoute.OrderLookup.route, inclusive = true)
     popBackStack(AppRoute.Receipt.route, inclusive = true)
     popBackStack(AppRoute.Orders.route, inclusive = true)
     popBackStack(AppRoute.Tracking.route, inclusive = true)

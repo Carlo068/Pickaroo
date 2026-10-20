@@ -46,7 +46,7 @@ fun ReceiptContent(
     onTracking: (String) -> Unit
 ) {
     val clipboard = LocalClipboardManager.current
-    LazyColumn(modifier = Modifier.fillMaxSize().background(Color.White),
+    LazyColumn(modifier = Modifier.fillMaxSize().background(Color.White).testTag("receipt_scroll"),
         contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
