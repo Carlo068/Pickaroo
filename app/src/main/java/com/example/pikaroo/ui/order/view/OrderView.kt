@@ -39,6 +39,7 @@ fun OrderView(
     cart: CartUiState = CartUiState(),
     isSaving: Boolean = false,
     saveError: String? = null,
+    onOpenLastOrder: (() -> Unit)? = null,
     onConfirmOrder: ((OrderState) -> Unit)? = null,
     onOpenCart: () -> Unit = {},
     viewModel: OrderViewModel = viewModel()
@@ -199,6 +200,9 @@ fun OrderView(
                         .testTag("checkout_review")
                 ) { Text(if (isSaving) "Guardando pedido…" else "Revisar pedido") }
                 saveError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                onOpenLastOrder?.let { open ->
+                    TextButton(onClick = open, enabled = !isSaving) { Text("Último pedido") }
+                }
             }
         }
     }

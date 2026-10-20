@@ -34,6 +34,7 @@ import com.example.pikaroo.ui.auth.model.RoleMode
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.pikaroo.ui.cart.view.CartView
+import com.example.pikaroo.ui.orders.view.ReceiptView
 import com.example.pikaroo.ui.orders.view.OrdersView
 import com.example.pikaroo.ui.orders.view.TrackingView
 import com.example.pikaroo.ui.cart.viewmodel.CartViewModel
@@ -89,13 +90,14 @@ fun TabsScaffold(
             composable(AppRoute.Order.route) {
                 OrderView(
                     cart = cartState,
+                    onOpenLastOrder = { nestedNavController.navigate(AppRoute.Receipt.create("latest")) { launchSingleTop = true } },
                     isSaving = placeState.isSaving,
                     saveError = placeState.error,
                     onConfirmOrder = { delivery ->
                         val snapshot = cartState
                         placeOrderViewModel.place(snapshot, delivery) { order ->
                             cartViewModel.removeOrderedItems(snapshot.items)
-                            nestedNavController.navigate(AppRoute.Tracking.create(order.id)) { launchSingleTop = true }
+                            nestedNavController.navigate(AppRoute.Receipt.create(order.id)) { launchSingleTop = true }
                         }
                     },
                     cartItemCount = cartState.itemCount,
@@ -125,6 +127,18 @@ fun TabsScaffold(
                 OrdersView(
                     onBack = { nestedNavController.popBackStack() },
                     onOpenOrder = { orderId -> nestedNavController.navigate(AppRoute.Tracking.create(orderId)) }
+                )
+            }
+
+            composable(
+                route = AppRoute.Receipt.route,
+                arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+            ) { entry ->
+                val id = entry.arguments?.getString("orderId")
+                ReceiptView(
+                    orderId = id?.takeUnless { it == "latest" },
+                    onBack = { nestedNavController.popBackStack() },
+                    onTracking = { orderId -> nestedNavController.navigate(AppRoute.Tracking.create(orderId)) }
                 )
             }
 
@@ -209,6 +223,7 @@ fun BottomNavigationBar(navController: NavHostController) {
 // para que no quede guardado y se restaure dentro de otra.
 fun NavHostController.navigateToTab(route: String) {
     popBackStack(AppRoute.Cart.route, inclusive = true)
+    popBackStack(AppRoute.Receipt.route, inclusive = true)
     popBackStack(AppRoute.Orders.route, inclusive = true)
     popBackStack(AppRoute.Tracking.route, inclusive = true)
     navigate(route) {

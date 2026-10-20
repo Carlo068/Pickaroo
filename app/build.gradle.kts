@@ -64,6 +64,10 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     
+    // QR del pedido y lector integrado (sin servicios externos).
+    implementation(libs.zxing.core)
+    implementation(libs.zxing.embedded)
+
     // Coil
     implementation(libs.coil.compose)
 
