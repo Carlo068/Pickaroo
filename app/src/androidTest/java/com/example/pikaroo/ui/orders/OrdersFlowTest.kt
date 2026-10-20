@@ -13,6 +13,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pikaroo.appContainer
 import com.example.pikaroo.common.preferences.AppPreferences
 import com.example.pikaroo.ui.auth.model.LoginRequest
+import com.example.pikaroo.ui.auth.model.RoleMode
 import com.example.pikaroo.ui.navigation.AppNavigation
 import com.example.pikaroo.ui.navigation.NavTestTags
 import com.example.pikaroo.ui.orders.model.OrderStatus
@@ -56,6 +57,7 @@ class OrdersFlowTest {
         runBlocking {
             container.sessionRepository.save(container.authApi.login(LoginRequest(username, "demo1234")))
         }
+        container.sessionRepository.setActiveMode(RoleMode.CUSTOMER)
         composeRule.setContent { AppNavigation() }
         waitForTag(NavTestTags.CUSTOMER_HOME)
         composeRule.onNodeWithText("Usuario").performClick()

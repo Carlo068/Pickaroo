@@ -154,7 +154,7 @@ class TrackingContentTest {
     fun aTemporaryErrorKeepsTheOrderOnScreen() {
         show(pickupOrder(READY), events(PLACED, ACCEPTED, PREPARING, READY), error = "Sin conexión. Reintentando…")
 
-        composeRule.onNodeWithTag(TrackingTestTags.ERROR).assertTextContains("Sin conexión")
+        composeRule.onNodeWithTag(TrackingTestTags.ERROR).assertTextContains("Sin conexión", substring = true)
         assertStep(READY, StepState.CURRENT)
     }
 
