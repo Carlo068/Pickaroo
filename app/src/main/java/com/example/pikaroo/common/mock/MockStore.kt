@@ -4,7 +4,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 
-class MockCollection(val name: String, val file: String, val key: String)
+class MockCollection(val name: String, val file: String? = null, val key: String? = null)
 
 object MockCollections {
     val CATEGORIES = MockCollection("categories", "catalog.json", "categories")
@@ -15,8 +15,9 @@ object MockCollections {
     val USERS = MockCollection("users", "users.json", "users")
     val ROLES = MockCollection("roles", "roles.json", "roles")
     val ORDERS = MockCollection("orders", "orders.seed.json", "orders")
+    val SESSIONS = MockCollection("sessions")
 
-    val all = listOf(CATEGORIES, GROUPS, PRODUCTS, ITEMS, SHOPS, USERS, ROLES, ORDERS)
+    val all = listOf(CATEGORIES, GROUPS, PRODUCTS, ITEMS, SHOPS, USERS, ROLES, ORDERS, SESSIONS)
 }
 
 /**
@@ -71,11 +72,13 @@ class MockStore(private val seed: SeedSource, private val storage: StringStore) 
         }
     }
 
-    private fun readSeed(collection: MockCollection): MutableList<JsonObject> =
-        JsonParser().parse(seed.read(collection.file)).asJsonObject
+    private fun readSeed(collection: MockCollection): MutableList<JsonObject> {
+        val file = collection.file ?: return mutableListOf()
+        return JsonParser().parse(seed.read(file)).asJsonObject
             .getAsJsonArray(collection.key)
             .map { it.asJsonObject }
             .toMutableList()
+    }
 
     private fun persist(collection: MockCollection, documents: List<JsonObject>) {
         val array = JsonArray().apply { documents.forEach { add(it) } }

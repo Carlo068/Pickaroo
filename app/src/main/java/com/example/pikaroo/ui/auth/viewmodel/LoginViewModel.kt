@@ -12,7 +12,7 @@ import com.example.pikaroo.ui.auth.model.LoginResponse
 import com.example.pikaroo.ui.auth.model.LoginState
 import com.example.pikaroo.ui.auth.model.LoginUiState
 import com.example.pikaroo.ui.auth.model.RegisterState
-import com.example.pikaroo.ui.auth.network.AuthRetrofitClient
+import com.example.pikaroo.PikarooApp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,7 +31,7 @@ import java.net.SocketTimeoutException
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private val session = SessionPreferences(application)
-    private val authService = AuthRetrofitClient.authService
+    private val authService = (application as PikarooApp).container.authApi
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
