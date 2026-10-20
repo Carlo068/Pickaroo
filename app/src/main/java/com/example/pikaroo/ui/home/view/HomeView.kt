@@ -39,7 +39,7 @@ import java.util.Locale
 
 @Composable
 fun HomeView(
-    viewModel: ProductsViewModel = viewModel(),
+    viewModel: ProductsViewModel = viewModel(factory = ProductsViewModel.Factory),
     onOpenProducts: (String) -> Unit,
     cartItemCount: Int = 0,
     onOpenCart: () -> Unit = {},

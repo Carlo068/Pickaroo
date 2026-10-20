@@ -1,0 +1,557 @@
+{
+  "orders": [
+    {
+      "id": "order_1001",
+      "shop_id": "shop_1",
+      "customer_id": "user_1",
+      "fulfilment": "pickup",
+      "status": "PICKED_UP",
+      "items": [
+        {
+          "product_id": "1",
+          "name": "Manzanas Rojas",
+          "quantity": 2,
+          "unit_price": 3.49,
+          "discount_percentage": 10,
+          "line_total": 6.28
+        },
+        {
+          "product_id": "3",
+          "name": "Leche Entera",
+          "quantity": 1,
+          "unit_price": 1.99,
+          "discount_percentage": 15,
+          "line_total": 1.69
+        },
+        {
+          "product_id": "2",
+          "name": "Pan Integral",
+          "quantity": 1,
+          "unit_price": 3.5,
+          "discount_percentage": 0,
+          "line_total": 3.5
+        }
+      ],
+      "subtotal": 11.47,
+      "delivery_fee": 0.0,
+      "total": 11.47,
+      "pickup": {
+        "slot_start": "2026-10-12T17:00:00Z",
+        "code": "K7M2QX"
+      },
+      "delivery": null,
+      "created_at": "2026-10-12T15:02:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-12T15:02:00Z",
+          "by": "user_1"
+        },
+        {
+          "status": "ACCEPTED",
+          "at": "2026-10-12T15:08:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "PREPARING",
+          "at": "2026-10-12T15:14:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "READY",
+          "at": "2026-10-12T15:20:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "PICKED_UP",
+          "at": "2026-10-12T15:26:00Z",
+          "by": "user_2"
+        }
+      ]
+    },
+    {
+      "id": "order_1002",
+      "shop_id": "shop_1",
+      "customer_id": "user_3",
+      "fulfilment": "pickup",
+      "status": "PICKED_UP",
+      "items": [
+        {
+          "product_id": "4",
+          "name": "Café Premium",
+          "quantity": 1,
+          "unit_price": 8.99,
+          "discount_percentage": 0,
+          "line_total": 8.99
+        },
+        {
+          "product_id": "5",
+          "name": "Yogurt Natural",
+          "quantity": 2,
+          "unit_price": 4.5,
+          "discount_percentage": 0,
+          "line_total": 9.0
+        }
+      ],
+      "subtotal": 17.99,
+      "delivery_fee": 0.0,
+      "total": 17.99,
+      "pickup": {
+        "slot_start": "2026-10-14T15:00:00Z",
+        "code": "P4D9TH"
+      },
+      "delivery": null,
+      "created_at": "2026-10-14T13:30:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-14T13:30:00Z",
+          "by": "user_3"
+        },
+        {
+          "status": "ACCEPTED",
+          "at": "2026-10-14T13:36:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "PREPARING",
+          "at": "2026-10-14T13:42:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "READY",
+          "at": "2026-10-14T13:48:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "PICKED_UP",
+          "at": "2026-10-14T13:54:00Z",
+          "by": "user_2"
+        }
+      ]
+    },
+    {
+      "id": "order_1003",
+      "shop_id": "shop_1",
+      "customer_id": "user_1",
+      "fulfilment": "pickup",
+      "status": "READY",
+      "items": [
+        {
+          "product_id": "11",
+          "name": "Portafolio Desayuno",
+          "quantity": 1,
+          "unit_price": 13.99,
+          "discount_percentage": 10,
+          "line_total": 12.59
+        }
+      ],
+      "subtotal": 12.59,
+      "delivery_fee": 0.0,
+      "total": 12.59,
+      "pickup": {
+        "slot_start": "2026-10-20T16:30:00Z",
+        "code": "W3N8RB"
+      },
+      "delivery": null,
+      "created_at": "2026-10-20T14:10:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-20T14:10:00Z",
+          "by": "user_1"
+        },
+        {
+          "status": "ACCEPTED",
+          "at": "2026-10-20T14:16:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "PREPARING",
+          "at": "2026-10-20T14:22:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "READY",
+          "at": "2026-10-20T14:28:00Z",
+          "by": "user_2"
+        }
+      ]
+    },
+    {
+      "id": "order_1004",
+      "shop_id": "shop_1",
+      "customer_id": "user_1",
+      "fulfilment": "pickup",
+      "status": "PREPARING",
+      "items": [
+        {
+          "product_id": "9",
+          "name": "Queso Mozzarella",
+          "quantity": 1,
+          "unit_price": 6.5,
+          "discount_percentage": 0,
+          "line_total": 6.5
+        },
+        {
+          "product_id": "8",
+          "name": "Tomates Frescos",
+          "quantity": 2,
+          "unit_price": 3.75,
+          "discount_percentage": 0,
+          "line_total": 7.5
+        },
+        {
+          "product_id": "7",
+          "name": "Aceite de Oliva",
+          "quantity": 1,
+          "unit_price": 12.99,
+          "discount_percentage": 0,
+          "line_total": 12.99
+        }
+      ],
+      "subtotal": 26.99,
+      "delivery_fee": 0.0,
+      "total": 26.99,
+      "pickup": {
+        "slot_start": "2026-10-20T17:00:00Z",
+        "code": "H6Z2LC"
+      },
+      "delivery": null,
+      "created_at": "2026-10-20T14:40:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-20T14:40:00Z",
+          "by": "user_1"
+        },
+        {
+          "status": "ACCEPTED",
+          "at": "2026-10-20T14:46:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "PREPARING",
+          "at": "2026-10-20T14:52:00Z",
+          "by": "user_2"
+        }
+      ]
+    },
+    {
+      "id": "order_1005",
+      "shop_id": "shop_2",
+      "customer_id": "user_3",
+      "fulfilment": "pickup",
+      "status": "ACCEPTED",
+      "items": [
+        {
+          "product_id": "14",
+          "name": "Concha de Vainilla",
+          "quantity": 6,
+          "unit_price": 1.25,
+          "discount_percentage": 0,
+          "line_total": 7.5
+        },
+        {
+          "product_id": "16",
+          "name": "Café Americano",
+          "quantity": 2,
+          "unit_price": 2.5,
+          "discount_percentage": 0,
+          "line_total": 5.0
+        }
+      ],
+      "subtotal": 12.5,
+      "delivery_fee": 0.0,
+      "total": 12.5,
+      "pickup": {
+        "slot_start": "2026-10-20T18:00:00Z",
+        "code": "M9Q5VF"
+      },
+      "delivery": null,
+      "created_at": "2026-10-20T15:05:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-20T15:05:00Z",
+          "by": "user_3"
+        },
+        {
+          "status": "ACCEPTED",
+          "at": "2026-10-20T15:11:00Z",
+          "by": "user_4"
+        }
+      ]
+    },
+    {
+      "id": "order_1006",
+      "shop_id": "shop_1",
+      "customer_id": "user_1",
+      "fulfilment": "pickup",
+      "status": "PLACED",
+      "items": [
+        {
+          "product_id": "13",
+          "name": "Portafolio Frutas y Yogurt",
+          "quantity": 1,
+          "unit_price": 10.99,
+          "discount_percentage": 0,
+          "line_total": 10.99
+        }
+      ],
+      "subtotal": 10.99,
+      "delivery_fee": 0.0,
+      "total": 10.99,
+      "pickup": {
+        "slot_start": "2026-10-20T18:30:00Z",
+        "code": "T2X7GD"
+      },
+      "delivery": null,
+      "created_at": "2026-10-20T15:20:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-20T15:20:00Z",
+          "by": "user_1"
+        }
+      ]
+    },
+    {
+      "id": "order_1007",
+      "shop_id": "shop_1",
+      "customer_id": "user_3",
+      "fulfilment": "pickup",
+      "status": "CANCELLED",
+      "items": [
+        {
+          "product_id": "12",
+          "name": "Portafolio Italiano",
+          "quantity": 1,
+          "unit_price": 22.99,
+          "discount_percentage": 0,
+          "line_total": 22.99
+        }
+      ],
+      "subtotal": 22.99,
+      "delivery_fee": 0.0,
+      "total": 22.99,
+      "pickup": {
+        "slot_start": "2026-10-18T14:00:00Z",
+        "code": "B8J3KS"
+      },
+      "delivery": null,
+      "created_at": "2026-10-18T12:00:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-18T12:00:00Z",
+          "by": "user_3"
+        },
+        {
+          "status": "CANCELLED",
+          "at": "2026-10-18T12:04:00Z",
+          "by": "user_3"
+        }
+      ]
+    },
+    {
+      "id": "order_1008",
+      "shop_id": "shop_1",
+      "customer_id": "user_1",
+      "fulfilment": "delivery",
+      "status": "DELIVERED",
+      "items": [
+        {
+          "product_id": "6",
+          "name": "Pasta Italiana",
+          "quantity": 3,
+          "unit_price": 2.25,
+          "discount_percentage": 30,
+          "line_total": 4.73
+        },
+        {
+          "product_id": "10",
+          "name": "Naranjas",
+          "quantity": 1,
+          "unit_price": 4.2,
+          "discount_percentage": 0,
+          "line_total": 4.2
+        }
+      ],
+      "subtotal": 8.93,
+      "delivery_fee": 2.99,
+      "total": 11.92,
+      "pickup": null,
+      "delivery": {
+        "address": "Calle Muestra 22, Col. Juárez",
+        "lat": 19.427,
+        "lng": -99.15,
+        "driver_id": "user_5"
+      },
+      "created_at": "2026-10-16T18:00:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-16T18:00:00Z",
+          "by": "user_1"
+        },
+        {
+          "status": "ACCEPTED",
+          "at": "2026-10-16T18:06:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "PREPARING",
+          "at": "2026-10-16T18:12:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "READY",
+          "at": "2026-10-16T18:18:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "DRIVER_ASSIGNED",
+          "at": "2026-10-16T18:24:00Z",
+          "by": "user_5"
+        },
+        {
+          "status": "OUT_FOR_DELIVERY",
+          "at": "2026-10-16T18:30:00Z",
+          "by": "user_5"
+        },
+        {
+          "status": "DELIVERED",
+          "at": "2026-10-16T18:36:00Z",
+          "by": "user_5"
+        }
+      ]
+    },
+    {
+      "id": "order_1009",
+      "shop_id": "shop_1",
+      "customer_id": "user_3",
+      "fulfilment": "delivery",
+      "status": "OUT_FOR_DELIVERY",
+      "items": [
+        {
+          "product_id": "12",
+          "name": "Portafolio Italiano",
+          "quantity": 1,
+          "unit_price": 22.99,
+          "discount_percentage": 0,
+          "line_total": 22.99
+        },
+        {
+          "product_id": "3",
+          "name": "Leche Entera",
+          "quantity": 2,
+          "unit_price": 1.99,
+          "discount_percentage": 15,
+          "line_total": 3.38
+        }
+      ],
+      "subtotal": 26.37,
+      "delivery_fee": 2.99,
+      "total": 29.36,
+      "pickup": null,
+      "delivery": {
+        "address": "Avenida Demo 310, Col. Doctores",
+        "lat": 19.418,
+        "lng": -99.145,
+        "driver_id": "user_5"
+      },
+      "created_at": "2026-10-20T14:50:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-20T14:50:00Z",
+          "by": "user_3"
+        },
+        {
+          "status": "ACCEPTED",
+          "at": "2026-10-20T14:56:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "PREPARING",
+          "at": "2026-10-20T15:02:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "READY",
+          "at": "2026-10-20T15:08:00Z",
+          "by": "user_2"
+        },
+        {
+          "status": "DRIVER_ASSIGNED",
+          "at": "2026-10-20T15:14:00Z",
+          "by": "user_5"
+        },
+        {
+          "status": "OUT_FOR_DELIVERY",
+          "at": "2026-10-20T15:20:00Z",
+          "by": "user_5"
+        }
+      ]
+    },
+    {
+      "id": "order_1010",
+      "shop_id": "shop_2",
+      "customer_id": "user_1",
+      "fulfilment": "delivery",
+      "status": "READY",
+      "items": [
+        {
+          "product_id": "17",
+          "name": "Combo Desayuno Panadero",
+          "quantity": 1,
+          "unit_price": 5.5,
+          "discount_percentage": 5,
+          "line_total": 5.23
+        },
+        {
+          "product_id": "15",
+          "name": "Baguette Artesanal",
+          "quantity": 2,
+          "unit_price": 2.2,
+          "discount_percentage": 10,
+          "line_total": 3.96
+        }
+      ],
+      "subtotal": 9.19,
+      "delivery_fee": 1.5,
+      "total": 10.69,
+      "pickup": null,
+      "delivery": {
+        "address": "Calle Falsa 9, Col. Roma Norte",
+        "lat": 19.422,
+        "lng": -99.16,
+        "driver_id": null
+      },
+      "created_at": "2026-10-20T15:10:00Z",
+      "events": [
+        {
+          "status": "PLACED",
+          "at": "2026-10-20T15:10:00Z",
+          "by": "user_1"
+        },
+        {
+          "status": "ACCEPTED",
+          "at": "2026-10-20T15:16:00Z",
+          "by": "user_4"
+        },
+        {
+          "status": "PREPARING",
+          "at": "2026-10-20T15:22:00Z",
+          "by": "user_4"
+        },
+        {
+          "status": "READY",
+          "at": "2026-10-20T15:28:00Z",
+          "by": "user_4"
+        }
+      ]
+    }
+  ]
+}

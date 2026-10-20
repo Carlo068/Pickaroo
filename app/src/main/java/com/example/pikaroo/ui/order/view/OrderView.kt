@@ -37,6 +37,8 @@ import com.example.pikaroo.ui.order.viewmodel.OrderViewModel
 fun OrderView(
     cartItemCount: Int = 0,
     cart: CartUiState = CartUiState(),
+    isSaving: Boolean = false,
+    saveError: String? = null,
     onConfirmOrder: ((OrderState) -> Unit)? = null,
     onOpenCart: () -> Unit = {},
     viewModel: OrderViewModel = viewModel()
@@ -52,7 +54,7 @@ fun OrderView(
                 if (onConfirmOrder != null) {
                     TextButton(onClick = {
                         showReview = false
-                        onConfirmOrder(state.copy(address = state.address.trim()))
+                        if (!isSaving) onConfirmOrder(state.copy(address = state.address.trim()))
                     }) { Text("Confirmar pedido") }
                 } else {
                     TextButton(onClick = { showReview = false }) { Text("Volver al resumen") }
@@ -142,25 +144,26 @@ fun OrderView(
                         icon = Icons.Default.Storefront,
                         title = "Pickup",
                         subtitle = if (state.method == DeliveryMethod.PICKUP) "Seleccionado" else "Recoge en sucursal",
-                        onClick = { viewModel.selectMethod(DeliveryMethod.PICKUP) }
+                        onClick = { if (!isSaving) viewModel.selectMethod(DeliveryMethod.PICKUP) }
                     )
                     DeliveryMethodCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.LocalShipping,
                         title = "Domicilio",
                         subtitle = if (state.method == DeliveryMethod.DELIVERY) "Seleccionado" else "Envío a domicilio",
-                        onClick = { viewModel.selectMethod(DeliveryMethod.DELIVERY) }
+                        onClick = { if (!isSaving) viewModel.selectMethod(DeliveryMethod.DELIVERY) }
                     )
                 }
                 Spacer(Modifier.height(20.dp))
                 if (state.method == DeliveryMethod.PICKUP) {
-                    Text("Sucursal Centro · Recoger hoy (ejemplo)")
+                    Text("Pickaroo Centro · Horario de ejemplo: dentro de una hora")
                     Text("Pago en tienda · pendiente")
                 } else if (state.method == DeliveryMethod.DELIVERY) {
                     Text("Pago contra entrega · pendiente")
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(
                         value = state.address,
+                        enabled = !isSaving,
                         onValueChange = viewModel::updateAddress,
                         label = { Text("Dirección de entrega") },
                         placeholder = { Text("Calle, número, colonia y ciudad") },
@@ -191,10 +194,11 @@ fun OrderView(
                     fontWeight = FontWeight.Bold)
                 Button(
                     onClick = { showReview = true },
-                    enabled = state.canReview(cart),
+                    enabled = !isSaving && state.canReview(cart),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp)
                         .testTag("checkout_review")
-                ) { Text("Revisar pedido") }
+                ) { Text(if (isSaving) "Guardando pedido…" else "Revisar pedido") }
+                saveError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }
         }
     }

@@ -21,6 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.pikaroo.ui.home.view.HomeView
 import com.example.pikaroo.ui.offers.view.OffersView
+import com.example.pikaroo.ui.order.viewmodel.PlaceOrderViewModel
 import com.example.pikaroo.ui.order.view.OrderView
 import com.example.pikaroo.ui.products.view.ProductsView
 import com.example.pikaroo.ui.user.view.UserView
@@ -29,19 +30,30 @@ import com.example.pikaroo.ui.theme.PikarooTextGray
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
 import androidx.compose.ui.platform.LocalContext
+import com.example.pikaroo.ui.auth.model.RoleMode
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.pikaroo.ui.cart.view.CartView
+import com.example.pikaroo.ui.orders.view.OrdersView
+import com.example.pikaroo.ui.orders.view.TrackingView
 import com.example.pikaroo.ui.cart.viewmodel.CartViewModel
 
 @Composable
-fun TabsScaffold(onLogout: () -> Unit = {}) {
+fun TabsScaffold(
+    onLogout: () -> Unit = {},
+    otherModes: List<RoleMode> = emptyList(),
+    onSwitchMode: (RoleMode) -> Unit = {}
+) {
     val nestedNavController = rememberNavController()
 
     // Compartido para enviar el filtro de Inicio a Productos.
-    val productosViewModel: ProductsViewModel = viewModel()
+    val productosViewModel: ProductsViewModel = viewModel(factory = ProductsViewModel.Factory)
 
     val context = LocalContext.current
     val cartViewModel: CartViewModel = viewModel(factory = CartViewModel.factory(context))
     val cartState by cartViewModel.uiState.collectAsState()
+    val placeOrderViewModel: PlaceOrderViewModel = viewModel(factory = PlaceOrderViewModel.Factory)
+    val placeState by placeOrderViewModel.state.collectAsState()
 
     val openCart = { nestedNavController.navigate(AppRoute.Cart.route) { launchSingleTop = true } }
 
@@ -77,6 +89,15 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
             composable(AppRoute.Order.route) {
                 OrderView(
                     cart = cartState,
+                    isSaving = placeState.isSaving,
+                    saveError = placeState.error,
+                    onConfirmOrder = { delivery ->
+                        val snapshot = cartState
+                        placeOrderViewModel.place(snapshot, delivery) { order ->
+                            cartViewModel.removeOrderedItems(snapshot.items)
+                            nestedNavController.navigate(AppRoute.Tracking.create(order.id)) { launchSingleTop = true }
+                        }
+                    },
                     cartItemCount = cartState.itemCount,
                     onOpenCart = openCart
                 )
@@ -92,8 +113,28 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
             composable(AppRoute.User.route) {
                 UserView(
                     onLogout = onLogout,
+                    otherModes = otherModes,
+                    onSwitchMode = onSwitchMode,
+                    onOpenOrders = { nestedNavController.navigate(AppRoute.Orders.route) { launchSingleTop = true } },
                     cartItemCount = cartState.itemCount,
                     onOpenCart = openCart
+                )
+            }
+
+            composable(AppRoute.Orders.route) {
+                OrdersView(
+                    onBack = { nestedNavController.popBackStack() },
+                    onOpenOrder = { orderId -> nestedNavController.navigate(AppRoute.Tracking.create(orderId)) }
+                )
+            }
+
+            composable(
+                route = AppRoute.Tracking.route,
+                arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+            ) { entry ->
+                TrackingView(
+                    orderId = entry.arguments?.getString("orderId").orEmpty(),
+                    onBack = { nestedNavController.popBackStack() }
                 )
             }
 
@@ -168,6 +209,8 @@ fun BottomNavigationBar(navController: NavHostController) {
 // para que no quede guardado y se restaure dentro de otra.
 fun NavHostController.navigateToTab(route: String) {
     popBackStack(AppRoute.Cart.route, inclusive = true)
+    popBackStack(AppRoute.Orders.route, inclusive = true)
+    popBackStack(AppRoute.Tracking.route, inclusive = true)
     navigate(route) {
         popUpTo(graph.startDestinationId) {
             saveState = true

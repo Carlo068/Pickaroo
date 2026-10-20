@@ -5,12 +5,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.pikaroo.appContainer
+import com.example.pikaroo.ui.products.data.ProductsRepository
 import com.example.pikaroo.ui.products.model.ProductsState
-import com.example.pikaroo.ui.products.network.RetrofitClient
 import kotlinx.coroutines.launch
 
-class ProductsViewModel : ViewModel() {
+class ProductsViewModel(private val repository: ProductsRepository) : ViewModel() {
     var state by mutableStateOf(ProductsState())
         private set
 
@@ -23,9 +27,7 @@ class ProductsViewModel : ViewModel() {
         viewModelScope.launch {
             state = state.copy(isLoading = true)
             try {
-                // Usando RetrofitClient para obtener los productos
-                val response = RetrofitClient.gistService.getProducts()
-                val products = response.products
+                val products = repository.getProducts()
                 
                 Log.d("ProductsViewModel", "Productos recibidos: ${products.size}")
                 
@@ -58,5 +60,11 @@ class ProductsViewModel : ViewModel() {
             selectedCategory = category,
             filteredProducts = filtered
         )
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer { ProductsViewModel(appContainer().productsRepository) }
+        }
     }
 }

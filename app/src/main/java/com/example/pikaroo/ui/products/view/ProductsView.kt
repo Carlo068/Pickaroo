@@ -32,7 +32,7 @@ import com.example.pikaroo.ui.theme.PikarooTextGray
 
 @Composable
 fun ProductsView(
-    viewModel: ProductsViewModel = viewModel(),
+    viewModel: ProductsViewModel = viewModel(factory = ProductsViewModel.Factory),
     onAddToCart: (Product) -> Unit = {}
 ) {
     val state = viewModel.state

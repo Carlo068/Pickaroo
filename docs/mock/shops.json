@@ -1,0 +1,117 @@
+{
+  "shops": [
+    {
+      "id": "shop_1",
+      "name": "Pickaroo Centro",
+      "description": "Supermercado de barrio con frutas, lácteos, despensa y portafolios.",
+      "address": "Calle Ejemplo 120, Col. Centro",
+      "lat": 19.4326,
+      "lng": -99.1332,
+      "timezone": "America/Mexico_City",
+      "logo_url": "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=300&fit=crop",
+      "hours": [
+        {
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "open": "08:00",
+          "close": "21:00"
+        },
+        {
+          "days": [
+            7
+          ],
+          "open": "09:00",
+          "close": "15:00"
+        }
+      ],
+      "pickup": {
+        "enabled": true,
+        "slot_minutes": 15,
+        "capacity_per_slot": 5,
+        "lead_minutes": 30
+      },
+      "delivery": {
+        "enabled": true,
+        "radius_km": 5.0,
+        "fee": 2.99
+      }
+    },
+    {
+      "id": "shop_2",
+      "name": "Panadería La Espiga",
+      "description": "Pan recién horneado, café y combos de desayuno.",
+      "address": "Avenida Muestra 45, Col. Roma",
+      "lat": 19.4194,
+      "lng": -99.1625,
+      "timezone": "America/Mexico_City",
+      "logo_url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop",
+      "hours": [
+        {
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "open": "07:00",
+          "close": "20:00"
+        }
+      ],
+      "pickup": {
+        "enabled": true,
+        "slot_minutes": 10,
+        "capacity_per_slot": 3,
+        "lead_minutes": 20
+      },
+      "delivery": {
+        "enabled": true,
+        "radius_km": 3.0,
+        "fee": 1.5
+      }
+    },
+    {
+      "id": "shop_3",
+      "name": "Frutería Don Luis",
+      "description": "Frutas y verduras frescas. Solo recoger en tienda.",
+      "address": "Calle Prueba 8, Col. Condesa",
+      "lat": 19.4115,
+      "lng": -99.1717,
+      "timezone": "America/Mexico_City",
+      "logo_url": "https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=400&h=300&fit=crop",
+      "hours": [
+        {
+          "days": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "open": "08:00",
+          "close": "18:00"
+        }
+      ],
+      "pickup": {
+        "enabled": true,
+        "slot_minutes": 30,
+        "capacity_per_slot": 4,
+        "lead_minutes": 45
+      },
+      "delivery": {
+        "enabled": false,
+        "radius_km": 0.0,
+        "fee": 0.0
+      }
+    }
+  ]
+}
