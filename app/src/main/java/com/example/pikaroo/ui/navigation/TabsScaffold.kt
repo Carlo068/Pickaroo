@@ -29,11 +29,16 @@ import com.example.pikaroo.ui.theme.PikarooTextGray
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
 import androidx.compose.ui.platform.LocalContext
+import com.example.pikaroo.ui.auth.model.RoleMode
 import com.example.pikaroo.ui.cart.view.CartView
 import com.example.pikaroo.ui.cart.viewmodel.CartViewModel
 
 @Composable
-fun TabsScaffold(onLogout: () -> Unit = {}) {
+fun TabsScaffold(
+    onLogout: () -> Unit = {},
+    otherModes: List<RoleMode> = emptyList(),
+    onSwitchMode: (RoleMode) -> Unit = {}
+) {
     val nestedNavController = rememberNavController()
 
     // Compartido para enviar el filtro de Inicio a Productos.
@@ -91,6 +96,8 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
             composable(AppRoute.User.route) {
                 UserView(
                     onLogout = onLogout,
+                    otherModes = otherModes,
+                    onSwitchMode = onSwitchMode,
                     cartItemCount = cartState.itemCount,
                     onOpenCart = openCart
                 )

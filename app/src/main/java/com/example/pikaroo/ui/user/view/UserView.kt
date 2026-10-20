@@ -22,6 +22,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.pikaroo.ui.auth.model.RoleMode
+import com.example.pikaroo.ui.auth.view.ModeSwitchButtons
 import com.example.pikaroo.ui.cart.view.CartIconButton
 import com.example.pikaroo.ui.theme.PikarooTheme
 import com.example.pikaroo.ui.user.viewmodel.UserViewModel
@@ -30,6 +32,8 @@ import com.example.pikaroo.ui.user.viewmodel.UserViewModel
 @Composable
 fun UserView(
     onLogout: () -> Unit = {},
+    otherModes: List<RoleMode> = emptyList(),
+    onSwitchMode: (RoleMode) -> Unit = {},
     cartItemCount: Int = 0,
     onOpenCart: () -> Unit = {},
     viewModel: UserViewModel = viewModel()
@@ -237,6 +241,11 @@ fun UserView(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            if (otherModes.isNotEmpty()) {
+                ModeSwitchButtons(modes = otherModes, onSwitch = onSwitchMode)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             OutlinedButton(
                 onClick = onLogout,
