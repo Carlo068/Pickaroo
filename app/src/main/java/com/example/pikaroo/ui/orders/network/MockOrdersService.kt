@@ -2,7 +2,6 @@ package com.example.pikaroo.ui.orders.network
 
 import com.example.pikaroo.common.mock.MockCollections.DRIVER_LOCATIONS
 import com.example.pikaroo.common.mock.MockCollections.ORDERS
-import com.example.pikaroo.common.mock.MockCollections.SHOPS
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.common.mock.MockPickarooApi
 import com.example.pikaroo.common.mock.MockStore
@@ -28,11 +27,11 @@ class MockOrdersService(
         all(ORDERS)
             .filter { it.get("customer_id").asString == caller.id }
             .sortedByDescending { it.get("created_at").asString }
-            .map { gson.fromJson(withShop(it), OrderDto::class.java) }
+            .map { gson.fromJson(orderWithShop(it), OrderDto::class.java) }
     }
 
     override suspend fun get(bearer: String, id: String): OrderDto = api.call {
-        gson.fromJson(withShop(ownOrder(bearer, id)), OrderDto::class.java)
+        gson.fromJson(orderWithShop(ownOrder(bearer, id)), OrderDto::class.java)
     }
 
     override suspend fun events(bearer: String, id: String): List<OrderEventDto> = api.call {
@@ -64,15 +63,5 @@ class MockOrdersService(
             throw MockErrors.forbidden("NOT_YOUR_ORDER", "This order belongs to another customer")
         }
         return order
-    }
-
-    /** El servidor une los datos básicos de la tienda al pedido. */
-    private fun MockStore.withShop(order: JsonObject): JsonObject {
-        val shop = find(SHOPS, order.get("shop_id").asString) ?: return order
-        return order.deepCopy().apply {
-            add("shop", JsonObject().apply {
-                listOf("id", "name", "address", "lat", "lng").forEach { add(it, shop.get(it)) }
-            })
-        }
     }
 }
