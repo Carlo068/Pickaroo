@@ -9,6 +9,11 @@ import com.example.pikaroo.ui.auth.network.AuthApi
 import com.example.pikaroo.ui.auth.network.MockAuthService
 import com.example.pikaroo.ui.auth.network.MockAuthenticator
 import com.example.pikaroo.ui.auth.network.RemoteAuthApi
+import com.example.pikaroo.ui.driver.data.ApiDriverRepository
+import com.example.pikaroo.ui.driver.data.DriverRepository
+import com.example.pikaroo.ui.driver.network.DriverApi
+import com.example.pikaroo.ui.driver.network.MockDriverService
+import com.example.pikaroo.ui.driver.network.RemoteDriverApi
 import com.example.pikaroo.ui.orders.data.ApiOrdersRepository
 import com.example.pikaroo.ui.orders.data.OrdersRepository
 import com.example.pikaroo.ui.orders.network.MockOrdersService
@@ -30,13 +35,19 @@ class AppContainer(
 
     val sessionRepository: SessionRepository by lazy { SessionRepository(sessionStore) }
 
-    private val mockApi: MockPickarooApi by lazy(mockApiFactory)
+    val mockApi: MockPickarooApi by lazy(mockApiFactory)
 
     val authorizedCalls: AuthorizedCalls by lazy { AuthorizedCalls(sessionRepository, authApi) }
 
     val ordersApi: OrdersApi by lazy {
         if (useMockApi) MockOrdersService(mockApi, MockAuthenticator { System.currentTimeMillis() / 1000 }) else RemoteOrdersApi()
     }
+
+    val driverApi: DriverApi by lazy {
+        if (useMockApi) MockDriverService(mockApi, MockAuthenticator { System.currentTimeMillis() / 1000 }) else RemoteDriverApi()
+    }
+
+    val driverRepository: DriverRepository by lazy { ApiDriverRepository(driverApi, authorizedCalls) }
 
     val ordersRepository: OrdersRepository by lazy { ApiOrdersRepository(ordersApi, authorizedCalls) }
 

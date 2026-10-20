@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
@@ -44,6 +45,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.cart.model.formatPrice
 import com.example.pikaroo.ui.orders.model.Fulfilment
+import com.example.pikaroo.ui.orders.model.MapPoint
 import com.example.pikaroo.ui.orders.model.OrderDto
 import com.example.pikaroo.ui.orders.model.OrderStatus
 import com.example.pikaroo.ui.orders.model.StepState
@@ -132,6 +134,17 @@ fun TrackingContent(state: TrackingUiState, onBack: () -> Unit) {
                 )
             }
 
+            val shop = order.shop
+            val destination = order.delivery
+            if (order.tracksDriver && shop != null && destination != null) {
+                LiveMapCard(
+                    shop = MapPoint(shop.lat, shop.lng),
+                    destination = MapPoint(destination.lat, destination.lng),
+                    driver = state.driverLocation?.let { MapPoint(it.lat, it.lng) },
+                    updatedAt = state.driverLocation?.updatedAt
+                )
+            }
+
             TimelineCard(order, state.timeline)
 
             if (order.fulfilment == Fulfilment.PICKUP && order.pickup != null && !order.status.isFinal) {
@@ -141,6 +154,50 @@ fun TrackingContent(state: TrackingUiState, onBack: () -> Unit) {
             SummaryCard(order)
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+}
+
+@Composable
+private fun LiveMapCard(shop: MapPoint, destination: MapPoint, driver: MapPoint?, updatedAt: String?) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column {
+            OsmMapView(
+                shop = shop,
+                destination = destination,
+                driver = driver,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            )
+            Column(modifier = Modifier.padding(12.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    LegendDot(Color(0xFF1E88E5), "Tienda")
+                    LegendDot(Color(0xFF43A047), "Destino")
+                    LegendDot(PikarooOrange, "Repartidor")
+                }
+                val time = formatTime(updatedAt)
+                Text(
+                    text = if (driver != null && time != null) "Ubicación actualizada $time" else "Esperando la ubicación del repartidor…",
+                    fontSize = 12.sp,
+                    color = PikarooTextGray,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegendDot(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(10.dp).background(color, CircleShape))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(label, fontSize = 12.sp, color = PikarooTextGray)
     }
 }
 

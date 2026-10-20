@@ -16,9 +16,10 @@ object MockCollections {
     val USERS = MockCollection("users", "users.json", "users")
     val ROLES = MockCollection("roles", "roles.json", "roles")
     val ORDERS = MockCollection("orders", "orders.seed.json", "orders")
+    val DRIVER_LOCATIONS = MockCollection("driver_locations", "driver-locations.seed.json", "locations")
     val SESSIONS = MockCollection("sessions")
 
-    val all = listOf(CATEGORIES, GROUPS, PRODUCTS, ITEMS, SHOPS, USERS, ROLES, ORDERS, SESSIONS)
+    val all = listOf(CATEGORIES, GROUPS, PRODUCTS, ITEMS, SHOPS, USERS, ROLES, ORDERS, DRIVER_LOCATIONS, SESSIONS)
 }
 
 /**
