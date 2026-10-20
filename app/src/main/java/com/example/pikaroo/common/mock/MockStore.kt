@@ -41,10 +41,11 @@ class MockStore(private val seed: SeedSource, private val storage: StringStore) 
     @Synchronized
     fun put(collection: MockCollection, document: JsonObject) {
         val id = document.idOrNull() ?: throw IllegalArgumentException("Document needs a string \"id\"")
-        val documents = load(collection)
+        val documents = load(collection).toMutableList()
         val index = documents.indexOfFirst { it.idOrNull() == id }
         if (index >= 0) documents[index] = document.deepCopy() else documents.add(document.deepCopy())
         persist(collection, documents)
+        cache[collection.name] = documents
     }
 
     @Synchronized

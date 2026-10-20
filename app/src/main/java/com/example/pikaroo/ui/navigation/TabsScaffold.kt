@@ -21,6 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.pikaroo.ui.home.view.HomeView
 import com.example.pikaroo.ui.offers.view.OffersView
+import com.example.pikaroo.ui.order.viewmodel.PlaceOrderViewModel
 import com.example.pikaroo.ui.order.view.OrderView
 import com.example.pikaroo.ui.products.view.ProductsView
 import com.example.pikaroo.ui.user.view.UserView
@@ -33,6 +34,8 @@ import com.example.pikaroo.ui.auth.model.RoleMode
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.pikaroo.ui.cart.view.CartView
+import com.example.pikaroo.ui.orders.view.OrderLookupView
+import com.example.pikaroo.ui.orders.view.ReceiptView
 import com.example.pikaroo.ui.orders.view.OrdersView
 import com.example.pikaroo.ui.orders.view.TrackingView
 import com.example.pikaroo.ui.cart.viewmodel.CartViewModel
@@ -51,6 +54,8 @@ fun TabsScaffold(
     val context = LocalContext.current
     val cartViewModel: CartViewModel = viewModel(factory = CartViewModel.factory(context))
     val cartState by cartViewModel.uiState.collectAsState()
+    val placeOrderViewModel: PlaceOrderViewModel = viewModel(factory = PlaceOrderViewModel.Factory)
+    val placeState by placeOrderViewModel.state.collectAsState()
 
     val openCart = { nestedNavController.navigate(AppRoute.Cart.route) { launchSingleTop = true } }
 
@@ -85,6 +90,18 @@ fun TabsScaffold(
 
             composable(AppRoute.Order.route) {
                 OrderView(
+                    cart = cartState,
+                    onLookupOrder = { nestedNavController.navigate(AppRoute.OrderLookup.route) { launchSingleTop = true } },
+                    onOpenLastOrder = { nestedNavController.navigate(AppRoute.Receipt.create("latest")) { launchSingleTop = true } },
+                    isSaving = placeState.isSaving,
+                    saveError = placeState.error,
+                    onConfirmOrder = { delivery ->
+                        val snapshot = cartState
+                        placeOrderViewModel.place(snapshot, delivery) { order ->
+                            cartViewModel.removeOrderedItems(snapshot.items)
+                            nestedNavController.navigate(AppRoute.Receipt.create(order.id)) { launchSingleTop = true }
+                        }
+                    },
                     cartItemCount = cartState.itemCount,
                     onOpenCart = openCart
                 )
@@ -112,6 +129,29 @@ fun TabsScaffold(
                 OrdersView(
                     onBack = { nestedNavController.popBackStack() },
                     onOpenOrder = { orderId -> nestedNavController.navigate(AppRoute.Tracking.create(orderId)) }
+                )
+            }
+
+            composable(AppRoute.OrderLookup.route) {
+                OrderLookupView(
+                    onBack = { nestedNavController.popBackStack() },
+                    onFound = { id ->
+                        nestedNavController.navigate(AppRoute.Receipt.create(id)) {
+                            popUpTo(AppRoute.OrderLookup.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = AppRoute.Receipt.route,
+                arguments = listOf(navArgument("orderId") { type = NavType.StringType })
+            ) { entry ->
+                val id = entry.arguments?.getString("orderId")
+                ReceiptView(
+                    orderId = id?.takeUnless { it == "latest" },
+                    onBack = { nestedNavController.popBackStack() },
+                    onTracking = { orderId -> nestedNavController.navigate(AppRoute.Tracking.create(orderId)) }
                 )
             }
 
@@ -196,6 +236,8 @@ fun BottomNavigationBar(navController: NavHostController) {
 // para que no quede guardado y se restaure dentro de otra.
 fun NavHostController.navigateToTab(route: String) {
     popBackStack(AppRoute.Cart.route, inclusive = true)
+    popBackStack(AppRoute.OrderLookup.route, inclusive = true)
+    popBackStack(AppRoute.Receipt.route, inclusive = true)
     popBackStack(AppRoute.Orders.route, inclusive = true)
     popBackStack(AppRoute.Tracking.route, inclusive = true)
     navigate(route) {

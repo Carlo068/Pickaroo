@@ -15,6 +15,10 @@ sealed class AppRoute(val route: String) {
     object Products : AppRoute("products")
     object User : AppRoute("user")
     object Cart : AppRoute("cart")
+    object OrderLookup : AppRoute("order_lookup")
+    object Receipt : AppRoute("receipt/{orderId}") {
+        fun create(orderId: String) = "receipt/${android.net.Uri.encode(orderId)}"
+    }
     object Orders : AppRoute("orders")
     object Tracking : AppRoute("tracking/{orderId}") {
         fun create(orderId: String) = "tracking/$orderId"

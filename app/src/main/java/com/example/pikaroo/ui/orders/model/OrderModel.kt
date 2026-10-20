@@ -29,8 +29,8 @@ data class PickupDto(
 
 data class DeliveryDto(
     val address: String,
-    val lat: Double,
-    val lng: Double,
+    val lat: Double? = null,
+    val lng: Double? = null,
     @SerializedName("driver_id") val driverId: String?
 )
 
@@ -63,7 +63,8 @@ data class OrderDto(
     val pickup: PickupDto?,
     val delivery: DeliveryDto?,
     @SerializedName("created_at") val createdAt: String,
-    val shop: ShopSummaryDto? = null
+    val shop: ShopSummaryDto? = null,
+    @SerializedName("payment_status") val paymentStatus: String? = null
 ) {
     /** Número que ve el cliente: order_1004 -> 1004. */
     val number: String get() = id.removePrefix("order_")
@@ -78,4 +79,13 @@ data class OrderEventDto(
     val status: OrderStatus,
     val at: String,
     val by: String
+)
+
+/** Snapshot del carrito; requestId se conserva al reintentar para no duplicar la orden. */
+data class CreateOrderRequest(
+    @SerializedName("request_id") val requestId: String,
+    @SerializedName("shop_id") val shopId: String,
+    val fulfilment: Fulfilment,
+    val items: List<OrderLineDto>,
+    val address: String? = null
 )
