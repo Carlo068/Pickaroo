@@ -37,7 +37,7 @@ fun TabsScaffold(onLogout: () -> Unit = {}) {
     val nestedNavController = rememberNavController()
 
     // Compartido para enviar el filtro de Inicio a Productos.
-    val productosViewModel: ProductsViewModel = viewModel()
+    val productosViewModel: ProductsViewModel = viewModel(factory = ProductsViewModel.Factory)
 
     val context = LocalContext.current
     val cartViewModel: CartViewModel = viewModel(factory = CartViewModel.factory(context))
