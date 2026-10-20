@@ -7,8 +7,20 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.pikaroo.common.di.AppContainer
 import com.example.pikaroo.common.mock.MockPickarooApi
 import com.example.pikaroo.common.preferences.PreferencesStringStore
+import org.osmdroid.config.Configuration
+import java.io.File
 
 class PikarooApp : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        // osmdroid exige un user agent propio y, desde Android 10, carpetas dentro de la app.
+        Configuration.getInstance().apply {
+            userAgentValue = packageName
+            osmdroidBasePath = File(cacheDir, "osmdroid")
+            osmdroidTileCache = File(cacheDir, "osmdroid/tiles")
+        }
+    }
     val container: AppContainer by lazy {
         AppContainer(
             sessionStore = PreferencesStringStore(this),

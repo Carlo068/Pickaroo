@@ -21,7 +21,7 @@ class MockDataFilesTest {
         .first { it.isDirectory }
 
     private val fileNames = listOf(
-        "catalog.json", "shops.json", "users.json", "roles.json", "orders.seed.json"
+        "catalog.json", "shops.json", "users.json", "roles.json", "orders.seed.json", "driver-locations.seed.json"
     )
 
     private val knownPermissions = setOf(
@@ -55,6 +55,7 @@ class MockDataFilesTest {
     private val groups get() = list("catalog.json", "groups")
     private val categories get() = list("catalog.json", "categories")
     private val orders get() = list("orders.seed.json", "orders")
+    private val locations get() = list("driver-locations.seed.json", "locations")
 
     private fun ids(objects: List<JsonObject>) = objects.map { it.str("id") }
 
@@ -332,6 +333,28 @@ class MockDataFilesTest {
             val times = events.map { Instant.parse(it.str("at")) }
             assertEquals("$oid events are in order", times.sorted(), times)
             events.forEach { assertTrue("$oid event author", it.str("by") in userIds) }
+        }
+    }
+
+    @Test
+    fun `driver locations belong to drivers on a delivery they are carrying`() {
+        val usersById = users.associateBy { it.str("id") }
+        val ordersById = orders.associateBy { it.str("id") }
+
+        assertTrue("at least one location", locations.isNotEmpty())
+        assertEquals(locations.size, ids(locations).toSet().size)
+
+        for (location in locations) {
+            val driverId = location.str("id")
+            assertTrue("$driverId is a driver", "driver" in roleIdsOf(usersById.getValue(driverId)))
+            assertTrue("$driverId lat", location.get("lat").asDouble in -90.0..90.0)
+            assertTrue("$driverId lng", location.get("lng").asDouble in -180.0..180.0)
+            Instant.parse(location.str("updated_at"))
+
+            val order = ordersById.getValue(location.str("order_id"))
+            assertEquals("delivery", order.str("fulfilment"))
+            assertEquals(driverId, order.obj("delivery")!!.str("driver_id"))
+            assertTrue("order on the way", order.str("status") in setOf("DRIVER_ASSIGNED", "OUT_FOR_DELIVERY"))
         }
     }
 }

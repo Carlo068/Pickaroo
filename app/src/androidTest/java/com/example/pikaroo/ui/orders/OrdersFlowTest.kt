@@ -1,6 +1,8 @@
 package com.example.pikaroo.ui.orders
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -11,6 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pikaroo.appContainer
+import com.example.pikaroo.common.mock.MockCollections.DRIVER_LOCATIONS
 import com.example.pikaroo.common.preferences.AppPreferences
 import com.example.pikaroo.ui.auth.model.LoginRequest
 import com.example.pikaroo.ui.auth.model.RoleMode
@@ -18,8 +21,10 @@ import com.example.pikaroo.ui.navigation.AppNavigation
 import com.example.pikaroo.ui.navigation.NavTestTags
 import com.example.pikaroo.ui.orders.model.OrderStatus
 import com.example.pikaroo.ui.orders.model.StepState
+import com.example.pikaroo.ui.orders.view.OSM_MAP_TAG
 import com.example.pikaroo.ui.orders.view.OrdersTestTags
 import com.example.pikaroo.ui.orders.view.TrackingTestTags
+import com.google.gson.JsonObject
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -46,6 +51,7 @@ class OrdersFlowTest {
     @After
     fun tearDown() {
         container.sessionRepository.clear()
+        container.mockApi.reset()
         preferences.putBoolean("completed_onboarding", onboardingWasCompleted)
     }
 
@@ -124,5 +130,57 @@ class OrdersFlowTest {
 
         composeRule.onNodeWithTag(TrackingTestTags.TITLE).assertDoesNotExist()
         composeRule.onNodeWithTag("user_orders").assertExists()
+    }
+
+    private fun mapDescription(): String? =
+        composeRule.onNodeWithTag(OSM_MAP_TAG).fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription)
+
+    private fun waitForMap(expected: String) {
+        composeRule.waitUntil(15_000) {
+            composeRule.onAllNodesWithTag(OSM_MAP_TAG).fetchSemanticsNodes().isNotEmpty() &&
+                mapDescription()?.contains(expected) == true
+        }
+    }
+
+    @Test
+    fun theDriverPinMovesOnTheCustomersMapWhenTheDriverReportsANewPosition() {
+        openMyOrdersAs("owner1")
+        waitForTag(OrdersTestTags.row("order_1009"))
+        composeRule.onNodeWithTag(OrdersTestTags.row("order_1009")).performClick()
+
+        waitForMap("driver=19.4230,-99.1420")
+
+        runBlocking {
+            container.mockApi.call {
+                put(DRIVER_LOCATIONS, JsonObject().apply {
+                    addProperty("id", "user_5")
+                    addProperty("order_id", "order_1009")
+                    addProperty("lat", 19.4201)
+                    addProperty("lng", -99.1433)
+                    addProperty("updated_at", "2026-10-20T15:07:00Z")
+                })
+            }
+        }
+
+        waitForMap("driver=19.4201,-99.1433")
+    }
+
+    @Test
+    fun theMapAlsoShowsTheShopAndTheDeliveryAddress() {
+        openMyOrdersAs("owner1")
+        waitForTag(OrdersTestTags.row("order_1009"))
+        composeRule.onNodeWithTag(OrdersTestTags.row("order_1009")).performClick()
+
+        waitForMap("shop=19.4326,-99.1332;destination=19.4180,-99.1450")
+    }
+
+    @Test
+    fun aPickupOrderHasNoMap() {
+        openMyOrdersAs("customer1")
+        waitForTag(OrdersTestTags.row("order_1004"))
+        composeRule.onNodeWithTag(OrdersTestTags.row("order_1004")).performClick()
+        waitForTag(TrackingTestTags.TITLE)
+
+        composeRule.onNodeWithTag(OSM_MAP_TAG).assertDoesNotExist()
     }
 }

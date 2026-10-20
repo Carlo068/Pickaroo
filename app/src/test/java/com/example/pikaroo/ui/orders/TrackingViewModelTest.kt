@@ -4,6 +4,7 @@ import com.example.pikaroo.MainDispatcherRule
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.ui.auth.data.SessionExpiredException
 import com.example.pikaroo.ui.orders.data.OrdersRepository
+import com.example.pikaroo.ui.orders.model.DriverLocationDto
 import com.example.pikaroo.ui.orders.model.Fulfilment
 import com.example.pikaroo.ui.orders.model.OrderDto
 import com.example.pikaroo.ui.orders.model.OrderEventDto
@@ -40,8 +41,13 @@ private fun orderWith(status: OrderStatus, fulfilment: Fulfilment = Fulfilment.P
 )
 
 /** Cada get() consume la siguiente respuesta (un pedido o un fallo); la última se repite. */
-private class ScriptedOrdersRepository(private val script: List<Any>) : OrdersRepository {
+private class ScriptedOrdersRepository(
+    private val script: List<Any>,
+    private val locations: List<Any?> = emptyList()
+) : OrdersRepository {
     var getCalls = 0
+        private set
+    var locationCalls = 0
         private set
 
     private fun next(): Any = script[minOf(getCalls, script.lastIndex)]
@@ -57,6 +63,13 @@ private class ScriptedOrdersRepository(private val script: List<Any>) : OrdersRe
         listOf(OrderEventDto(PLACED, "2026-10-20T14:00:00Z", "user_1"))
 
     override suspend fun listMine(): List<OrderDto> = emptyList()
+
+    override suspend fun driverLocation(id: String): DriverLocationDto? {
+        val response = locations.getOrNull(minOf(locationCalls, locations.lastIndex))
+        locationCalls++
+        if (response is Exception) throw response
+        return response as DriverLocationDto?
+    }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,6 +82,16 @@ class TrackingViewModelTest {
         val repository = ScriptedOrdersRepository(script.toList())
         return TrackingViewModel("order_1", repository, intervals) to repository
     }
+
+    private fun viewModelWithLocations(
+        script: List<Any>,
+        locations: List<Any?>
+    ): Pair<TrackingViewModel, ScriptedOrdersRepository> {
+        val repository = ScriptedOrdersRepository(script, locations)
+        return TrackingViewModel("order_1", repository) to repository
+    }
+
+    private fun at(lat: Double, lng: Double) = DriverLocationDto(lat, lng, "2026-10-20T15:05:00Z")
 
     @Test
     fun `polling fills the state with the order and its timeline`() = runTest {
@@ -205,6 +228,7 @@ class TrackingViewModelTest {
             override suspend fun listMine() = listOf(orderWith(READY, id = "order_7"), orderWith(PLACED, id = "order_8"))
             override suspend fun get(id: String) = orderWith(READY)
             override suspend fun events(id: String) = emptyList<OrderEventDto>()
+            override suspend fun driverLocation(id: String): DriverLocationDto? = null
         }
 
         val viewModel = OrdersViewModel(repository)
@@ -224,6 +248,7 @@ class TrackingViewModelTest {
             }
             override suspend fun get(id: String) = orderWith(READY)
             override suspend fun events(id: String) = emptyList<OrderEventDto>()
+            override suspend fun driverLocation(id: String): DriverLocationDto? = null
         }
 
         val viewModel = OrdersViewModel(repository)
@@ -235,5 +260,80 @@ class TrackingViewModelTest {
         assertNull(viewModel.state.value.error)
         assertEquals(1, viewModel.state.value.orders.size)
         assertNotNull(viewModel.state.value.orders.firstOrNull())
+    }
+
+    @Test
+    fun `the driver location is followed while the order is out for delivery`() = runTest {
+        val delivery = Fulfilment.DELIVERY
+        val (viewModel, repository) = viewModelWithLocations(
+            script = listOf(
+                orderWith(OUT_FOR_DELIVERY, delivery), orderWith(OUT_FOR_DELIVERY, delivery),
+                orderWith(OUT_FOR_DELIVERY, delivery), orderWith(DELIVERED, delivery)
+            ),
+            locations = listOf(at(19.43, -99.13), at(19.42, -99.14), at(19.41, -99.15))
+        )
+        val seen = mutableListOf<Double?>()
+
+        val job = launch { viewModel.poll() }
+        runCurrent()
+        seen += viewModel.state.value.driverLocation?.lat
+        advanceTimeBy(2_000)
+        runCurrent()
+        seen += viewModel.state.value.driverLocation?.lat
+        advanceTimeBy(2_000)
+        runCurrent()
+        seen += viewModel.state.value.driverLocation?.lat
+        job.join()
+
+        assertEquals(listOf<Double?>(19.43, 19.42, 19.41), seen)
+        assertEquals(3, repository.locationCalls)
+        assertNull(viewModel.state.value.driverLocation)
+    }
+
+    @Test
+    fun `the driver location is not requested when no driver is on the way`() = runTest {
+        val (pickup, pickupRepository) = viewModelWithLocations(listOf(orderWith(PICKED_UP)), listOf(at(1.0, 1.0)))
+        val (waiting, waitingRepository) = viewModelWithLocations(
+            listOf(orderWith(READY, Fulfilment.DELIVERY), orderWith(DELIVERED, Fulfilment.DELIVERY)), listOf(at(1.0, 1.0))
+        )
+
+        pickup.poll()
+        waiting.poll()
+
+        assertEquals(0, pickupRepository.locationCalls)
+        assertEquals(0, waitingRepository.locationCalls)
+    }
+
+    @Test
+    fun `a driver who has not reported yet leaves the map without a pin`() = runTest {
+        val delivery = Fulfilment.DELIVERY
+        val (viewModel, _) = viewModelWithLocations(
+            script = listOf(orderWith(OUT_FOR_DELIVERY, delivery), orderWith(DELIVERED, delivery)),
+            locations = listOf(null)
+        )
+
+        viewModel.poll()
+
+        assertNull(viewModel.state.value.driverLocation)
+        assertNull(viewModel.state.value.error)
+    }
+
+    @Test
+    fun `a failing location request keeps the last pin and the order keeps updating`() = runTest {
+        val delivery = Fulfilment.DELIVERY
+        val (viewModel, repository) = viewModelWithLocations(
+            script = listOf(orderWith(OUT_FOR_DELIVERY, delivery), orderWith(OUT_FOR_DELIVERY, delivery), orderWith(DELIVERED, delivery)),
+            locations = listOf(at(19.43, -99.13), MockErrors.http(500, "SERVER_ERROR", "boom"))
+        )
+
+        val job = launch { viewModel.poll() }
+        runCurrent()
+        advanceTimeBy(2_000)
+        runCurrent()
+
+        assertEquals(19.43, viewModel.state.value.driverLocation!!.lat, 0.0001)
+        assertNull(viewModel.state.value.error)
+        job.join()
+        assertEquals(3, repository.getCalls)
     }
 }

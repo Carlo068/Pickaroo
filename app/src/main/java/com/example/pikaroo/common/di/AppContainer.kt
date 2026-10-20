@@ -30,7 +30,7 @@ class AppContainer(
 
     val sessionRepository: SessionRepository by lazy { SessionRepository(sessionStore) }
 
-    private val mockApi: MockPickarooApi by lazy(mockApiFactory)
+    val mockApi: MockPickarooApi by lazy(mockApiFactory)
 
     val authorizedCalls: AuthorizedCalls by lazy { AuthorizedCalls(sessionRepository, authApi) }
 
