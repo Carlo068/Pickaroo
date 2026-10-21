@@ -59,6 +59,33 @@ class MockDriverService(
         gson.fromJson(orderWithShop(order), OrderDto::class.java)
     }
 
+    override suspend fun pickup(bearer: String, id: String): OrderDto =
+        advance(bearer, id, from = "DRIVER_ASSIGNED", to = "OUT_FOR_DELIVERY")
+
+    override suspend fun deliver(bearer: String, id: String): OrderDto =
+        advance(bearer, id, from = "OUT_FOR_DELIVERY", to = "DELIVERED")
+
+    /** Solo el repartidor asignado puede avanzar su entrega, y solo desde el estado anterior. */
+    private suspend fun advance(bearer: String, id: String, from: String, to: String): OrderDto = api.call {
+        val driver = driver(bearer, Permission.DELIVERY_UPDATE)
+        val order = find(ORDERS, id) ?: throw MockErrors.notFound("ORDER_NOT_FOUND", "Order not found")
+        if (order.driverId() != driver.id) {
+            throw MockErrors.forbidden("NOT_YOUR_DELIVERY", "This delivery belongs to another driver")
+        }
+        if (order.get("status").asString != from) {
+            throw MockErrors.conflict("INVALID_STATUS", "The order is not in the right state for this action")
+        }
+
+        order.addProperty("status", to)
+        order.getAsJsonArray("events").add(JsonObject().apply {
+            addProperty("status", to)
+            addProperty("at", formatIsoUtc(nowSeconds()))
+            addProperty("by", driver.id)
+        })
+        put(ORDERS, order)
+        gson.fromJson(orderWithShop(order), OrderDto::class.java)
+    }
+
     private fun MockStore.driver(bearer: String, permission: String): AuthenticatedUser {
         val caller = authenticator.authenticate(this, bearer)
         if (!caller.can(permission)) throw MockErrors.forbidden()

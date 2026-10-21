@@ -196,4 +196,96 @@ class MockDriverServiceTest {
         expectError(401, "UNAUTHORIZED") { driver.available("no token") }
         expectError(401, "INVALID_TOKEN") { driver.accept("Bearer garbage", "order_1010") }
     }
+
+    private suspend fun startDelivery(): String {
+        finishCurrentDelivery()
+        val bearer = bearer("driver1")
+        driver.accept(bearer, "order_1010")
+        return bearer
+    }
+
+    @Test
+    fun `picking up sends the order out for delivery and records the event`() = runTest {
+        val bearer = startDelivery()
+
+        val order = driver.pickup(bearer, "order_1010")
+
+        assertEquals(OrderStatus.OUT_FOR_DELIVERY, order.status)
+        val last = orders.events(bearer("customer1"), "order_1010").last()
+        assertEquals(OrderStatus.OUT_FOR_DELIVERY, last.status)
+        assertEquals("user_5", last.by)
+        assertEquals(formatIsoUtc(now), last.at)
+    }
+
+    @Test
+    fun `delivering completes the order and frees the driver`() = runTest {
+        val bearer = startDelivery()
+        driver.pickup(bearer, "order_1010")
+
+        val order = driver.deliver(bearer, "order_1010")
+
+        assertEquals(OrderStatus.DELIVERED, order.status)
+        expectError(404, "NO_ACTIVE_DELIVERY") { driver.current(bearer) }
+    }
+
+    @Test
+    fun `the customer sees every step of the delivery in order`() = runTest {
+        val bearer = startDelivery()
+        driver.pickup(bearer, "order_1010")
+        driver.deliver(bearer, "order_1010")
+
+        val events = orders.events(bearer("customer1"), "order_1010")
+
+        assertEquals(
+            listOf(
+                OrderStatus.PLACED, OrderStatus.ACCEPTED, OrderStatus.PREPARING, OrderStatus.READY,
+                OrderStatus.DRIVER_ASSIGNED, OrderStatus.OUT_FOR_DELIVERY, OrderStatus.DELIVERED
+            ),
+            events.map { it.status }
+        )
+        assertEquals(OrderStatus.DELIVERED, orders.get(bearer("customer1"), "order_1010").status)
+    }
+
+    @Test
+    fun `steps cannot be skipped or repeated`() = runTest {
+        val bearer = startDelivery()
+
+        expectError(409, "INVALID_STATUS") { driver.deliver(bearer, "order_1010") }
+        driver.pickup(bearer, "order_1010")
+        expectError(409, "INVALID_STATUS") { driver.pickup(bearer, "order_1010") }
+        driver.deliver(bearer, "order_1010")
+        expectError(409, "INVALID_STATUS") { driver.deliver(bearer, "order_1010") }
+    }
+
+    @Test
+    fun `the delivery already on the way can be delivered but not picked up again`() = runTest {
+        val bearer = bearer("driver1")
+
+        expectError(409, "INVALID_STATUS") { driver.pickup(bearer, "order_1009") }
+        assertEquals(OrderStatus.DELIVERED, driver.deliver(bearer, "order_1009").status)
+    }
+
+    @Test
+    fun `only the assigned driver can move an order forward`() = runTest {
+        change("order_1009") { getAsJsonObject("delivery").addProperty("driver_id", "user_99") }
+        val bearer = bearer("driver1")
+
+        expectError(403, "NOT_YOUR_DELIVERY") { driver.deliver(bearer, "order_1009") }
+        expectError(403, "NOT_YOUR_DELIVERY") { driver.pickup(bearer, "order_1010") }
+    }
+
+    @Test
+    fun `customers and shop staff cannot move deliveries`() = runTest {
+        for (username in listOf("customer1", "staff1", "owner1")) {
+            val bearer = bearer(username)
+            expectError(403, "FORBIDDEN") { driver.pickup(bearer, "order_1009") }
+            expectError(403, "FORBIDDEN") { driver.deliver(bearer, "order_1009") }
+        }
+    }
+
+    @Test
+    fun `unknown orders and missing tokens are rejected`() = runTest {
+        expectError(404, "ORDER_NOT_FOUND") { driver.pickup(bearer("driver1"), "order_9999") }
+        expectError(401, "UNAUTHORIZED") { driver.deliver("no token", "order_1009") }
+    }
 }

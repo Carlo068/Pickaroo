@@ -20,6 +20,14 @@ interface DriverApi {
     /** 409 ORDER_NOT_AVAILABLE si otro repartidor lo tomó primero; 409 ALREADY_DELIVERING si ya lleva una entrega. */
     @POST("driver/orders/{id}/accept")
     suspend fun accept(@Header("Authorization") bearer: String, @Path("id") id: String): OrderDto
+
+    /** DRIVER_ASSIGNED -> OUT_FOR_DELIVERY. 403 NOT_YOUR_DELIVERY, 409 INVALID_STATUS. */
+    @POST("driver/orders/{id}/pickup")
+    suspend fun pickup(@Header("Authorization") bearer: String, @Path("id") id: String): OrderDto
+
+    /** OUT_FOR_DELIVERY -> DELIVERED. 403 NOT_YOUR_DELIVERY, 409 INVALID_STATUS. */
+    @POST("driver/orders/{id}/deliver")
+    suspend fun deliver(@Header("Authorization") bearer: String, @Path("id") id: String): OrderDto
 }
 
 class RemoteDriverApi : DriverApi {
@@ -29,4 +37,6 @@ class RemoteDriverApi : DriverApi {
     override suspend fun available(bearer: String) = notConnected()
     override suspend fun current(bearer: String) = notConnected()
     override suspend fun accept(bearer: String, id: String) = notConnected()
+    override suspend fun pickup(bearer: String, id: String) = notConnected()
+    override suspend fun deliver(bearer: String, id: String) = notConnected()
 }

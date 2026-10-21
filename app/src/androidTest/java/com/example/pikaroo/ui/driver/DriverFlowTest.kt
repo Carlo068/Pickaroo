@@ -4,7 +4,9 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pikaroo.appContainer
 import com.example.pikaroo.common.mock.MockCollections.ORDERS
@@ -14,6 +16,10 @@ import com.example.pikaroo.ui.auth.model.LoginRequest
 import com.example.pikaroo.ui.driver.view.DriverTestTags
 import com.example.pikaroo.ui.navigation.AppNavigation
 import com.example.pikaroo.ui.navigation.NavTestTags
+import com.example.pikaroo.ui.orders.model.OrderStatus
+import com.example.pikaroo.ui.orders.model.StepState
+import com.example.pikaroo.ui.orders.view.OrdersTestTags
+import com.example.pikaroo.ui.orders.view.TrackingTestTags
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -145,5 +151,66 @@ class DriverFlowTest {
         openDriverHome()
 
         waitForTag(DriverTestTags.current("order_1010"))
+    }
+
+    private fun driverBearer() = runBlocking {
+        "Bearer " + container.authApi.login(LoginRequest("driver1", "demo1234")).access
+    }
+
+    @Test
+    fun deliveringTheCurrentOrderCompletesItAndTheNextOneAppears() {
+        openDriverHome()
+        waitForTag(DriverTestTags.current("order_1009"))
+
+        composeRule.onNodeWithTag(DriverTestTags.DELIVER_BUTTON).performScrollTo().performClick()
+
+        waitForTag(DriverTestTags.MESSAGE)
+        composeRule.onNodeWithTag(DriverTestTags.MESSAGE).assertTextContains("¡Entrega completada!")
+        waitForTag(DriverTestTags.available("order_1010"))
+        assertEquals("DELIVERED", statusOf("order_1009"))
+    }
+
+    @Test
+    fun aDriverCanAcceptPickUpAndDeliverAnOrder() {
+        finishCurrentDelivery()
+        openDriverHome()
+        waitForTag(DriverTestTags.accept("order_1010"))
+
+        composeRule.onNodeWithTag(DriverTestTags.accept("order_1010")).performClick()
+        waitForTag(DriverTestTags.PICKUP_BUTTON)
+        composeRule.onNodeWithTag(DriverTestTags.PICKUP_BUTTON).performScrollTo().performClick()
+
+        waitForTag(DriverTestTags.DELIVER_BUTTON)
+        assertEquals("OUT_FOR_DELIVERY", statusOf("order_1010"))
+        composeRule.onNodeWithTag(DriverTestTags.DELIVER_BUTTON).performScrollTo().performClick()
+
+        waitForTag(DriverTestTags.MESSAGE)
+        waitForTag(DriverTestTags.EMPTY)
+        assertEquals("DELIVERED", statusOf("order_1010"))
+    }
+
+    @Test
+    fun theCustomerTimelineFollowsEveryStepTheDriverTakes() {
+        finishCurrentDelivery()
+        val bearer = driverBearer()
+        runBlocking { container.driverApi.accept(bearer, "order_1010") }
+
+        runBlocking {
+            container.sessionRepository.save(container.authApi.login(LoginRequest("customer1", "demo1234")))
+        }
+        composeRule.setContent { AppNavigation() }
+        waitForTag(NavTestTags.CUSTOMER_HOME)
+        composeRule.onNodeWithText("Usuario").performClick()
+        composeRule.onNodeWithTag("user_orders").performScrollTo().performClick()
+        waitForTag(OrdersTestTags.row("order_1010"))
+        composeRule.onNodeWithTag(OrdersTestTags.row("order_1010")).performClick()
+
+        waitForTag(TrackingTestTags.step(OrderStatus.DRIVER_ASSIGNED, StepState.CURRENT))
+
+        runBlocking { container.driverApi.pickup(bearer, "order_1010") }
+        waitForTag(TrackingTestTags.step(OrderStatus.OUT_FOR_DELIVERY, StepState.CURRENT))
+
+        runBlocking { container.driverApi.deliver(bearer, "order_1010") }
+        waitForTag(TrackingTestTags.step(OrderStatus.DELIVERED, StepState.DONE))
     }
 }

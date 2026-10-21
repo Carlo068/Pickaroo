@@ -13,6 +13,10 @@ interface DriverRepository {
     suspend fun current(): OrderDto?
 
     suspend fun accept(orderId: String): OrderDto
+
+    suspend fun pickup(orderId: String): OrderDto
+
+    suspend fun deliver(orderId: String): OrderDto
 }
 
 class ApiDriverRepository(
@@ -29,4 +33,8 @@ class ApiDriverRepository(
     }
 
     override suspend fun accept(orderId: String) = authorized.call { api.accept(it, orderId) }
+
+    override suspend fun pickup(orderId: String) = authorized.call { api.pickup(it, orderId) }
+
+    override suspend fun deliver(orderId: String) = authorized.call { api.deliver(it, orderId) }
 }

@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performScrollTo
 import com.example.pikaroo.ui.auth.model.RoleMode
 import com.example.pikaroo.ui.driver.model.AvailableOrderDto
 import com.example.pikaroo.ui.driver.view.DriverHomeContent
+import com.example.pikaroo.ui.orders.view.OSM_MAP_TAG
 import com.example.pikaroo.ui.driver.view.DriverTestTags
 import com.example.pikaroo.ui.driver.viewmodel.DriverHomeState
 import com.example.pikaroo.ui.navigation.NavTestTags
@@ -48,6 +49,8 @@ class DriverHomeContentTest {
         val switched = mutableListOf<RoleMode>()
         var logouts = 0
         var dismissed = 0
+        var pickups = 0
+        var deliveries = 0
     }
 
     private fun show(state: DriverHomeState, modes: List<RoleMode> = emptyList(), calls: Calls = Calls()): Calls {
@@ -60,6 +63,8 @@ class DriverHomeContentTest {
                 onLogout = { calls.logouts++ },
                 onOnlineChange = { calls.online += it },
                 onAccept = { calls.accepted += it },
+                onPickup = { calls.pickups++ },
+                onDeliver = { calls.deliveries++ },
                 onDismissMessage = { calls.dismissed++ }
             )
         }
@@ -172,5 +177,58 @@ class DriverHomeContentTest {
 
         assertEquals(listOf(RoleMode.CUSTOMER), calls.switched)
         assertEquals(1, calls.logouts)
+    }
+
+    private fun carryingAt(status: OrderStatus) = carrying.copy(status = status)
+
+    @Test
+    fun anOrderToCollectShowsTheShopAndThePickupButton() {
+        val calls = show(DriverHomeState(current = carryingAt(OrderStatus.DRIVER_ASSIGNED), isLoading = false))
+
+        composeRule.onNodeWithText("Ve a recoger el pedido a").assertExists()
+        composeRule.onNodeWithText("Panadería La Espiga · Avenida Muestra 45").assertExists()
+        composeRule.onNodeWithTag(DriverTestTags.DELIVER_BUTTON).assertDoesNotExist()
+        composeRule.onNodeWithTag(DriverTestTags.PICKUP_BUTTON).assertTextContains("Recogí el pedido")
+
+        composeRule.onNodeWithTag(DriverTestTags.PICKUP_BUTTON).performScrollTo().performClick()
+
+        assertEquals(1, calls.pickups)
+        assertEquals(0, calls.deliveries)
+    }
+
+    @Test
+    fun anOrderOnTheWayShowsTheAddressAndTheDeliveredButton() {
+        val calls = show(DriverHomeState(current = carryingAt(OrderStatus.OUT_FOR_DELIVERY), isLoading = false))
+
+        composeRule.onNodeWithText("Entrega el pedido en").assertExists()
+        composeRule.onNodeWithText("Avenida Demo 310").assertExists()
+        composeRule.onNodeWithTag(DriverTestTags.PICKUP_BUTTON).assertDoesNotExist()
+        composeRule.onNodeWithTag(DriverTestTags.DELIVER_BUTTON).assertTextContains("Entregado")
+
+        composeRule.onNodeWithTag(DriverTestTags.DELIVER_BUTTON).performScrollTo().performClick()
+
+        assertEquals(1, calls.deliveries)
+        assertEquals(0, calls.pickups)
+    }
+
+    @Test
+    fun theActiveDeliveryShowsTheRouteOnAMap() {
+        show(DriverHomeState(current = carryingAt(OrderStatus.DRIVER_ASSIGNED), isLoading = false))
+
+        composeRule.onNodeWithTag(OSM_MAP_TAG).assertExists()
+    }
+
+    @Test
+    fun whileTheActionIsRunningTheButtonIsDisabled() {
+        show(DriverHomeState(current = carryingAt(OrderStatus.DRIVER_ASSIGNED), acting = true, isLoading = false))
+
+        composeRule.onNodeWithTag(DriverTestTags.PICKUP_BUTTON).assertIsNotEnabled().assertTextContains("Guardando…")
+    }
+
+    @Test
+    fun theCompletionMessageIsShown() {
+        show(DriverHomeState(message = "¡Entrega completada!", isLoading = false))
+
+        composeRule.onNodeWithTag(DriverTestTags.MESSAGE).assertTextContains("¡Entrega completada!")
     }
 }

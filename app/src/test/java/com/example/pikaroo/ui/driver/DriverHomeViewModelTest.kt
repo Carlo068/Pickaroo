@@ -45,6 +45,10 @@ private class FakeDriverRepository : DriverRepository {
     var failure: Exception? = null
     var acceptFailure: Exception? = null
     var acceptDelayMillis = 0L
+    var actionFailure: Exception? = null
+    var actionDelayMillis = 0L
+    var pickups = 0
+    var deliveries = 0
     var availableCalls = 0
     var currentCalls = 0
     val accepted = mutableListOf<String>()
@@ -59,6 +63,22 @@ private class FakeDriverRepository : DriverRepository {
         currentCalls++
         failure?.let { throw it }
         return currentOrder
+    }
+
+    override suspend fun pickup(orderId: String): OrderDto {
+        if (actionDelayMillis > 0) delay(actionDelayMillis)
+        actionFailure?.let { throw it }
+        pickups++
+        return currentOrder!!.copy(status = OrderStatus.OUT_FOR_DELIVERY).also { currentOrder = it }
+    }
+
+    override suspend fun deliver(orderId: String): OrderDto {
+        if (actionDelayMillis > 0) delay(actionDelayMillis)
+        actionFailure?.let { throw it }
+        deliveries++
+        val done = currentOrder!!.copy(status = OrderStatus.DELIVERED)
+        currentOrder = null
+        return done
     }
 
     override suspend fun accept(orderId: String): OrderDto {
@@ -214,7 +234,7 @@ class DriverHomeViewModelTest {
         assertEquals("Ya tienes una entrega en curso", messageFor(MockErrors.conflict("ALREADY_DELIVERING")))
         assertEquals("Este pedido ya no existe", messageFor(MockErrors.notFound("ORDER_NOT_FOUND")))
         assertEquals("No tienes permiso para aceptar pedidos", messageFor(MockErrors.forbidden()))
-        assertEquals("No se pudo aceptar el pedido", messageFor(MockErrors.http(500, "SERVER_ERROR", "boom")))
+        assertEquals("No se pudo completar la acción", messageFor(MockErrors.http(500, "SERVER_ERROR", "boom")))
         assertEquals("Sin conexión. Intenta de nuevo.", messageFor(IOException("offline")))
     }
 
@@ -280,5 +300,102 @@ class DriverHomeViewModelTest {
         assertNull(viewModel.state.value.error)
         assertEquals(1, repository.currentCalls)
         assertEquals(0L, currentTime)
+    }
+
+    @Test
+    fun `picking up moves the delivery to the next step`() = runTest {
+        repository.currentOrder = carrying("order_9")
+        val job = launch { viewModel.poll() }
+        runCurrent()
+
+        viewModel.pickUp()
+        runCurrent()
+        job.cancel()
+
+        assertEquals(1, repository.pickups)
+        assertEquals(OrderStatus.OUT_FOR_DELIVERY, viewModel.state.value.current!!.status)
+        assertNull(viewModel.state.value.message)
+        assertTrue(!viewModel.state.value.acting)
+    }
+
+    @Test
+    fun `delivering ends the delivery, celebrates and brings the list back`() = runTest {
+        repository.currentOrder = carrying("order_9").copy(status = OrderStatus.OUT_FOR_DELIVERY)
+        repository.availableOrders = listOf(available("order_next"))
+        val job = launch { viewModel.poll() }
+        runCurrent()
+
+        viewModel.deliver()
+        runCurrent()
+        job.cancel()
+
+        assertEquals(1, repository.deliveries)
+        assertNull(viewModel.state.value.current)
+        assertEquals("¡Entrega completada!", viewModel.state.value.message)
+        assertEquals(listOf("order_next"), viewModel.state.value.available.map { it.id })
+    }
+
+    @Test
+    fun `the action buttons do nothing without a delivery in progress`() = runTest {
+        viewModel.pickUp()
+        viewModel.deliver()
+        runCurrent()
+
+        assertEquals(0, repository.pickups)
+        assertEquals(0, repository.deliveries)
+        assertTrue(!viewModel.state.value.acting)
+    }
+
+    @Test
+    fun `a second tap while the action is running is ignored`() = runTest {
+        repository.currentOrder = carrying("order_9")
+        repository.actionDelayMillis = 1_000
+        val job = launch { viewModel.poll() }
+        runCurrent()
+
+        viewModel.pickUp()
+        viewModel.pickUp()
+        runCurrent()
+        assertTrue(viewModel.state.value.acting)
+        advanceTimeBy(1_000)
+        runCurrent()
+        job.cancel()
+
+        assertEquals(1, repository.pickups)
+        assertTrue(!viewModel.state.value.acting)
+    }
+
+    @Test
+    fun `a step that is no longer valid shows a message and refreshes`() = runTest {
+        repository.currentOrder = carrying("order_9")
+        val job = launch { viewModel.poll() }
+        runCurrent()
+        repository.actionFailure = MockErrors.conflict("INVALID_STATUS")
+
+        viewModel.pickUp()
+        runCurrent()
+        job.cancel()
+
+        assertEquals("Este pedido ya no está en ese paso", viewModel.state.value.message)
+        assertTrue(!viewModel.state.value.acting)
+        assertEquals("order_9", viewModel.state.value.current!!.id)
+    }
+
+    @Test
+    fun `other failures of a delivery action have their own messages`() = runTest {
+        repository.currentOrder = carrying("order_9")
+        val job = launch { viewModel.poll() }
+        runCurrent()
+
+        suspend fun messageFor(failure: Exception): String? {
+            repository.actionFailure = failure
+            viewModel.deliver()
+            runCurrent()
+            return viewModel.state.value.message
+        }
+
+        assertEquals("Esta entrega pertenece a otro repartidor", messageFor(MockErrors.forbidden("NOT_YOUR_DELIVERY")))
+        assertEquals("Sin conexión. Intenta de nuevo.", messageFor(IOException("offline")))
+        job.cancel()
     }
 }
