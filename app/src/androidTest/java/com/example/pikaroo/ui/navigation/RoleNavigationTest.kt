@@ -15,6 +15,7 @@ import com.example.pikaroo.appContainer
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.common.preferences.AppPreferences
 import com.example.pikaroo.ui.auth.model.LoginRequest
+import com.example.pikaroo.ui.driver.location.DeliveryTrackingService
 import com.example.pikaroo.ui.auth.model.LogoutRequest
 import com.example.pikaroo.ui.auth.model.Permission
 import com.example.pikaroo.ui.auth.model.RoleMode
@@ -46,6 +47,7 @@ class RoleNavigationTest {
 
     @After
     fun tearDown() {
+        DeliveryTrackingService.stop(context)
         container.sessionRepository.clear()
         preferences.putBoolean(ONBOARDING_KEY, onboardingWasCompleted)
     }

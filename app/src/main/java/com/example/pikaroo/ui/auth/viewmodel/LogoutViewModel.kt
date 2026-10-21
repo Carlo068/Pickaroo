@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.pikaroo.ui.auth.model.LogoutRequest
 import com.example.pikaroo.PikarooApp
+import com.example.pikaroo.ui.driver.location.DeliveryTrackingService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -40,6 +41,7 @@ class LogoutViewModel(application: Application) : AndroidViewModel(application) 
         val refresh = session.refreshToken()
 
         session.clear()
+        DeliveryTrackingService.stop(getApplication())
         onLoggedOut()
 
         if (access.isNotBlank() && refresh.isNotBlank()) {

@@ -81,6 +81,8 @@ private class FakeDriverRepository : DriverRepository {
         return done
     }
 
+    override suspend fun reportLocation(orderId: String, lat: Double, lng: Double) = Unit
+
     override suspend fun accept(orderId: String): OrderDto {
         if (acceptDelayMillis > 0) delay(acceptDelayMillis)
         acceptFailure?.let { throw it }

@@ -11,6 +11,8 @@ import com.example.pikaroo.ui.auth.network.MockAuthenticator
 import com.example.pikaroo.ui.auth.network.RemoteAuthApi
 import com.example.pikaroo.ui.driver.data.ApiDriverRepository
 import com.example.pikaroo.ui.driver.data.DriverRepository
+import com.example.pikaroo.ui.driver.location.DriverLocationPreferences
+import com.example.pikaroo.ui.driver.location.DriverTracking
 import com.example.pikaroo.ui.driver.network.DriverApi
 import com.example.pikaroo.ui.driver.network.MockDriverService
 import com.example.pikaroo.ui.driver.network.RemoteDriverApi
@@ -29,7 +31,7 @@ import com.example.pikaroo.ui.products.data.RemoteProductsRepository
  */
 class AppContainer(
     private val useMockApi: Boolean = BuildConfig.USE_MOCK_API,
-    sessionStore: StringStore,
+    private val sessionStore: StringStore,
     mockApiFactory: () -> MockPickarooApi
 ) {
 
@@ -46,6 +48,10 @@ class AppContainer(
     val driverApi: DriverApi by lazy {
         if (useMockApi) MockDriverService(mockApi, MockAuthenticator { System.currentTimeMillis() / 1000 }) else RemoteDriverApi()
     }
+
+    val driverTracking: DriverTracking by lazy { DriverTracking() }
+
+    val driverLocationPreferences: DriverLocationPreferences by lazy { DriverLocationPreferences(sessionStore) }
 
     val driverRepository: DriverRepository by lazy { ApiDriverRepository(driverApi, authorizedCalls) }
 

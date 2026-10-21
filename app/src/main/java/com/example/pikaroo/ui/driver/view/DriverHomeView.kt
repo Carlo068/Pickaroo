@@ -1,15 +1,25 @@
 package com.example.pikaroo.ui.driver.view
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,21 +36,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.pikaroo.BuildConfig
+import com.example.pikaroo.appContainer
 import com.example.pikaroo.ui.auth.model.RoleMode
 import com.example.pikaroo.ui.auth.view.ModeSwitchButtons
 import com.example.pikaroo.ui.cart.model.formatPrice
+import com.example.pikaroo.ui.driver.location.DeliveryTrackingService
+import com.example.pikaroo.ui.driver.location.LocationMode
+import com.example.pikaroo.ui.driver.location.toMapPoint
 import com.example.pikaroo.ui.driver.model.AvailableOrderDto
 import com.example.pikaroo.ui.driver.viewmodel.DriverHomeState
 import com.example.pikaroo.ui.driver.viewmodel.DriverHomeViewModel
@@ -63,10 +83,34 @@ object DriverTestTags {
     const val ERROR = "driver_error"
     const val PICKUP_BUTTON = "driver_pickup_button"
     const val DELIVER_BUTTON = "driver_deliver_button"
+    const val TRACKING_ACTIVE = "driver_tracking_active"
+    const val LOCATION_PERMISSION = "driver_location_permission"
+    const val LOCATION_PERMISSION_BUTTON = "driver_location_permission_button"
+    const val SIMULATE_SWITCH = "driver_simulate_switch"
     fun available(orderId: String) = "driver_available_$orderId"
     fun accept(orderId: String) = "driver_accept_$orderId"
     fun current(orderId: String) = "driver_current_$orderId"
 }
+
+/** Lo relativo a compartir la ubicación, ya resuelto para dibujar. */
+data class DriverTrackingUi(
+    val isSharing: Boolean = false,
+    val needsPermission: Boolean = false,
+    val simulate: Boolean = false,
+    val showSimulateToggle: Boolean = false,
+    val driverPosition: MapPoint? = null
+)
+
+private fun hasLocationPermission(context: Context): Boolean =
+    listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION).any {
+        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+    }
+
+private fun requestedPermissions(): Array<String> = buildList {
+    add(Manifest.permission.ACCESS_FINE_LOCATION)
+    add(Manifest.permission.ACCESS_COARSE_LOCATION)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.POST_NOTIFICATIONS)
+}.toTypedArray()
 
 @Composable
 fun DriverHomeView(
@@ -78,10 +122,41 @@ fun DriverHomeView(
     val viewModel: DriverHomeViewModel = viewModel(factory = DriverHomeViewModel.Factory)
     val state by viewModel.state.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
+    val container = context.appContainer()
+    val trackingState by container.driverTracking.state.collectAsState()
+    val mode by container.driverLocationPreferences.mode.collectAsState()
+
+    var hasPermission by remember { mutableStateOf(hasLocationPermission(context)) }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        hasPermission = hasLocationPermission(context)
+    }
 
     LaunchedEffect(viewModel, lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { viewModel.poll() }
     }
+
+    val activeOrderId = state.current
+        ?.takeIf { it.status == OrderStatus.DRIVER_ASSIGNED || it.status == OrderStatus.OUT_FOR_DELIVERY }
+        ?.id
+
+    // El servicio comparte la ubicación mientras haya una entrega en curso, también con la app en segundo plano.
+    LaunchedEffect(activeOrderId, hasPermission, mode, state.isLoading) {
+        when {
+            activeOrderId != null && hasPermission -> DeliveryTrackingService.start(context, activeOrderId)
+            activeOrderId == null && !state.isLoading -> DeliveryTrackingService.stop(context)
+        }
+    }
+
+    val tracking = DriverTrackingUi(
+        isSharing = trackingState.isActive && trackingState.orderId == activeOrderId,
+        needsPermission = activeOrderId != null && !hasPermission,
+        simulate = mode == LocationMode.SIMULATED,
+        showSimulateToggle = BuildConfig.DEBUG,
+        driverPosition = trackingState.lastFix
+            ?.takeIf { activeOrderId != null && trackingState.orderId == activeOrderId }
+            ?.toMapPoint()
+    )
 
     DriverHomeContent(
         state = state,
@@ -93,7 +168,10 @@ fun DriverHomeView(
         onAccept = viewModel::accept,
         onPickup = viewModel::pickUp,
         onDeliver = viewModel::deliver,
-        onDismissMessage = viewModel::dismissMessage
+        onDismissMessage = viewModel::dismissMessage,
+        tracking = tracking,
+        onRequestPermission = { permissionLauncher.launch(requestedPermissions()) },
+        onSimulateChange = { container.driverLocationPreferences.setMode(if (it) LocationMode.SIMULATED else LocationMode.GPS) }
     )
 }
 
@@ -108,7 +186,10 @@ fun DriverHomeContent(
     onAccept: (String) -> Unit,
     onPickup: () -> Unit,
     onDeliver: () -> Unit,
-    onDismissMessage: () -> Unit
+    onDismissMessage: () -> Unit,
+    tracking: DriverTrackingUi = DriverTrackingUi(),
+    onRequestPermission: () -> Unit = {},
+    onSimulateChange: (Boolean) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -117,7 +198,7 @@ fun DriverHomeContent(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item { Header(userName, state.isOnline, onOnlineChange) }
+        item { Header(userName, state.isOnline, onOnlineChange, tracking, onSimulateChange) }
 
         state.message?.let { message ->
             item { MessageCard(message, onDismissMessage) }
@@ -127,7 +208,9 @@ fun DriverHomeContent(
         }
 
         when {
-            state.current != null -> item { CurrentDeliveryCard(state.current, state.acting, onPickup, onDeliver) }
+            state.current != null -> item {
+                CurrentDeliveryCard(state.current, state.acting, onPickup, onDeliver, tracking, onRequestPermission)
+            }
 
             !state.isOnline -> item {
                 Text(
@@ -178,7 +261,13 @@ fun DriverHomeContent(
 }
 
 @Composable
-private fun Header(userName: String, isOnline: Boolean, onOnlineChange: (Boolean) -> Unit) {
+private fun Header(
+    userName: String,
+    isOnline: Boolean,
+    onOnlineChange: (Boolean) -> Unit,
+    tracking: DriverTrackingUi,
+    onSimulateChange: (Boolean) -> Unit
+) {
     Column {
         Text("Modo repartidor", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         Text(userName, fontSize = 14.sp, color = PikarooTextGray)
@@ -191,6 +280,17 @@ private fun Header(userName: String, isOnline: Boolean, onOnlineChange: (Boolean
                 colors = SwitchDefaults.colors(checkedTrackColor = PikarooOrange),
                 modifier = Modifier.testTag(DriverTestTags.ONLINE_SWITCH)
             )
+        }
+        if (tracking.showSimulateToggle) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Simular ruta (demo)", modifier = Modifier.weight(1f), fontSize = 13.sp, color = PikarooTextGray)
+                Switch(
+                    checked = tracking.simulate,
+                    onCheckedChange = onSimulateChange,
+                    colors = SwitchDefaults.colors(checkedTrackColor = PikarooOrange),
+                    modifier = Modifier.testTag(DriverTestTags.SIMULATE_SWITCH)
+                )
+            }
         }
     }
 }
@@ -246,7 +346,14 @@ private fun AvailableOrderCard(order: AvailableOrderDto, busy: Boolean, acceptin
 }
 
 @Composable
-private fun CurrentDeliveryCard(order: OrderDto, acting: Boolean, onPickup: () -> Unit, onDeliver: () -> Unit) {
+private fun CurrentDeliveryCard(
+    order: OrderDto,
+    acting: Boolean,
+    onPickup: () -> Unit,
+    onDeliver: () -> Unit,
+    tracking: DriverTrackingUi,
+    onRequestPermission: () -> Unit
+) {
     val goingToShop = order.status == OrderStatus.DRIVER_ASSIGNED
     val shop = order.shop
     val destination = order.delivery
@@ -261,7 +368,7 @@ private fun CurrentDeliveryCard(order: OrderDto, acting: Boolean, onPickup: () -
                 OsmMapView(
                     shop = MapPoint(shop.lat, shop.lng),
                     destination = MapPoint(destination.lat, destination.lng),
-                    driver = null,
+                    driver = tracking.driverPosition,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(220.dp)
@@ -269,6 +376,13 @@ private fun CurrentDeliveryCard(order: OrderDto, acting: Boolean, onPickup: () -
                 )
             }
             Column(modifier = Modifier.padding(16.dp)) {
+                if (tracking.needsPermission) {
+                    LocationPermissionPrompt(onRequestPermission)
+                    Spacer(modifier = Modifier.height(12.dp))
+                } else if (tracking.isSharing) {
+                    SharingIndicator()
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
                 Text("Entrega en curso", fontSize = 14.sp, color = PikarooTextGray)
                 Text("Pedido #${order.number}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Text(order.status.label(order.fulfilment), fontSize = 14.sp, color = PikarooOrange, fontWeight = FontWeight.Medium)
@@ -302,6 +416,38 @@ private fun CurrentDeliveryCard(order: OrderDto, acting: Boolean, onPickup: () -
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SharingIndicator() {
+    Row(
+        modifier = Modifier.testTag(DriverTestTags.TRACKING_ACTIVE),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(Modifier.size(10.dp).background(Color(0xFF43A047), CircleShape))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text("Compartiendo tu ubicación con el cliente", fontSize = 13.sp, color = Color(0xFF2E7D32))
+    }
+}
+
+@Composable
+private fun LocationPermissionPrompt(onRequestPermission: () -> Unit) {
+    Column {
+        Text(
+            "Activa tu ubicación para que el cliente vea dónde vas",
+            fontSize = 14.sp,
+            modifier = Modifier.testTag(DriverTestTags.LOCATION_PERMISSION)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = onRequestPermission,
+            modifier = Modifier.fillMaxWidth().testTag(DriverTestTags.LOCATION_PERMISSION_BUTTON),
+            colors = ButtonDefaults.buttonColors(containerColor = PikarooOrange),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("Permitir ubicación", color = Color.White)
         }
     }
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.pikaroo.common.di.AppContainer
 import com.example.pikaroo.common.mock.MockPickarooApi
 import com.example.pikaroo.common.preferences.PreferencesStringStore
+import com.example.pikaroo.ui.driver.location.LocationSourceFactory
 import org.osmdroid.config.Configuration
 import java.io.File
 
@@ -21,6 +22,10 @@ class PikarooApp : Application() {
             osmdroidTileCache = File(cacheDir, "osmdroid/tiles")
         }
     }
+    val locationSourceFactory: LocationSourceFactory by lazy {
+        LocationSourceFactory(this, container.driverLocationPreferences, container.driverRepository)
+    }
+
     val container: AppContainer by lazy {
         AppContainer(
             sessionStore = PreferencesStringStore(this),

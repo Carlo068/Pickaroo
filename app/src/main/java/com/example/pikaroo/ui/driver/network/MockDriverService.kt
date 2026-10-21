@@ -1,5 +1,6 @@
 package com.example.pikaroo.ui.driver.network
 
+import com.example.pikaroo.common.mock.MockCollections.DRIVER_LOCATIONS
 import com.example.pikaroo.common.mock.MockCollections.ORDERS
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.common.mock.MockPickarooApi
@@ -9,6 +10,7 @@ import com.example.pikaroo.ui.auth.model.Permission
 import com.example.pikaroo.ui.auth.network.AuthenticatedUser
 import com.example.pikaroo.ui.auth.network.MockAuthenticator
 import com.example.pikaroo.ui.driver.model.AvailableOrderDto
+import com.example.pikaroo.ui.driver.model.DriverLocationRequest
 import com.example.pikaroo.ui.orders.model.OrderDto
 import com.example.pikaroo.ui.orders.network.orderWithShop
 import com.google.gson.Gson
@@ -64,6 +66,29 @@ class MockDriverService(
 
     override suspend fun deliver(bearer: String, id: String): OrderDto =
         advance(bearer, id, from = "OUT_FOR_DELIVERY", to = "DELIVERED")
+
+    override suspend fun reportLocation(bearer: String, body: DriverLocationRequest) {
+        api.call {
+            val driver = driver(bearer, Permission.LOCATION_WRITE)
+            if (body.lat !in -90.0..90.0 || body.lng !in -180.0..180.0) {
+                throw MockErrors.badRequest("INVALID_LOCATION", "Latitude or longitude is out of range")
+            }
+            val order = find(ORDERS, body.orderId) ?: throw MockErrors.notFound("ORDER_NOT_FOUND", "Order not found")
+            if (order.driverId() != driver.id) {
+                throw MockErrors.forbidden("NOT_YOUR_DELIVERY", "This delivery belongs to another driver")
+            }
+            if (order.get("status").asString !in setOf("DRIVER_ASSIGNED", "OUT_FOR_DELIVERY")) {
+                throw MockErrors.conflict("INVALID_STATUS", "The delivery is not in progress")
+            }
+            put(DRIVER_LOCATIONS, JsonObject().apply {
+                addProperty("id", driver.id)
+                addProperty("order_id", body.orderId)
+                addProperty("lat", body.lat)
+                addProperty("lng", body.lng)
+                addProperty("updated_at", formatIsoUtc(nowSeconds()))
+            })
+        }
+    }
 
     /** Solo el repartidor asignado puede avanzar su entrega, y solo desde el estado anterior. */
     private suspend fun advance(bearer: String, id: String, from: String, to: String): OrderDto = api.call {

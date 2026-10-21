@@ -1,5 +1,8 @@
 package com.example.pikaroo.ui.driver
 
+import android.Manifest
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -13,7 +16,10 @@ import com.example.pikaroo.common.mock.MockCollections.ORDERS
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.common.preferences.AppPreferences
 import com.example.pikaroo.ui.auth.model.LoginRequest
+import com.example.pikaroo.ui.driver.location.DeliveryTrackingService
+import com.example.pikaroo.ui.driver.location.LocationMode
 import com.example.pikaroo.ui.driver.view.DriverTestTags
+import com.example.pikaroo.ui.orders.view.OSM_MAP_TAG
 import com.example.pikaroo.ui.navigation.AppNavigation
 import com.example.pikaroo.ui.navigation.NavTestTags
 import com.example.pikaroo.ui.orders.model.OrderStatus
@@ -47,6 +53,8 @@ class DriverFlowTest {
 
     @After
     fun tearDown() {
+        DeliveryTrackingService.stop(context)
+        container.driverLocationPreferences.setMode(LocationMode.GPS)
         container.sessionRepository.clear()
         container.mockApi.reset()
         preferences.putBoolean("completed_onboarding", onboardingWasCompleted)
@@ -212,5 +220,36 @@ class DriverFlowTest {
 
         runBlocking { container.driverApi.deliver(bearer, "order_1010") }
         waitForTag(TrackingTestTags.step(OrderStatus.DELIVERED, StepState.DONE))
+    }
+
+    private fun driverPinDescription(): String? =
+        composeRule.onNodeWithTag(OSM_MAP_TAG).fetchSemanticsNode().config.getOrNull(SemanticsProperties.StateDescription)
+
+    @Test
+    fun withLocationAllowedTheDriverSharesItAndSeesTheirOwnPin() {
+        InstrumentationRegistry.getInstrumentation().uiAutomation
+            .grantRuntimePermission(context.packageName, Manifest.permission.ACCESS_FINE_LOCATION)
+        container.driverLocationPreferences.setMode(LocationMode.SIMULATED)
+        openDriverHome()
+        waitForTag(DriverTestTags.current("order_1009"))
+
+        waitForTag(DriverTestTags.TRACKING_ACTIVE)
+        composeRule.waitUntil(20_000) { driverPinDescription()?.endsWith("driver=none") == false }
+        composeRule.onNodeWithTag(DriverTestTags.LOCATION_PERMISSION).assertDoesNotExist()
+    }
+
+    @Test
+    fun deliveringTheOrderStopsSharingTheLocation() {
+        InstrumentationRegistry.getInstrumentation().uiAutomation
+            .grantRuntimePermission(context.packageName, Manifest.permission.ACCESS_FINE_LOCATION)
+        container.driverLocationPreferences.setMode(LocationMode.SIMULATED)
+        openDriverHome()
+        waitForTag(DriverTestTags.TRACKING_ACTIVE)
+
+        composeRule.onNodeWithTag(DriverTestTags.DELIVER_BUTTON).performScrollTo().performClick()
+
+        waitForTag(DriverTestTags.MESSAGE)
+        composeRule.waitUntil(20_000) { !container.driverTracking.state.value.isActive }
+        composeRule.onNodeWithTag(DriverTestTags.TRACKING_ACTIVE).assertDoesNotExist()
     }
 }

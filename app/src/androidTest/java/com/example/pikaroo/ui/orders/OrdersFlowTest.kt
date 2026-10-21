@@ -21,12 +21,22 @@ import com.example.pikaroo.ui.navigation.AppNavigation
 import com.example.pikaroo.ui.navigation.NavTestTags
 import com.example.pikaroo.ui.orders.model.OrderStatus
 import com.example.pikaroo.ui.orders.model.StepState
+import com.example.pikaroo.ui.auth.data.AuthorizedCalls
+import com.example.pikaroo.ui.auth.data.SessionRepository
+import com.example.pikaroo.ui.driver.data.ApiDriverRepository
+import com.example.pikaroo.ui.driver.location.LocationReporter
+import com.example.pikaroo.ui.driver.location.SimulatedRouteSource
+import com.example.pikaroo.ui.orders.model.MapPoint
 import com.example.pikaroo.ui.orders.view.OSM_MAP_TAG
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.example.pikaroo.ui.orders.view.OrdersTestTags
 import com.example.pikaroo.ui.orders.view.TrackingTestTags
 import com.google.gson.JsonObject
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -182,5 +192,44 @@ class OrdersFlowTest {
         waitForTag(TrackingTestTags.TITLE)
 
         composeRule.onNodeWithTag(OSM_MAP_TAG).assertDoesNotExist()
+    }
+
+    /** Un teléfono de repartidor aparte: su propia sesión, sin tocar la del cliente que usa la app. */
+    private fun driverReporter(route: List<MapPoint>): LocationReporter = runBlocking {
+        val store = object : com.example.pikaroo.common.preferences.StringStore {
+            private val data = mutableMapOf<String, String>()
+            override fun get(key: String) = data[key]
+            override fun put(key: String, value: String) { data[key] = value }
+            override fun remove(key: String) { data.remove(key) }
+        }
+        val driverSession = SessionRepository(store)
+        driverSession.save(container.authApi.login(LoginRequest("driver1", "demo1234")))
+        val repository = ApiDriverRepository(container.driverApi, AuthorizedCalls(driverSession, container.authApi))
+        LocationReporter(repository, SimulatedRouteSource(route, stepsPerLeg = 6, intervalMillis = 600), minIntervalMillis = 600)
+    }
+
+    @Test
+    fun theCustomersMapFollowsTheDriverAsTheyMove() {
+        openMyOrdersAs("owner1")
+        waitForTag(OrdersTestTags.row("order_1009"))
+        composeRule.onNodeWithTag(OrdersTestTags.row("order_1009")).performClick()
+        waitForMap("driver=19.4230,-99.1420")
+
+        val reporter = driverReporter(listOf(MapPoint(19.4326, -99.1332), MapPoint(19.4180, -99.1450)))
+        val job = CoroutineScope(Dispatchers.Default).launch { reporter.run("order_1009") }
+        try {
+            val seen = linkedSetOf<String>()
+            composeRule.waitUntil(30_000) {
+                mapDescription()?.substringAfter("driver=")?.let { seen += it }
+                seen.size >= 4
+            }
+            // Se movió respecto a la posición inicial y fue acercándose al destino (la latitud baja de 19.4326 a 19.4180).
+            val latitudes = seen.drop(1).map { it.substringBefore(",").toDouble() }
+            assertTrue("positions: $seen", latitudes.size >= 3)
+            assertTrue("positions: $seen", latitudes.zipWithNext().all { (a, b) -> b <= a })
+            assertTrue("positions: $seen", latitudes.all { it in 19.4180..19.4326 })
+        } finally {
+            job.cancel()
+        }
     }
 }

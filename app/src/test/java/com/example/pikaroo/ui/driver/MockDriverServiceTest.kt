@@ -288,4 +288,71 @@ class MockDriverServiceTest {
         expectError(404, "ORDER_NOT_FOUND") { driver.pickup(bearer("driver1"), "order_9999") }
         expectError(401, "UNAUTHORIZED") { driver.deliver("no token", "order_1009") }
     }
+
+    private fun at(lat: Double, lng: Double, order: String = "order_1009") =
+        com.example.pikaroo.ui.driver.model.DriverLocationRequest(order, lat, lng)
+
+    @Test
+    fun `a reported position reaches the customer who is following the order`() = runTest {
+        driver.reportLocation(bearer("driver1"), at(19.4201, -99.1433))
+
+        val location = orders.driverLocation(bearer("owner1"), "order_1009")
+
+        assertEquals(19.4201, location.lat, 0.00001)
+        assertEquals(-99.1433, location.lng, 0.00001)
+        assertEquals(formatIsoUtc(now), location.updatedAt)
+    }
+
+    @Test
+    fun `each new position replaces the previous one`() = runTest {
+        val bearer = bearer("driver1")
+        driver.reportLocation(bearer, at(19.4300, -99.1300))
+        driver.reportLocation(bearer, at(19.4250, -99.1400))
+
+        val location = orders.driverLocation(bearer("owner1"), "order_1009")
+
+        assertEquals(19.4250, location.lat, 0.00001)
+        assertEquals(-99.1400, location.lng, 0.00001)
+    }
+
+    @Test
+    fun `positions outside the globe are rejected`() = runTest {
+        val bearer = bearer("driver1")
+
+        expectError(400, "INVALID_LOCATION") { driver.reportLocation(bearer, at(91.0, 0.0)) }
+        expectError(400, "INVALID_LOCATION") { driver.reportLocation(bearer, at(-91.0, 0.0)) }
+        expectError(400, "INVALID_LOCATION") { driver.reportLocation(bearer, at(0.0, 181.0)) }
+        expectError(400, "INVALID_LOCATION") { driver.reportLocation(bearer, at(Double.NaN, 0.0)) }
+    }
+
+    @Test
+    fun `a driver can only report positions for their own delivery`() = runTest {
+        val bearer = bearer("driver1")
+
+        expectError(403, "NOT_YOUR_DELIVERY") { driver.reportLocation(bearer, at(19.4, -99.1, order = "order_1010")) }
+        change("order_1009") { getAsJsonObject("delivery").addProperty("driver_id", "user_99") }
+        expectError(403, "NOT_YOUR_DELIVERY") { driver.reportLocation(bearer, at(19.4, -99.1)) }
+    }
+
+    @Test
+    fun `positions stop being accepted once the delivery is over`() = runTest {
+        val bearer = bearer("driver1")
+        driver.deliver(bearer, "order_1009")
+
+        expectError(409, "INVALID_STATUS") { driver.reportLocation(bearer, at(19.4, -99.1)) }
+        expectError(404, "NO_DRIVER_LOCATION") { orders.driverLocation(bearer("owner1"), "order_1009") }
+    }
+
+    @Test
+    fun `an unknown order is not found when reporting`() = runTest {
+        expectError(404, "ORDER_NOT_FOUND") { driver.reportLocation(bearer("driver1"), at(19.4, -99.1, order = "order_9999")) }
+    }
+
+    @Test
+    fun `only drivers can report positions and they need a valid token`() = runTest {
+        for (username in listOf("customer1", "staff1", "owner1")) {
+            expectError(403, "FORBIDDEN") { driver.reportLocation(bearer(username), at(19.4, -99.1)) }
+        }
+        expectError(401, "UNAUTHORIZED") { driver.reportLocation("no token", at(19.4, -99.1)) }
+    }
 }
