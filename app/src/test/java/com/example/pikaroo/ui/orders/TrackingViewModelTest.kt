@@ -45,6 +45,7 @@ private class ScriptedOrdersRepository(
     private val script: List<Any>,
     private val locations: List<Any?> = emptyList()
 ) : OrdersRepository {
+    override suspend fun create(request: com.example.pikaroo.ui.orders.model.CreateOrderRequest): OrderDto = error("Unexpected create")
     var getCalls = 0
         private set
     var locationCalls = 0
@@ -225,6 +226,7 @@ class TrackingViewModelTest {
     @Test
     fun `the orders list loads the customer's orders`() = runTest {
         val repository = object : OrdersRepository {
+    override suspend fun create(request: com.example.pikaroo.ui.orders.model.CreateOrderRequest): OrderDto = error("Unexpected create")
             override suspend fun listMine() = listOf(orderWith(READY, id = "order_7"), orderWith(PLACED, id = "order_8"))
             override suspend fun get(id: String) = orderWith(READY)
             override suspend fun events(id: String) = emptyList<OrderEventDto>()
@@ -242,6 +244,7 @@ class TrackingViewModelTest {
     fun `the orders list shows an error and can be retried`() = runTest {
         var fail = true
         val repository = object : OrdersRepository {
+    override suspend fun create(request: com.example.pikaroo.ui.orders.model.CreateOrderRequest): OrderDto = error("Unexpected create")
             override suspend fun listMine(): List<OrderDto> {
                 if (fail) throw MockErrors.http(500, "SERVER_ERROR", "boom")
                 return listOf(orderWith(READY))

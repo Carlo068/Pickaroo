@@ -228,4 +228,14 @@ class TrackingContentTest {
 
         composeRule.onNodeWithTag(OSM_MAP_TAG).assertDoesNotExist()
     }
+
+    @Test
+    fun addressOnlyDeliveryDoesNotTryToRenderAMapWithMissingCoordinates() {
+        val order = deliveryOrder(OUT_FOR_DELIVERY).copy(
+            delivery = DeliveryDto(address = "Calle Primera 123", driverId = "user_5")
+        )
+        show(order, events(*onTheWay))
+        composeRule.onNodeWithTag(OSM_MAP_TAG).assertDoesNotExist()
+        composeRule.onNodeWithText("Calle Primera 123").assertExists()
+    }
 }

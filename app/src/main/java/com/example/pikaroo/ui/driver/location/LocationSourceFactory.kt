@@ -21,7 +21,8 @@ class LocationSourceFactory(
         val order = repository.current()
         val shop = order?.shop
         val destination = order?.delivery
-        if (order == null || shop == null || destination == null) return NO_POSITIONS
+        // Un domicilio escrito en el checkout puede no traer coordenadas: no hay ruta que simular.
+        if (order == null || shop == null || destination?.lat == null || destination.lng == null) return NO_POSITIONS
         return SimulatedRouteSource.forDelivery(
             shop = MapPoint(shop.lat, shop.lng),
             destination = MapPoint(destination.lat, destination.lng),

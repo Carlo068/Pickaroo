@@ -364,7 +364,7 @@ private fun CurrentDeliveryCard(
         colors = CardDefaults.cardColors(containerColor = PikarooLightOrange)
     ) {
         Column {
-            if (shop != null && destination != null) {
+            if (shop != null && destination?.lat != null && destination.lng != null) {
                 OsmMapView(
                     shop = MapPoint(shop.lat, shop.lng),
                     destination = MapPoint(destination.lat, destination.lng),

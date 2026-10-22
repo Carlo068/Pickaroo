@@ -136,7 +136,7 @@ fun TrackingContent(state: TrackingUiState, onBack: () -> Unit) {
 
             val shop = order.shop
             val destination = order.delivery
-            if (order.tracksDriver && shop != null && destination != null) {
+            if (order.tracksDriver && shop != null && destination?.lat != null && destination.lng != null) {
                 LiveMapCard(
                     shop = MapPoint(shop.lat, shop.lng),
                     destination = MapPoint(destination.lat, destination.lng),

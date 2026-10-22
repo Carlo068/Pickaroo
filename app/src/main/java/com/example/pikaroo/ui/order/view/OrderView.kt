@@ -9,7 +9,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.testTag
+import com.example.pikaroo.ui.cart.model.CartUiState
+import com.example.pikaroo.ui.cart.model.formatPrice
+import com.example.pikaroo.ui.order.model.DeliveryMethod
+import com.example.pikaroo.ui.order.model.OrderState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,9 +36,34 @@ import com.example.pikaroo.ui.order.viewmodel.OrderViewModel
 @Composable
 fun OrderView(
     cartItemCount: Int = 0,
+    cart: CartUiState = CartUiState(),
+    isSaving: Boolean = false,
+    saveError: String? = null,
+    onLookupOrder: (() -> Unit)? = null,
+    onOpenLastOrder: (() -> Unit)? = null,
+    onConfirmOrder: ((OrderState) -> Unit)? = null,
     onOpenCart: () -> Unit = {},
     viewModel: OrderViewModel = viewModel()
 ) {
+    val state = viewModel.state
+    var showReview by remember { mutableStateOf(false) }
+    if (showReview && state.canReview(cart)) {
+        AlertDialog(
+            onDismissRequest = { showReview = false },
+            title = { Text("Revisa tu pedido") },
+            text = { Text("${if (state.method == DeliveryMethod.PICKUP) "Pickup · Sucursal Centro · Recoger hoy" else "Domicilio · ${state.address.trim()}"}\nTotal: ${formatPrice(state.total(cart))}\nPago pendiente: ${if (state.method == DeliveryMethod.PICKUP) "en tienda" else "contra entrega"}") },
+            confirmButton = {
+                if (onConfirmOrder != null) {
+                    TextButton(onClick = {
+                        showReview = false
+                        if (!isSaving) onConfirmOrder(state.copy(address = state.address.trim()))
+                    }) { Text("Confirmar pedido") }
+                } else {
+                    TextButton(onClick = { showReview = false }) { Text("Volver al resumen") }
+                }
+            }
+        )
+    }
     Scaffold(
         topBar = {
             Row(
@@ -65,6 +97,8 @@ fun OrderView(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
         ) {
             // Header with Gradient Background
             Box(
@@ -112,16 +146,67 @@ fun OrderView(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Storefront,
                         title = "Pickup",
-                        subtitle = "Recoge en sucursal",
-                        onClick = {}
+                        subtitle = if (state.method == DeliveryMethod.PICKUP) "Seleccionado" else "Recoge en sucursal",
+                        onClick = { if (!isSaving) viewModel.selectMethod(DeliveryMethod.PICKUP) }
                     )
                     DeliveryMethodCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.LocalShipping,
-                        title = "Delivery",
-                        subtitle = "Envío a domicilio",
-                        onClick = {}
+                        title = "Domicilio",
+                        subtitle = if (state.method == DeliveryMethod.DELIVERY) "Seleccionado" else "Envío a domicilio",
+                        onClick = { if (!isSaving) viewModel.selectMethod(DeliveryMethod.DELIVERY) }
                     )
+                }
+                Spacer(Modifier.height(20.dp))
+                if (state.method == DeliveryMethod.PICKUP) {
+                    Text("Pickaroo Centro · Horario de ejemplo: dentro de una hora")
+                    Text("Pago en tienda · pendiente")
+                } else if (state.method == DeliveryMethod.DELIVERY) {
+                    Text("Pago contra entrega · pendiente")
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = state.address,
+                        enabled = !isSaving,
+                        onValueChange = viewModel::updateAddress,
+                        label = { Text("Dirección de entrega") },
+                        placeholder = { Text("Calle, número, colonia y ciudad") },
+                        supportingText = {
+                            Text(if (state.address.isBlank()) {
+                                "Agrega una dirección para continuar"
+                            } else {
+                                "Incluye número interior si corresponde"
+                            })
+                        },
+                        isError = state.address.isNotEmpty() && state.address.isBlank(),
+                        minLines = 2,
+                        maxLines = 4,
+                        modifier = Modifier.fillMaxWidth().testTag("checkout_address")
+                    )
+                }
+                Spacer(Modifier.height(20.dp))
+                Text("Resumen del pedido", style = MaterialTheme.typography.titleLarge)
+                if (cart.isEmpty) Text("Tu carrito está vacío")
+                cart.items.forEach { item ->
+                    Text("${item.quantity} × ${item.name} · ${formatPrice(item.lineTotal)}")
+                }
+                HorizontalDivider(Modifier.padding(vertical = 12.dp))
+                Text("Subtotal: ${formatPrice(cart.subtotal)}")
+                Text("Envío: ${formatPrice(state.deliveryFee(cart))}")
+                Text("Total: ${formatPrice(state.total(cart))}",
+                    modifier = Modifier.testTag("checkout_total"),
+                    fontWeight = FontWeight.Bold)
+                Button(
+                    onClick = { showReview = true },
+                    enabled = !isSaving && state.canReview(cart),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp)
+                        .testTag("checkout_review")
+                ) { Text(if (isSaving) "Guardando pedido…" else "Revisar pedido") }
+                saveError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                onLookupOrder?.let { open ->
+                    TextButton(onClick = open, enabled = !isSaving) { Text("Consultar QR") }
+                }
+                onOpenLastOrder?.let { open ->
+                    TextButton(onClick = open, enabled = !isSaving) { Text("Último pedido") }
                 }
             }
         }

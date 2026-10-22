@@ -50,6 +50,14 @@ class CartViewModel(private val storage: CartStorage) : ViewModel() {
         commit(_uiState.value.items.filterNot { it.productId == productId })
     }
 
+    /** Descuenta solo el snapshot confirmado: conserva artículos añadidos durante el guardado. */
+    fun removeOrderedItems(ordered: List<CartItem>) {
+        val quantities = ordered.associate { it.productId to it.quantity }
+        commit(_uiState.value.items.map {
+            it.copy(quantity = it.quantity - (quantities[it.productId] ?: 0))
+        }.filter { it.quantity > 0 })
+    }
+
     fun clear() {
         commit(emptyList())
     }
