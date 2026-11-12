@@ -26,6 +26,7 @@ data class DriverHomeState(
     val available: List<AvailableOrderDto> = emptyList(),
     val isLoading: Boolean = true,
     val acceptingId: String? = null,
+    val acting: Boolean = false,
     val message: String? = null,
     val error: String? = null
 )
@@ -69,6 +70,32 @@ class DriverHomeViewModel(
         }
     }
 
+    fun pickUp() = advance(successMessage = null) { repository.pickup(it) }
+
+    fun deliver() = advance(successMessage = "¡Entrega completada!") { repository.deliver(it) }
+
+    private fun advance(successMessage: String?, action: suspend (String) -> Unit) {
+        val order = _state.value.current ?: return
+        if (_state.value.acting) return
+        _state.update { it.copy(acting = true, message = null) }
+        viewModelScope.launch {
+            val message = try {
+                action(order.id)
+                successMessage
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: SessionExpiredException) {
+                null
+            } catch (e: HttpException) {
+                messageFor(e)
+            } catch (_: Exception) {
+                "Sin conexión. Intenta de nuevo."
+            }
+            _state.update { it.copy(acting = false, message = message) }
+            refresh()
+        }
+    }
+
     fun dismissMessage() {
         _state.update { it.copy(message = null) }
     }
@@ -100,7 +127,9 @@ class DriverHomeViewModel(
         "ORDER_NOT_AVAILABLE" -> "Otro repartidor ya tomó este pedido"
         "ALREADY_DELIVERING" -> "Ya tienes una entrega en curso"
         "ORDER_NOT_FOUND" -> "Este pedido ya no existe"
-        else -> if (e.code() == 403) "No tienes permiso para aceptar pedidos" else "No se pudo aceptar el pedido"
+        "INVALID_STATUS" -> "Este pedido ya no está en ese paso"
+        "NOT_YOUR_DELIVERY" -> "Esta entrega pertenece a otro repartidor"
+        else -> if (e.code() == 403) "No tienes permiso para aceptar pedidos" else "No se pudo completar la acción"
     }
 
     companion object {

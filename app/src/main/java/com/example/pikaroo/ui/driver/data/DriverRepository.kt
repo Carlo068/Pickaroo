@@ -2,6 +2,7 @@ package com.example.pikaroo.ui.driver.data
 
 import com.example.pikaroo.ui.auth.data.AuthorizedCalls
 import com.example.pikaroo.ui.driver.model.AvailableOrderDto
+import com.example.pikaroo.ui.driver.model.DriverLocationRequest
 import com.example.pikaroo.ui.driver.network.DriverApi
 import com.example.pikaroo.ui.orders.model.OrderDto
 import retrofit2.HttpException
@@ -13,6 +14,12 @@ interface DriverRepository {
     suspend fun current(): OrderDto?
 
     suspend fun accept(orderId: String): OrderDto
+
+    suspend fun pickup(orderId: String): OrderDto
+
+    suspend fun deliver(orderId: String): OrderDto
+
+    suspend fun reportLocation(orderId: String, lat: Double, lng: Double)
 }
 
 class ApiDriverRepository(
@@ -29,4 +36,11 @@ class ApiDriverRepository(
     }
 
     override suspend fun accept(orderId: String) = authorized.call { api.accept(it, orderId) }
+
+    override suspend fun pickup(orderId: String) = authorized.call { api.pickup(it, orderId) }
+
+    override suspend fun deliver(orderId: String) = authorized.call { api.deliver(it, orderId) }
+
+    override suspend fun reportLocation(orderId: String, lat: Double, lng: Double) =
+        authorized.call { api.reportLocation(it, DriverLocationRequest(orderId, lat, lng)) }
 }
