@@ -24,6 +24,8 @@ import com.example.pikaroo.ui.orders.network.RemoteOrdersApi
 import com.example.pikaroo.ui.products.data.MockProductsRepository
 import com.example.pikaroo.ui.products.data.ProductsRepository
 import com.example.pikaroo.ui.products.data.RemoteProductsRepository
+import com.example.pikaroo.ui.user.data.UserRepository
+import com.example.pikaroo.ui.user.data.ApiUserRepository
 
 /**
  * Único lugar donde se crean los repositorios. Para agregar uno: interfaz en
@@ -54,6 +56,8 @@ class AppContainer(
     val driverLocationPreferences: DriverLocationPreferences by lazy { DriverLocationPreferences(sessionStore) }
 
     val driverRepository: DriverRepository by lazy { ApiDriverRepository(driverApi, authorizedCalls) }
+
+    val userRepository: UserRepository by lazy { ApiUserRepository(authApi, authorizedCalls) }
 
     val ordersRepository: OrdersRepository by lazy { ApiOrdersRepository(ordersApi, authorizedCalls) }
 
