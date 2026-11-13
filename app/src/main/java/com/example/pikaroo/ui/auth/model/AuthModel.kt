@@ -92,6 +92,7 @@ data class LoginState(
 
 /** Campos del formulario de registro. */
 data class RegisterState(
+    val username: String = "",
     val name: String = "",
     val email: String = "",
     val password: String = "",
