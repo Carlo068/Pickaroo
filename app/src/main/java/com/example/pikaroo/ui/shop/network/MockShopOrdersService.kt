@@ -13,6 +13,8 @@ import com.example.pikaroo.ui.orders.network.orderWithShop
 import com.example.pikaroo.ui.shop.model.ShopStatusRequest
 import com.example.pikaroo.ui.shop.model.nextShopStatus
 import com.google.gson.Gson
+import com.example.pikaroo.ui.orders.model.OrderStatus
+import java.util.Locale
 
 class MockShopOrdersService(
     private val api: MockPickarooApi,
@@ -36,6 +38,12 @@ class MockShopOrdersService(
             val order = gson.fromJson(document, OrderDto::class.java)
             if (order.status != request.expected || nextShopStatus(order.status, order.fulfilment) != request.status) {
                 throw MockErrors.conflict("INVALID_STATUS", "El pedido cambió o la transición no está permitida")
+            }
+            if (request.status == OrderStatus.PICKED_UP) {
+                val code = request.pickupCode?.trim()?.uppercase(Locale.ROOT)
+                if (code.isNullOrEmpty() || order.pickup?.code == null || code != order.pickup.code.uppercase(Locale.ROOT)) {
+                    throw MockErrors.badRequest("INVALID_PICKUP_CODE", "El código de recogida no coincide")
+                }
             }
             document.addProperty("status", request.status.name)
             document.getAsJsonArray("events").add(gson.toJsonTree(OrderEventDto(request.status, formatIsoUtc(nowSeconds()), callerId)))

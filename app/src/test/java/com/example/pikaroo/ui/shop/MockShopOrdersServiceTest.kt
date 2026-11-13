@@ -54,14 +54,37 @@ class MockShopOrdersServiceTest {
                 OrderStatus.PREPARING to OrderStatus.READY
             ) + if (mode == Fulfilment.PICKUP) setOf(OrderStatus.READY to OrderStatus.PICKED_UP) else emptySet()
             if ((from to to) in allowed) {
-                val result = shop.update(bearer, "order_1001", ShopStatusRequest(from, to))
+                val result = shop.update(bearer, "order_1001", ShopStatusRequest(from, to, before.getAsJsonObject("pickup")?.get("code")?.asString))
                 assertEquals(to, result.status)
                 assertEquals(before.getAsJsonArray("events").size() + 1, store.find(ORDERS, "order_1001")!!.getAsJsonArray("events").size())
             } else {
-                error(409, "INVALID_STATUS") { shop.update(bearer, "order_1001", ShopStatusRequest(from, to)) }
+                error(409, "INVALID_STATUS") { shop.update(bearer, "order_1001", ShopStatusRequest(from, to, before.getAsJsonObject("pickup")?.get("code")?.asString)) }
                 assertEquals(before, store.find(ORDERS, "order_1001"))
             }
         }
+    }
+
+    @Test fun `wrong missing and blank pickup codes preserve status and events`() = runTest {
+        setOrder("order_1001", OrderStatus.READY, Fulfilment.PICKUP)
+        val bearer = token("staff1")
+        val before = store.find(ORDERS, "order_1001")!!
+        for (code in listOf(null, "", "  ", "WRONG", "order_1001")) {
+            error(400, "INVALID_PICKUP_CODE") {
+                shop.update(bearer, "order_1001", ShopStatusRequest(OrderStatus.READY, OrderStatus.PICKED_UP, code))
+            }
+            assertEquals(before, store.find(ORDERS, "order_1001"))
+        }
+    }
+
+    @Test fun `valid pickup code accepts lowercase and spaces and cannot be reused`() = runTest {
+        setOrder("order_1001", OrderStatus.READY, Fulfilment.PICKUP)
+        val bearer = token("staff1")
+        val before = store.find(ORDERS, "order_1001")!!
+        val code = before.getAsJsonObject("pickup").get("code").asString
+        val request = ShopStatusRequest(OrderStatus.READY, OrderStatus.PICKED_UP, "  " + code.lowercase(java.util.Locale.ROOT) + "  ")
+        assertEquals(OrderStatus.PICKED_UP, shop.update(bearer, "order_1001", request).status)
+        assertEquals(before.getAsJsonArray("events").size() + 1, store.find(ORDERS, "order_1001")!!.getAsJsonArray("events").size())
+        error(409, "INVALID_STATUS") { shop.update(bearer, "order_1001", request) }
     }
 
     @Test fun `stale or repeated actions do not advance twice`() = runTest {
