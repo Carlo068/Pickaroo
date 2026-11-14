@@ -1,6 +1,8 @@
 package com.example.pikaroo.ui.auth.view
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,8 +37,7 @@ import com.example.pikaroo.ui.theme.*
  * Cuando el login es correcto, [LoginViewModel] pone isLoggedIn = true y esta
  * vista dispara [onLoginSuccess] para que quien la use decida a dónde navegar.
  *
- * La pestaña "Registrarse" sigue siendo solo de UI: la API no expone registro,
- * así que ese botón navega directo como lo hacía antes.
+ * Registro y login guardan la sesión antes de navegar al modo autorizado.
  */
 @Composable
 fun LoginView(
@@ -56,6 +57,7 @@ fun LoginView(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
+            .imePadding()
     ) {
         // Header
         Box(
@@ -107,7 +109,9 @@ fun LoginView(
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -126,7 +130,19 @@ fun LoginView(
                     onValueChange = { viewModel.onRegisterNameChange(it) },
                     label = "Nombre completo",
                     placeholder = "Tu nombre",
-                    icon = Icons.Default.Person
+                    icon = Icons.Default.Person,
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier.testTag("register_name")
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                LoginTextField(
+                    value = registerState.username,
+                    onValueChange = viewModel::onRegisterUsernameChange,
+                    label = "Nombre de usuario",
+                    placeholder = "tu_usuario",
+                    icon = Icons.Default.Person,
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier.testTag("register_username")
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -134,10 +150,11 @@ fun LoginView(
             LoginTextField(
                 value = if (isLogin) loginState.username else registerState.email,
                 onValueChange = { if (isLogin) viewModel.onLoginUsernameChange(it) else viewModel.onRegisterEmailChange(it) },
-                label = if (isLogin) "Usuario" else "Correo electrónico o numero telefonico",
+                label = if (isLogin) "Usuario" else "Correo electrónico",
                 placeholder = if (isLogin) "tu_usuario" else "correo@ejemplo.com",
                 icon = if (isLogin) Icons.Default.Person else Icons.Default.Email,
                 keyboardType = if (isLogin) KeyboardType.Text else KeyboardType.Email,
+                modifier = Modifier.testTag(if (isLogin) "login_username" else "register_email"),
                 enabled = !uiState.isLoading
             )
 
@@ -152,6 +169,7 @@ fun LoginView(
                 isPassword = true,
                 isPasswordVisible = if (isLogin) loginState.isPasswordVisible else registerState.isPasswordVisible,
                 onPasswordToggle = { if (isLogin) viewModel.toggleLoginPasswordVisibility() else viewModel.toggleRegisterPasswordVisibility() },
+                modifier = Modifier.testTag(if (isLogin) "login_password" else "register_password"),
                 enabled = !uiState.isLoading
             )
 
@@ -165,7 +183,9 @@ fun LoginView(
                     icon = Icons.Default.Lock,
                     isPassword = true,
                     isPasswordVisible = registerState.isPasswordVisible,
-                    onPasswordToggle = { viewModel.toggleRegisterPasswordVisibility() }
+                    onPasswordToggle = { viewModel.toggleRegisterPasswordVisibility() },
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier.testTag("register_confirm")
                 )
             }
 
@@ -181,13 +201,13 @@ fun LoginView(
                 )
             }
 
-            if (isLogin && uiState.error != null) {
+            if (uiState.error != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = uiState.error!!,
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 14.sp,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().testTag("auth_error")
                 )
             }
 
@@ -195,7 +215,7 @@ fun LoginView(
 
             // Action Button
             Button(
-                onClick = { if (isLogin) viewModel.login() else onLoginSuccess() },
+                onClick = { if (isLogin) viewModel.login() else viewModel.register() },
                 enabled = !uiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -237,7 +257,7 @@ fun LoginView(
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Footer Link
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -320,7 +340,8 @@ fun LoginTextField(
     isPasswordVisible: Boolean = false,
     onPasswordToggle: () -> Unit = {},
     keyboardType: KeyboardType = KeyboardType.Text,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -332,7 +353,7 @@ fun LoginTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             enabled = enabled,
             placeholder = { Text(text = placeholder, color = Color.LightGray) },
             leadingIcon = { Icon(imageVector = icon, contentDescription = null, tint = PikarooTextGray) },
