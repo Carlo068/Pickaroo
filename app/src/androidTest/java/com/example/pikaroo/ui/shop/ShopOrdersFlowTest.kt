@@ -63,7 +63,16 @@ class ShopOrdersFlowTest {
         compose.onNodeWithText("Volver").performClick()
         compose.onNodeWithTag(ShopTestTags.order("order_1001", OrderStatus.READY)).assertExists()
         compose.onNodeWithTag(ShopTestTags.advance("order_1001")).performScrollTo().performClick()
-        compose.onNodeWithText("Confirmar", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("pickup_code_confirm").assertIsNotEnabled()
+        compose.onNodeWithTag("pickup_code_input").performTextInput("WRONG")
+        compose.onNodeWithTag("pickup_code_confirm").performClick()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("pickup_code_error").fetchSemanticsNodes().isNotEmpty() }
+        runBlocking {
+            assertEquals(OrderStatus.READY, container.shopOrdersRepository.orders().first { it.id == "order_1001" }.status)
+        }
+        val code = runBlocking { container.mockApi.call { find(ORDERS, "order_1001")!!.getAsJsonObject("pickup").get("code").asString } }
+        compose.onNodeWithTag("pickup_code_input").performTextReplacement(code)
+        compose.onNodeWithTag("pickup_code_confirm").performClick()
         compose.waitUntil(10_000) {
             runBlocking { container.shopOrdersRepository.orders().first { it.id == "order_1001" }.status == OrderStatus.PICKED_UP }
         }

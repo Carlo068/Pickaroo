@@ -12,4 +12,8 @@ fun nextShopStatus(status: OrderStatus, fulfilment: Fulfilment): OrderStatus? = 
     else -> null
 }
 
-data class ShopStatusRequest(val expected: OrderStatus, val status: OrderStatus)
+data class ShopStatusRequest(
+    val expected: OrderStatus,
+    val status: OrderStatus,
+    @com.google.gson.annotations.SerializedName("pickup_code") val pickupCode: String? = null
+)
