@@ -29,6 +29,10 @@ import com.example.pikaroo.ui.auth.view.ModeSwitchButtons
 import com.example.pikaroo.ui.cart.view.CartIconButton
 import com.example.pikaroo.ui.theme.PikarooTheme
 import com.example.pikaroo.ui.user.viewmodel.UserViewModel
+import com.example.pikaroo.ui.user.model.UserState
+import com.example.pikaroo.ui.auth.model.MeResponse
+import com.example.pikaroo.ui.auth.model.UserDto
+import com.example.pikaroo.ui.auth.model.RoleAssignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +43,31 @@ fun UserView(
     onOpenOrders: () -> Unit = {},
     cartItemCount: Int = 0,
     onOpenCart: () -> Unit = {},
-    viewModel: UserViewModel = viewModel()
+    viewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
+) {
+    UserContent(
+        state = viewModel.state,
+        onRetry = viewModel::refresh,
+        onLogout = onLogout,
+        otherModes = otherModes,
+        onSwitchMode = onSwitchMode,
+        onOpenOrders = onOpenOrders,
+        cartItemCount = cartItemCount,
+        onOpenCart = onOpenCart
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UserContent(
+    state: UserState,
+    onRetry: () -> Unit = {},
+    onLogout: () -> Unit = {},
+    otherModes: List<RoleMode> = emptyList(),
+    onSwitchMode: (RoleMode) -> Unit = {},
+    onOpenOrders: () -> Unit = {},
+    cartItemCount: Int = 0,
+    onOpenCart: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -115,16 +143,34 @@ fun UserView(
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text(
-                        text = "María González",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "maria.gonzalez@email.com",
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
+                    val profile = state.profile
+                    if (profile != null) {
+                        Text(profile.user.name, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.testTag("profile_name"))
+                        Text(profile.user.email, color = Color.Gray, fontSize = 14.sp, modifier = Modifier.testTag("profile_email"))
+                        Text(
+                            profile.roles.map { assignment ->
+                                when (assignment.role) {
+                                    "customer" -> "Cliente"
+                                    "owner" -> "Dueño"
+                                    "staff" -> "Personal"
+                                    "driver" -> "Repartidor"
+                                    else -> assignment.role
+                                }
+                            }.distinct().joinToString(" · "),
+                            color = Color.Gray,
+                            fontSize = 12.sp,
+                            modifier = Modifier.testTag("profile_roles")
+                        )
+                    } else {
+                        Text(if (state.isLoading) "Cargando perfil…" else "Tu perfil", fontSize = 20.sp)
+                    }
+                }
+            }
+            if (state.isLoading) LinearProgressIndicator(Modifier.fillMaxWidth().testTag("profile_loading"))
+            state.error?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("profile_error"))
+                TextButton(onClick = onRetry, enabled = !state.isLoading, modifier = Modifier.testTag("profile_retry")) {
+                    Text("Reintentar")
                 }
             }
 
@@ -347,6 +393,9 @@ fun ShoppingListItem(name: String, category: String, price: String) {
 @Composable
 fun UserViewPreview() {
     PikarooTheme {
-        UserView()
+        UserContent(UserState(profile = MeResponse(
+            UserDto("preview", "cliente", "Cliente Demo", "cliente@pickaroo.test"),
+            listOf(RoleAssignment("customer")), emptyList()
+        )))
     }
 }
