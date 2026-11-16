@@ -1,5 +1,10 @@
 package com.example.pikaroo.common.di
 
+import com.example.pikaroo.ui.shop.network.ShopOrdersApi
+import com.example.pikaroo.ui.shop.network.MockShopOrdersService
+import com.example.pikaroo.ui.shop.network.RemoteShopOrdersApi
+import com.example.pikaroo.ui.shop.data.ShopOrdersRepository
+import com.example.pikaroo.ui.shop.data.ApiShopOrdersRepository
 import com.example.pikaroo.BuildConfig
 import com.example.pikaroo.common.mock.MockPickarooApi
 import com.example.pikaroo.common.preferences.StringStore
@@ -47,6 +52,15 @@ class AppContainer(
 
     val driverApi: DriverApi by lazy {
         if (useMockApi) MockDriverService(mockApi, MockAuthenticator { System.currentTimeMillis() / 1000 }) else RemoteDriverApi()
+    }
+
+    val shopOrdersApi: ShopOrdersApi by lazy {
+        if (useMockApi) MockShopOrdersService(mockApi, MockAuthenticator { System.currentTimeMillis() / 1000 })
+        else RemoteShopOrdersApi()
+    }
+
+    val shopOrdersRepository: ShopOrdersRepository by lazy {
+        ApiShopOrdersRepository(shopOrdersApi, authorizedCalls)
     }
 
     val driverTracking: DriverTracking by lazy { DriverTracking() }
