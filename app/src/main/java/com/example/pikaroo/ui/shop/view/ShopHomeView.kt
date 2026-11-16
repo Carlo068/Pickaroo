@@ -61,7 +61,7 @@ fun ShopOrdersContent(
             dismissButton = { TextButton(onClick = { confirmPickup = null }) { Text(stringResource(R.string.common_return)) } }
         )
     }
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    Column(Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp)) {
         Text(stringResource(R.string.shop_home_title), style = MaterialTheme.typography.headlineMedium)
         Text(userName)
         ModeSwitchButtons(otherModes, onSwitchMode)

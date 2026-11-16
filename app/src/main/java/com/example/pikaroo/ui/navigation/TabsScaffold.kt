@@ -1,6 +1,7 @@
 package com.example.pikaroo.ui.navigation
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
@@ -72,7 +73,9 @@ fun TabsScaffold(
         NavHost(
             navController = nestedNavController,
             startDestination = AppRoute.Home.route,
-            modifier = Modifier.padding(innerPadding)
+            // The padding already covers the system bars and the bottom bar; consuming it keeps the
+            // screens' own Scaffolds and imePadding from adding the same insets a second time.
+            modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding)
         ) {
             composable(AppRoute.Home.route) {
                 HomeView(

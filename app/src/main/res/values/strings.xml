@@ -142,6 +142,11 @@
     <string name="user_change_password_subtitle">Update your password</string>
     <string name="user_change_email_title">Change email</string>
     <string name="user_change_email_subtitle">Change your email address</string>
+    <string name="user_language_title">Language / Idioma</string>
+    <string name="user_language_system">System default</string>
+    <string name="user_language_spanish">Español</string>
+    <string name="user_language_english">English</string>
+    <string name="common_cancel">Cancel</string>
     <string name="user_lists_title">My shopping lists</string>
     <string name="user_lists_subtitle">Manage your saved lists</string>
     <string name="user_list_weekly_name">Weekly shop</string>

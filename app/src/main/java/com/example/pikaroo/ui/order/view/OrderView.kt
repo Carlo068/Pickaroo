@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.testTag
@@ -50,7 +51,7 @@ fun OrderView(
     viewModel: OrderViewModel = viewModel()
 ) {
     val state = viewModel.state
-    var showReview by remember { mutableStateOf(false) }
+    var showReview by rememberSaveable { mutableStateOf(false) }
     if (showReview && state.canReview(cart)) {
         AlertDialog(
             onDismissRequest = { showReview = false },

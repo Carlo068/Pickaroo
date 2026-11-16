@@ -18,13 +18,20 @@ sealed interface UiText {
 
     /** A string resource, with optional format arguments. */
     data class Res(@StringRes val id: Int, val args: List<Any> = emptyList()) : UiText {
-        constructor(@StringRes id: Int, vararg args: Any) : this(id, args.toList())
+        companion object {
+            /** Same as the constructor, with the arguments listed inline: `Res.of(R.string.x, a, b)`. */
+            fun of(@StringRes id: Int, vararg args: Any): Res = Res(id, args.toList())
+        }
     }
 
     /** A plurals resource; [count] picks the quantity and is also the first format argument. */
     data class Plural(@PluralsRes val id: Int, val count: Int, val args: List<Any> = listOf(count)) : UiText
 
-    /** Text that is data, not copy (for example a message that came from the server or an exception). */
+    /**
+     * Text that is user or business data, not copy (a person's name, an address, a product name).
+     * Never pass server messages or exception text: API errors are translated by their code to a
+     * [Res], and a server message must not be shown to the user.
+     */
     data class Raw(val value: String) : UiText
 
     fun asString(context: Context): String = when (this) {
