@@ -1,11 +1,12 @@
 package com.example.pikaroo.ui.onboarding.model
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 
 data class OnboardingPage(
     @DrawableRes val imageRes: Int,
-    val title: String,
-    val description: String
+    @StringRes val titleRes: Int,
+    @StringRes val descriptionRes: Int
 )
 
 data class OnboardingUiState(

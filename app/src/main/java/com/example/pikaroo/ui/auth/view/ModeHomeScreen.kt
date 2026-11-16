@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.sp
 import com.example.pikaroo.ui.auth.model.RoleMode
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
 
 @Composable
 fun ModeHomeScreen(
@@ -57,7 +59,7 @@ fun ModeHomeScreen(
             colors = ButtonDefaults.buttonColors(containerColor = PikarooOrange),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Cerrar sesión", color = Color.White)
+            Text(stringResource(R.string.common_logout), color = Color.White)
         }
     }
 }

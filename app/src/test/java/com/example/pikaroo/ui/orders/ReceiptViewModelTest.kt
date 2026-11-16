@@ -1,5 +1,7 @@
 package com.example.pikaroo.ui.orders
 
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 import com.example.pikaroo.MainDispatcherRule
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.ui.orders.data.OrdersRepository
@@ -53,11 +55,11 @@ class ReceiptViewModelTest {
         val repository = ReceiptRepository()
         repository.fail = true
         val model = ReceiptViewModel("order_1001", repository)
-        assertEquals("No se encontró el pedido", model.state.value.error)
+        assertEquals(UiText.Res(R.string.order_error_not_found), model.state.value.error)
         repository.fail = false
         model.load()
         assertNotNull(model.state.value.order)
         repository.saved = emptyList()
-        assertEquals("Todavía no tienes pedidos", ReceiptViewModel(null, repository).state.value.error)
+        assertEquals(UiText.Res(R.string.orders_empty), ReceiptViewModel(null, repository).state.value.error)
     }
 }

@@ -36,6 +36,8 @@ import com.example.pikaroo.ui.theme.OnboardingGreenEnd
 import com.example.pikaroo.ui.theme.OnboardingGreenStart
 import com.example.pikaroo.ui.theme.OnboardingOrangeEnd
 import com.example.pikaroo.ui.theme.OnboardingOrangeStart
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
 
 @Composable
 fun OnboardingView(
@@ -135,7 +137,7 @@ fun OnboardingView(
                         .padding(top = 12.dp, end = 16.dp)
                 ) {
                     Text(
-                        text = "Saltar",
+                        text = stringResource(R.string.onboarding_skip),
                         color = Color.White,
                         fontSize = 16.sp
                     )
@@ -202,7 +204,7 @@ fun OnboardingView(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
-                    text = currentPage.title,
+                    text = stringResource(currentPage.titleRes),
                     color = Color.Black,
                     fontSize = 38.sp,
                     lineHeight = 42.sp,
@@ -212,7 +214,7 @@ fun OnboardingView(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = currentPage.description,
+                    text = stringResource(currentPage.descriptionRes),
                     color = OnboardingDescription,
                     fontSize = 16.sp,
                     lineHeight = 25.sp
@@ -232,7 +234,7 @@ fun OnboardingView(
                         onClick = finishOnboarding
                     ) {
                         Text(
-                            text = "Saltar",
+                            text = stringResource(R.string.onboarding_skip),
                             color = OnboardingDescription,
                             fontSize = 16.sp
                         )
@@ -263,9 +265,9 @@ fun OnboardingView(
                 ) {
                     Text(
                         text = if (uiState.isLastPage) {
-                            "Comenzar"
+                            stringResource(R.string.onboarding_start)
                         } else {
-                            "Siguiente"
+                            stringResource(R.string.onboarding_next)
                         },
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold

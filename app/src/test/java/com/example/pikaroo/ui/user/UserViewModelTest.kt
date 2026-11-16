@@ -1,5 +1,7 @@
 package com.example.pikaroo.ui.user
 
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 import com.example.pikaroo.MainDispatcherRule
 import com.example.pikaroo.ui.auth.data.SessionExpiredException
 import com.example.pikaroo.ui.auth.model.*
@@ -28,7 +30,7 @@ class UserViewModelTest {
     @Test fun `failed load has no invented profile and retry recovers`() = runTest {
         val r = Repository(); r.failure = IllegalStateException("Offline")
         val vm = UserViewModel(r); runCurrent()
-        assertNull(vm.state.profile); assertNotNull(vm.state.error)
+        assertNull(vm.state.profile); assertEquals(UiText.Res(R.string.user_profile_error_load), vm.state.error)
         r.failure = null; vm.refresh(); runCurrent()
         assertEquals(profile, vm.state.profile); assertNull(vm.state.error)
     }
@@ -42,5 +44,6 @@ class UserViewModelTest {
         val r = Repository(); val vm = UserViewModel(r); runCurrent()
         r.failure = SessionExpiredException(); vm.refresh(); runCurrent()
         assertNull(vm.state.profile); assertFalse(vm.state.isLoading)
+        assertEquals(UiText.Res(R.string.user_profile_error_session), vm.state.error)
     }
 }

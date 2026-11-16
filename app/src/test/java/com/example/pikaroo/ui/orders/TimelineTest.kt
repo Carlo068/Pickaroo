@@ -1,5 +1,6 @@
 package com.example.pikaroo.ui.orders
 
+import com.example.pikaroo.R
 import com.example.pikaroo.ui.orders.model.Fulfilment
 import com.example.pikaroo.ui.orders.model.OrderDto
 import com.example.pikaroo.ui.orders.model.OrderEventDto
@@ -15,7 +16,7 @@ import com.example.pikaroo.ui.orders.model.OrderStatus.PREPARING
 import com.example.pikaroo.ui.orders.model.OrderStatus.READY
 import com.example.pikaroo.ui.orders.model.StepState
 import com.example.pikaroo.ui.orders.model.buildTimeline
-import com.example.pikaroo.ui.orders.model.label
+import com.example.pikaroo.ui.orders.model.labelRes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -116,9 +117,9 @@ class TimelineTest {
 
     @Test
     fun `ready is worded for pickup and for delivery`() {
-        assertEquals("Listo para recoger", READY.label(Fulfilment.PICKUP))
-        assertEquals("Listo, esperando repartidor", READY.label(Fulfilment.DELIVERY))
-        assertEquals("Cancelado", CANCELLED.label(Fulfilment.PICKUP))
+        assertEquals(R.string.order_status_ready_pickup, READY.labelRes(Fulfilment.PICKUP))
+        assertEquals(R.string.order_status_ready_delivery, READY.labelRes(Fulfilment.DELIVERY))
+        assertEquals(R.string.order_status_cancelled, CANCELLED.labelRes(Fulfilment.PICKUP))
     }
 
     @Test

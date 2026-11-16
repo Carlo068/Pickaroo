@@ -15,11 +15,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 
 data class OrdersUiState(
     val orders: List<OrderDto> = emptyList(),
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: UiText? = null
 )
 
 class OrdersViewModel(private val repository: OrdersRepository) : ViewModel() {
@@ -41,10 +43,10 @@ class OrdersViewModel(private val repository: OrdersRepository) : ViewModel() {
             } catch (_: SessionExpiredException) {
                 _state.value = _state.value.copy(isLoading = false)
             } catch (e: HttpException) {
-                val message = if (e.code() == 403) "No tienes acceso a tus pedidos" else "No se pudieron cargar tus pedidos"
+                val message = UiText.Res(if (e.code() == 403) R.string.orders_error_forbidden else R.string.orders_error_load)
                 _state.value = _state.value.copy(isLoading = false, error = message)
             } catch (_: Exception) {
-                _state.value = _state.value.copy(isLoading = false, error = "Sin conexión. Intenta de nuevo.")
+                _state.value = _state.value.copy(isLoading = false, error = UiText.Res(R.string.error_offline_retry))
             }
         }
     }

@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.pikaroo.R
 import com.example.pikaroo.appContainer
+import com.example.pikaroo.common.text.UiText
 import com.example.pikaroo.ui.auth.data.SessionExpiredException
 import com.example.pikaroo.ui.orders.model.OrderDto
 import com.example.pikaroo.ui.shop.data.ShopOrdersRepository
@@ -25,7 +27,7 @@ data class ShopOrdersState(
     val orders: List<OrderDto> = emptyList(),
     val loading: Boolean = true,
     val updatingId: String? = null,
-    val error: String? = null
+    val error: UiText? = null
 )
 
 class ShopOrdersViewModel(private val repository: ShopOrdersRepository, private val pollMillis: Long = 5_000) : ViewModel() {
@@ -51,8 +53,8 @@ class ShopOrdersViewModel(private val repository: ShopOrdersRepository, private 
                 } catch (e: CancellationException) { throw e
                 } catch (_: SessionExpiredException) {
                 } catch (e: Exception) {
-                    mutableState.update { it.copy(error = if (e is HttpException && e.code() == 409)
-                        "El pedido cambió. Actualiza la lista antes de continuar." else "No se pudo actualizar el pedido. Intenta de nuevo.") }
+                    mutableState.update { it.copy(error = UiText.Res(if (e is HttpException && e.code() == 409)
+                        R.string.shop_error_changed else R.string.shop_error_update)) }
                 } finally {
                     mutableState.update { it.copy(updatingId = null) }
                 }
@@ -68,8 +70,8 @@ class ShopOrdersViewModel(private val repository: ShopOrdersRepository, private 
         } catch (e: CancellationException) { throw e
         } catch (_: SessionExpiredException) { false
         } catch (e: Exception) {
-            mutableState.update { it.copy(loading = false, error = if (e is HttpException && e.code() == 403)
-                "No tienes permiso para ver los pedidos de esta tienda." else "No se pudieron cargar los pedidos. Reintenta.") }
+            mutableState.update { it.copy(loading = false, error = UiText.Res(if (e is HttpException && e.code() == 403)
+                R.string.shop_error_forbidden else R.string.shop_error_load)) }
             !(e is HttpException && e.code() == 403)
         }
     }

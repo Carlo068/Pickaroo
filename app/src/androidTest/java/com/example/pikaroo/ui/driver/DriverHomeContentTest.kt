@@ -1,5 +1,7 @@
 package com.example.pikaroo.ui.driver
 
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsEnabled
@@ -167,7 +169,7 @@ class DriverHomeContentTest {
 
     @Test
     fun aMessageIsShownAndCanBeDismissed() {
-        val calls = show(DriverHomeState(message = "Otro repartidor ya tomó este pedido", isLoading = false))
+        val calls = show(DriverHomeState(message = UiText.Res(R.string.driver_error_taken), isLoading = false))
 
         composeRule.onNodeWithTag(DriverTestTags.MESSAGE).assertTextContains("Otro repartidor", substring = true)
         composeRule.onNodeWithTag(DriverTestTags.MESSAGE_DISMISS).performClick()
@@ -177,7 +179,7 @@ class DriverHomeContentTest {
 
     @Test
     fun aLoadingErrorIsShownWithoutHidingTheList() {
-        show(DriverHomeState(available = listOf(available("order_1")), error = "Sin conexión. Reintentando…", isLoading = false))
+        show(DriverHomeState(available = listOf(available("order_1")), error = UiText.Res(R.string.error_offline_retrying), isLoading = false))
 
         composeRule.onNodeWithTag(DriverTestTags.ERROR).assertExists()
         composeRule.onNodeWithTag(DriverTestTags.available("order_1")).assertExists()
@@ -242,7 +244,7 @@ class DriverHomeContentTest {
 
     @Test
     fun theCompletionMessageIsShown() {
-        show(DriverHomeState(message = "¡Entrega completada!", isLoading = false))
+        show(DriverHomeState(message = UiText.Res(R.string.driver_delivery_completed), isLoading = false))
 
         composeRule.onNodeWithTag(DriverTestTags.MESSAGE).assertTextContains("¡Entrega completada!")
     }

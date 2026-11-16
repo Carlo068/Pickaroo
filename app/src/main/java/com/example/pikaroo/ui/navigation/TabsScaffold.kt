@@ -1,5 +1,6 @@
 package com.example.pikaroo.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
@@ -39,6 +40,8 @@ import com.example.pikaroo.ui.orders.view.ReceiptView
 import com.example.pikaroo.ui.orders.view.OrdersView
 import com.example.pikaroo.ui.orders.view.TrackingView
 import com.example.pikaroo.ui.cart.viewmodel.CartViewModel
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
 
 @Composable
 fun TabsScaffold(
@@ -179,17 +182,17 @@ fun TabsScaffold(
 data class NavigationItem(
     val route: AppRoute,
     val icon: ImageVector,
-    val label: String
+    @StringRes val label: Int
 )
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
-        NavigationItem(AppRoute.Home, Icons.Outlined.Home, "Inicio"),
-        NavigationItem(AppRoute.Offers, Icons.Outlined.LocalOffer, "Ofertas"),
-        NavigationItem(AppRoute.Order, Icons.Outlined.ShoppingCart, "Ordenar"),
-        NavigationItem(AppRoute.Products, Icons.Outlined.Inventory2, "Productos"),
-        NavigationItem(AppRoute.User, Icons.Outlined.Person, "Usuario")
+        NavigationItem(AppRoute.Home, Icons.Outlined.Home, R.string.nav_home),
+        NavigationItem(AppRoute.Offers, Icons.Outlined.LocalOffer, R.string.nav_offers),
+        NavigationItem(AppRoute.Order, Icons.Outlined.ShoppingCart, R.string.nav_order),
+        NavigationItem(AppRoute.Products, Icons.Outlined.Inventory2, R.string.nav_products),
+        NavigationItem(AppRoute.User, Icons.Outlined.Person, R.string.nav_user)
     )
     
     NavigationBar(
@@ -205,12 +208,12 @@ fun BottomNavigationBar(navController: NavHostController) {
                 icon = { 
                     Icon(
                         imageVector = item.icon, 
-                        contentDescription = item.label
+                        contentDescription = stringResource(item.label)
                     ) 
                 },
                 label = { 
                     Text(
-                        text = item.label, 
+                        text = stringResource(item.label), 
                         fontSize = 11.sp
                     ) 
                 },

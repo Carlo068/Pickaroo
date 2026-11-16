@@ -1,5 +1,7 @@
 package com.example.pikaroo.ui.driver
 
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 import com.example.pikaroo.MainDispatcherRule
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.ui.auth.data.SessionExpiredException
@@ -218,7 +220,7 @@ class DriverHomeViewModelTest {
         runCurrent()
         job.cancel()
 
-        assertEquals("Otro repartidor ya tomó este pedido", viewModel.state.value.message)
+        assertEquals(UiText.Res(R.string.driver_error_taken), viewModel.state.value.message)
         assertEquals(listOf("order_2"), viewModel.state.value.available.map { it.id })
         assertNull(viewModel.state.value.acceptingId)
         assertNull(viewModel.state.value.current)
@@ -226,18 +228,18 @@ class DriverHomeViewModelTest {
 
     @Test
     fun `other conflicts and failures have their own messages`() = runTest {
-        suspend fun messageFor(failure: Exception): String? {
+        suspend fun messageFor(failure: Exception): UiText? {
             repository.acceptFailure = failure
             viewModel.accept("order_1")
             runCurrent()
             return viewModel.state.value.message
         }
 
-        assertEquals("Ya tienes una entrega en curso", messageFor(MockErrors.conflict("ALREADY_DELIVERING")))
-        assertEquals("Este pedido ya no existe", messageFor(MockErrors.notFound("ORDER_NOT_FOUND")))
-        assertEquals("No tienes permiso para aceptar pedidos", messageFor(MockErrors.forbidden()))
-        assertEquals("No se pudo completar la acción", messageFor(MockErrors.http(500, "SERVER_ERROR", "boom")))
-        assertEquals("Sin conexión. Intenta de nuevo.", messageFor(IOException("offline")))
+        assertEquals(UiText.Res(R.string.driver_error_already_delivering), messageFor(MockErrors.conflict("ALREADY_DELIVERING")))
+        assertEquals(UiText.Res(R.string.driver_error_order_gone), messageFor(MockErrors.notFound("ORDER_NOT_FOUND")))
+        assertEquals(UiText.Res(R.string.driver_error_forbidden_accept), messageFor(MockErrors.forbidden()))
+        assertEquals(UiText.Res(R.string.driver_error_action), messageFor(MockErrors.http(500, "SERVER_ERROR", "boom")))
+        assertEquals(UiText.Res(R.string.error_offline_retry), messageFor(IOException("offline")))
     }
 
     @Test
@@ -274,7 +276,7 @@ class DriverHomeViewModelTest {
         val job = launch { viewModel.poll() }
         runCurrent()
 
-        assertEquals("Sin conexión. Reintentando…", viewModel.state.value.error)
+        assertEquals(UiText.Res(R.string.error_offline_retrying), viewModel.state.value.error)
         repository.failure = null
         advanceTimeBy(5_000)
         runCurrent()
@@ -289,7 +291,7 @@ class DriverHomeViewModelTest {
 
         viewModel.poll()
 
-        assertEquals("No tienes permiso para ver entregas", viewModel.state.value.error)
+        assertEquals(UiText.Res(R.string.driver_error_forbidden_list), viewModel.state.value.error)
         assertEquals(1, repository.currentCalls)
     }
 
@@ -333,7 +335,7 @@ class DriverHomeViewModelTest {
 
         assertEquals(1, repository.deliveries)
         assertNull(viewModel.state.value.current)
-        assertEquals("¡Entrega completada!", viewModel.state.value.message)
+        assertEquals(UiText.Res(R.string.driver_delivery_completed), viewModel.state.value.message)
         assertEquals(listOf("order_next"), viewModel.state.value.available.map { it.id })
     }
 
@@ -378,7 +380,7 @@ class DriverHomeViewModelTest {
         runCurrent()
         job.cancel()
 
-        assertEquals("Este pedido ya no está en ese paso", viewModel.state.value.message)
+        assertEquals(UiText.Res(R.string.driver_error_invalid_status), viewModel.state.value.message)
         assertTrue(!viewModel.state.value.acting)
         assertEquals("order_9", viewModel.state.value.current!!.id)
     }
@@ -389,15 +391,15 @@ class DriverHomeViewModelTest {
         val job = launch { viewModel.poll() }
         runCurrent()
 
-        suspend fun messageFor(failure: Exception): String? {
+        suspend fun messageFor(failure: Exception): UiText? {
             repository.actionFailure = failure
             viewModel.deliver()
             runCurrent()
             return viewModel.state.value.message
         }
 
-        assertEquals("Esta entrega pertenece a otro repartidor", messageFor(MockErrors.forbidden("NOT_YOUR_DELIVERY")))
-        assertEquals("Sin conexión. Intenta de nuevo.", messageFor(IOException("offline")))
+        assertEquals(UiText.Res(R.string.driver_error_not_yours), messageFor(MockErrors.forbidden("NOT_YOUR_DELIVERY")))
+        assertEquals(UiText.Res(R.string.error_offline_retry), messageFor(IOException("offline")))
         job.cancel()
     }
 }

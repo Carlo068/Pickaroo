@@ -16,8 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 
-data class PlaceOrderUiState(val isSaving: Boolean = false, val error: String? = null)
+data class PlaceOrderUiState(val isSaving: Boolean = false, val error: UiText? = null)
 
 class PlaceOrderViewModel(private val orders: OrdersRepository) : ViewModel() {
     private val _state = MutableStateFlow(PlaceOrderUiState())
@@ -43,7 +45,7 @@ class PlaceOrderViewModel(private val orders: OrdersRepository) : ViewModel() {
                 _state.value = PlaceOrderUiState()
                 throw e
             } catch (_: Exception) {
-                _state.value = PlaceOrderUiState(error = "No se pudo guardar el pedido. Tu carrito sigue disponible. Intenta de nuevo.")
+                _state.value = PlaceOrderUiState(error = UiText.Res(R.string.checkout_save_error))
                 return@launch
             }
             // El callback de éxito queda fuera del catch: no confundir navegación con fallo de guardado.

@@ -16,7 +16,7 @@ android {
 
         buildConfigField("boolean", "USE_MOCK_API", "true")
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.example.pikaroo.PikarooTestRunner"
     }
 
     buildTypes {

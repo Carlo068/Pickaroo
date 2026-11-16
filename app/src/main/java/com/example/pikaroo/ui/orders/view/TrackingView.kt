@@ -56,6 +56,9 @@ import com.example.pikaroo.ui.theme.PikarooBackground
 import com.example.pikaroo.ui.theme.PikarooLightOrange
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.asString
 
 object TrackingTestTags {
     const val ERROR = "tracking_error"
@@ -96,10 +99,10 @@ fun TrackingContent(state: TrackingUiState, onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
             }
             Text(
-                text = if (order != null) "Pedido #${order.number}" else "Pedido",
+                text = if (order != null) stringResource(R.string.order_number, order.number) else stringResource(R.string.tracking_title_loading),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
@@ -110,7 +113,7 @@ fun TrackingContent(state: TrackingUiState, onBack: () -> Unit) {
         if (order == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 if (state.error != null) {
-                    Text(state.error, color = Color.Red, modifier = Modifier.testTag(TrackingTestTags.ERROR))
+                    Text(state.error.asString(), color = Color.Red, modifier = Modifier.testTag(TrackingTestTags.ERROR))
                 } else {
                     CircularProgressIndicator(color = PikarooOrange)
                 }
@@ -127,7 +130,7 @@ fun TrackingContent(state: TrackingUiState, onBack: () -> Unit) {
         ) {
             if (state.error != null) {
                 Text(
-                    text = state.error,
+                    text = state.error.asString(),
                     color = PikarooTextGray,
                     fontSize = 13.sp,
                     modifier = Modifier.testTag(TrackingTestTags.ERROR)
@@ -176,13 +179,13 @@ private fun LiveMapCard(shop: MapPoint, destination: MapPoint, driver: MapPoint?
             )
             Column(modifier = Modifier.padding(12.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    LegendDot(Color(0xFF1E88E5), "Tienda")
-                    LegendDot(Color(0xFF43A047), "Destino")
-                    LegendDot(PikarooOrange, "Repartidor")
+                    LegendDot(Color(0xFF1E88E5), stringResource(R.string.map_shop))
+                    LegendDot(Color(0xFF43A047), stringResource(R.string.map_destination))
+                    LegendDot(PikarooOrange, stringResource(R.string.map_driver))
                 }
                 val time = formatTime(updatedAt)
                 Text(
-                    text = if (driver != null && time != null) "Ubicación actualizada $time" else "Esperando la ubicación del repartidor…",
+                    text = if (driver != null && time != null) stringResource(R.string.tracking_location_updated, time) else stringResource(R.string.tracking_waiting_driver),
                     fontSize = 12.sp,
                     color = PikarooTextGray,
                     modifier = Modifier.padding(top = 4.dp)
@@ -210,7 +213,7 @@ private fun TimelineCard(order: OrderDto, steps: List<TimelineStep>) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = if (order.fulfilment == Fulfilment.PICKUP) "Recoger en tienda" else "Entrega a domicilio",
+                text = stringResource(if (order.fulfilment == Fulfilment.PICKUP) R.string.order_fulfilment_pickup else R.string.order_fulfilment_delivery),
                 fontSize = 14.sp,
                 color = PikarooTextGray
             )
@@ -258,7 +261,7 @@ private fun TimelineRow(step: TimelineStep, isLast: Boolean) {
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.padding(bottom = if (isLast) 0.dp else 12.dp)) {
             Text(
-                text = step.label,
+                text = stringResource(step.labelRes),
                 fontSize = 16.sp,
                 fontWeight = if (step.state == StepState.CURRENT) FontWeight.Bold else FontWeight.Medium,
                 color = if (step.state == StepState.PENDING) PikarooTextGray else Color.Black
@@ -280,7 +283,7 @@ private fun PickupCodeCard(order: OrderDto) {
         colors = CardDefaults.cardColors(containerColor = PikarooLightOrange)
     ) {
         Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Tu código de recolección", fontSize = 14.sp, color = PikarooTextGray)
+            Text(stringResource(R.string.tracking_pickup_code), fontSize = 14.sp, color = PikarooTextGray)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = pickup.code,
@@ -291,7 +294,7 @@ private fun PickupCodeCard(order: OrderDto) {
             )
             val slot = formatTime(pickup.slotStart)
             if (slot != null) {
-                Text("Horario: $slot", fontSize = 13.sp, color = PikarooTextGray)
+                Text(stringResource(R.string.order_time_slot, slot), fontSize = 13.sp, color = PikarooTextGray)
             }
         }
     }
@@ -305,7 +308,7 @@ private fun SummaryCard(order: OrderDto) {
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Resumen", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.tracking_summary), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             order.items.forEach { line ->
                 Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
@@ -314,13 +317,13 @@ private fun SummaryCard(order: OrderDto) {
                 }
             }
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFF0F0F0))
-            SummaryLine("Subtotal", formatPrice(order.subtotal))
+            SummaryLine(stringResource(R.string.cart_subtotal), formatPrice(order.subtotal))
             if (order.fulfilment == Fulfilment.DELIVERY) {
-                SummaryLine("Envío", formatPrice(order.deliveryFee))
+                SummaryLine(stringResource(R.string.cart_delivery_fee), formatPrice(order.deliveryFee))
                 order.delivery?.let { Text(it.address, fontSize = 12.sp, color = PikarooTextGray) }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            SummaryLine("Total", formatPrice(order.total), bold = true)
+            SummaryLine(stringResource(R.string.cart_total), formatPrice(order.total), bold = true)
         }
     }
 }

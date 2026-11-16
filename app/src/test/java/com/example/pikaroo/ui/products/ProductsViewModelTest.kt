@@ -1,6 +1,9 @@
 package com.example.pikaroo.ui.products
 
 import com.example.pikaroo.MainDispatcherRule
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
+import com.example.pikaroo.ui.products.model.ALL_CATEGORIES
 import com.example.pikaroo.ui.products.data.ProductsRepository
 import com.example.pikaroo.ui.products.model.Product
 import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
@@ -48,10 +51,10 @@ class ProductsViewModelTest {
     }
 
     @Test
-    fun `categories start with Todos and are sorted without duplicates`() {
+    fun `categories start with the all-categories entry and are sorted without duplicates`() {
         val viewModel = ProductsViewModel(FakeProductsRepository(listOf(bread, apple, banana)))
 
-        assertEquals(listOf("Todos", "Frutas", "Panadería"), viewModel.state.categories)
+        assertEquals(listOf(ALL_CATEGORIES, "Frutas", "Panadería"), viewModel.state.categories)
     }
 
     @Test
@@ -60,9 +63,16 @@ class ProductsViewModelTest {
             FakeProductsRepository(failure = IllegalStateException("sin conexión"))
         )
 
-        assertEquals("sin conexión", viewModel.state.error)
+        assertEquals(UiText.Raw("sin conexión"), viewModel.state.error)
         assertFalse(viewModel.state.isLoading)
         assertTrue(viewModel.state.products.isEmpty())
+    }
+
+    @Test
+    fun `a failure without a message falls back to a generic error text`() {
+        val viewModel = ProductsViewModel(FakeProductsRepository(failure = IllegalStateException()))
+
+        assertEquals(UiText.Res(R.string.products_error_unknown), viewModel.state.error)
     }
 
     @Test
@@ -76,11 +86,11 @@ class ProductsViewModelTest {
     }
 
     @Test
-    fun `selecting Todos shows every product again`() {
+    fun `selecting all categories shows every product again`() {
         val viewModel = ProductsViewModel(FakeProductsRepository(listOf(apple, bread, banana)))
         viewModel.selectCategory("Panadería")
 
-        viewModel.selectCategory("Todos")
+        viewModel.selectCategory(ALL_CATEGORIES)
 
         assertEquals(listOf(apple, bread, banana), viewModel.state.filteredProducts)
     }

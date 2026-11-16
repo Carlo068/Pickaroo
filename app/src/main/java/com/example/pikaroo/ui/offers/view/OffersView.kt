@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.offers.viewmodel.OffersViewModel
+import com.example.pikaroo.common.text.asString
 
 @Composable
 fun OffersView(
@@ -23,7 +24,7 @@ fun OffersView(
         if (state.isLoading) {
             CircularProgressIndicator()
         } else {
-            Text(text = state.title)
+            Text(text = state.title.asString())
         }
     }
 }

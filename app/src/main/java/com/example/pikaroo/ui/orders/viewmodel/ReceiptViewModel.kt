@@ -13,8 +13,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 
-data class ReceiptUiState(val order: OrderDto? = null, val isLoading: Boolean = true, val error: String? = null)
+data class ReceiptUiState(val order: OrderDto? = null, val isLoading: Boolean = true, val error: UiText? = null)
 
 class ReceiptViewModel(private val orderId: String?, private val repository: OrdersRepository) : ViewModel() {
     private val _state = MutableStateFlow(ReceiptUiState())
@@ -32,17 +34,17 @@ class ReceiptViewModel(private val orderId: String?, private val repository: Ord
             try {
                 val order = if (orderId != null) repository.get(orderId)
                     else repository.listMine().maxByOrNull { it.createdAt }
-                _state.value = ReceiptUiState(order, false, if (order == null) "Todavía no tienes pedidos" else null)
+                _state.value = ReceiptUiState(order, false, if (order == null) UiText.Res(R.string.orders_empty) else null)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: HttpException) {
                 _state.value = ReceiptUiState(isLoading = false, error = when (e.code()) {
-                    403 -> "No tienes acceso a este pedido"
-                    404 -> "No se encontró el pedido"
-                    else -> "No se pudo cargar el comprobante"
+                    403 -> UiText.Res(R.string.order_error_forbidden)
+                    404 -> UiText.Res(R.string.order_error_not_found)
+                    else -> UiText.Res(R.string.receipt_error_load)
                 })
             } catch (_: Exception) {
-                _state.value = ReceiptUiState(isLoading = false, error = "No se pudo cargar el comprobante. Intenta de nuevo.")
+                _state.value = ReceiptUiState(isLoading = false, error = UiText.Res(R.string.receipt_error_load_retry))
             } finally { jobActive = false }
         }
     }

@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.net.SocketTimeoutException
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 
 /**
  * ViewModel de la pantalla de login. Dueño del estado ([LoginUiState]) y de la
@@ -112,7 +114,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         val password = loginState.password
 
         if (username.isBlank() || password.isBlank()) {
-            _uiState.update { it.copy(error = "Ingresa usuario y contraseña") }
+            _uiState.update { it.copy(error = UiText.Res(R.string.login_error_empty)) }
             return
         }
 
@@ -126,11 +128,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update { it.copy(isLoading = false, error = messageForHttp(e.code())) }
             } catch (e: SocketTimeoutException) {
                 _uiState.update {
-                    it.copy(isLoading = false, error = "El servidor está iniciando. Vuelve a intentar.")
+                    it.copy(isLoading = false, error = UiText.Res(R.string.login_error_server_starting))
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isLoading = false, error = "Sin conexión. Revisa tu internet e intenta de nuevo.")
+                    it.copy(isLoading = false, error = UiText.Res(R.string.login_error_offline))
                 }
             }
         }
@@ -157,7 +159,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: HttpException) {
                 _uiState.update { it.copy(isLoading = false, error = registrationErrorMessage(e.toApiError()?.code)) }
             } catch (_: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = "No se pudo conectar. Intenta de nuevo o inicia sesión si ya se creó tu cuenta.") }
+                _uiState.update { it.copy(isLoading = false, error = UiText.Res(R.string.register_error_offline)) }
             }
         }
     }
@@ -180,9 +182,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             authService.login(request)
         }
 
-    private fun messageForHttp(code: Int): String = when (code) {
-        401 -> "Usuario o contraseña incorrectos"
-        400 -> "Revisa los datos ingresados"
-        else -> "No se pudo iniciar sesión (error $code)"
+    private fun messageForHttp(code: Int): UiText = when (code) {
+        401 -> UiText.Res(R.string.login_error_invalid_credentials)
+        400 -> UiText.Res(R.string.login_error_bad_request)
+        else -> UiText.Res(R.string.login_error_generic, code)
     }
 }

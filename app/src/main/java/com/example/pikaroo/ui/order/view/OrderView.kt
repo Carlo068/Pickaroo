@@ -31,6 +31,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.cart.view.CartIconButton
 import com.example.pikaroo.ui.theme.PikarooTheme
 import com.example.pikaroo.ui.order.viewmodel.OrderViewModel
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
+import com.example.pikaroo.common.text.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +42,7 @@ fun OrderView(
     cartItemCount: Int = 0,
     cart: CartUiState = CartUiState(),
     isSaving: Boolean = false,
-    saveError: String? = null,
+    saveError: UiText? = null,
     onLookupOrder: (() -> Unit)? = null,
     onOpenLastOrder: (() -> Unit)? = null,
     onConfirmOrder: ((OrderState) -> Unit)? = null,
@@ -50,16 +54,29 @@ fun OrderView(
     if (showReview && state.canReview(cart)) {
         AlertDialog(
             onDismissRequest = { showReview = false },
-            title = { Text("Revisa tu pedido") },
-            text = { Text("${if (state.method == DeliveryMethod.PICKUP) "Pickup · Sucursal Centro · Recoger hoy" else "Domicilio · ${state.address.trim()}"}\nTotal: ${formatPrice(state.total(cart))}\nPago pendiente: ${if (state.method == DeliveryMethod.PICKUP) "en tienda" else "contra entrega"}") },
+            title = { Text(stringResource(R.string.checkout_review_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.checkout_review_message,
+                        if (state.method == DeliveryMethod.PICKUP) stringResource(R.string.checkout_review_pickup)
+                        else stringResource(R.string.checkout_review_delivery, state.address.trim()),
+                        formatPrice(state.total(cart)),
+                        stringResource(
+                            if (state.method == DeliveryMethod.PICKUP) R.string.checkout_pay_in_store
+                            else R.string.checkout_pay_on_delivery
+                        )
+                    )
+                )
+            },
             confirmButton = {
                 if (onConfirmOrder != null) {
                     TextButton(onClick = {
                         showReview = false
                         if (!isSaving) onConfirmOrder(state.copy(address = state.address.trim()))
-                    }) { Text("Confirmar pedido") }
+                    }) { Text(stringResource(R.string.checkout_confirm)) }
                 } else {
-                    TextButton(onClick = { showReview = false }) { Text("Volver al resumen") }
+                    TextButton(onClick = { showReview = false }) { Text(stringResource(R.string.checkout_back_to_summary)) }
                 }
             }
         )
@@ -78,7 +95,7 @@ fun OrderView(
                     modifier = Modifier
                         .weight(1f)
                         .height(56.dp),
-                    placeholder = { Text("Buscar...") },
+                    placeholder = { Text(stringResource(R.string.checkout_search_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     shape = RoundedCornerShape(28.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -113,12 +130,12 @@ fun OrderView(
             ) {
                 Column {
                     Text(
-                        text = "Método de Entrega",
+                        text = stringResource(R.string.checkout_method_title),
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Elige cómo recibir tu pedido",
+                        text = stringResource(R.string.checkout_method_subtitle),
                         color = Color.Gray,
                         fontSize = 16.sp
                     )
@@ -132,7 +149,7 @@ fun OrderView(
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
-                    text = "Selecciona el método",
+                    text = stringResource(R.string.checkout_method_select),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -145,36 +162,36 @@ fun OrderView(
                     DeliveryMethodCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Storefront,
-                        title = "Pickup",
-                        subtitle = if (state.method == DeliveryMethod.PICKUP) "Seleccionado" else "Recoge en sucursal",
+                        title = stringResource(R.string.checkout_method_pickup),
+                        subtitle = if (state.method == DeliveryMethod.PICKUP) stringResource(R.string.checkout_method_selected) else stringResource(R.string.checkout_method_pickup_hint),
                         onClick = { if (!isSaving) viewModel.selectMethod(DeliveryMethod.PICKUP) }
                     )
                     DeliveryMethodCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.LocalShipping,
-                        title = "Domicilio",
-                        subtitle = if (state.method == DeliveryMethod.DELIVERY) "Seleccionado" else "Envío a domicilio",
+                        title = stringResource(R.string.checkout_method_delivery),
+                        subtitle = if (state.method == DeliveryMethod.DELIVERY) stringResource(R.string.checkout_method_selected) else stringResource(R.string.checkout_method_delivery_hint),
                         onClick = { if (!isSaving) viewModel.selectMethod(DeliveryMethod.DELIVERY) }
                     )
                 }
                 Spacer(Modifier.height(20.dp))
                 if (state.method == DeliveryMethod.PICKUP) {
-                    Text("Pickaroo Centro · Horario de ejemplo: dentro de una hora")
-                    Text("Pago en tienda · pendiente")
+                    Text(stringResource(R.string.checkout_pickup_info))
+                    Text(stringResource(R.string.checkout_pickup_payment))
                 } else if (state.method == DeliveryMethod.DELIVERY) {
-                    Text("Pago contra entrega · pendiente")
+                    Text(stringResource(R.string.checkout_delivery_payment))
                     Spacer(Modifier.height(12.dp))
                     OutlinedTextField(
                         value = state.address,
                         enabled = !isSaving,
                         onValueChange = viewModel::updateAddress,
-                        label = { Text("Dirección de entrega") },
-                        placeholder = { Text("Calle, número, colonia y ciudad") },
+                        label = { Text(stringResource(R.string.checkout_address_label)) },
+                        placeholder = { Text(stringResource(R.string.checkout_address_placeholder)) },
                         supportingText = {
                             Text(if (state.address.isBlank()) {
-                                "Agrega una dirección para continuar"
+                                stringResource(R.string.checkout_address_required)
                             } else {
-                                "Incluye número interior si corresponde"
+                                stringResource(R.string.checkout_address_hint)
                             })
                         },
                         isError = state.address.isNotEmpty() && state.address.isBlank(),
@@ -184,15 +201,15 @@ fun OrderView(
                     )
                 }
                 Spacer(Modifier.height(20.dp))
-                Text("Resumen del pedido", style = MaterialTheme.typography.titleLarge)
-                if (cart.isEmpty) Text("Tu carrito está vacío")
+                Text(stringResource(R.string.checkout_summary_title), style = MaterialTheme.typography.titleLarge)
+                if (cart.isEmpty) Text(stringResource(R.string.checkout_cart_empty))
                 cart.items.forEach { item ->
                     Text("${item.quantity} × ${item.name} · ${formatPrice(item.lineTotal)}")
                 }
                 HorizontalDivider(Modifier.padding(vertical = 12.dp))
-                Text("Subtotal: ${formatPrice(cart.subtotal)}")
-                Text("Envío: ${formatPrice(state.deliveryFee(cart))}")
-                Text("Total: ${formatPrice(state.total(cart))}",
+                Text(stringResource(R.string.checkout_subtotal_line, formatPrice(cart.subtotal)))
+                Text(stringResource(R.string.checkout_delivery_line, formatPrice(state.deliveryFee(cart))))
+                Text(stringResource(R.string.checkout_total_line, formatPrice(state.total(cart))),
                     modifier = Modifier.testTag("checkout_total"),
                     fontWeight = FontWeight.Bold)
                 Button(
@@ -200,13 +217,13 @@ fun OrderView(
                     enabled = !isSaving && state.canReview(cart),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp)
                         .testTag("checkout_review")
-                ) { Text(if (isSaving) "Guardando pedido…" else "Revisar pedido") }
-                saveError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                ) { Text(if (isSaving) stringResource(R.string.checkout_saving) else stringResource(R.string.checkout_review_button)) }
+                saveError?.let { Text(it.asString(), color = MaterialTheme.colorScheme.error) }
                 onLookupOrder?.let { open ->
-                    TextButton(onClick = open, enabled = !isSaving) { Text("Consultar QR") }
+                    TextButton(onClick = open, enabled = !isSaving) { Text(stringResource(R.string.checkout_lookup_qr)) }
                 }
                 onOpenLastOrder?.let { open ->
-                    TextButton(onClick = open, enabled = !isSaving) { Text("Último pedido") }
+                    TextButton(onClick = open, enabled = !isSaving) { Text(stringResource(R.string.checkout_last_order)) }
                 }
             }
         }

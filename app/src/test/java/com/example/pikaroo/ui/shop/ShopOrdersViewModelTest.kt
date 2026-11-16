@@ -1,5 +1,7 @@
 package com.example.pikaroo.ui.shop
 
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 import com.example.pikaroo.MainDispatcherRule
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.ui.orders.model.*
@@ -50,7 +52,7 @@ class ShopOrdersViewModelTest {
         val r = Repository(); val vm = ShopOrdersViewModel(r)
         vm.retry(); runCurrent(); r.failure = IllegalStateException("Offline")
         vm.advance(order); runCurrent()
-        assertEquals(listOf(order), vm.state.value.orders); assertNotNull(vm.state.value.error)
+        assertEquals(listOf(order), vm.state.value.orders); assertEquals(UiText.Res(R.string.shop_error_update), vm.state.value.error)
         r.failure = null; vm.retry(); runCurrent(); assertNull(vm.state.value.error)
     }
     @Test fun `forbidden refresh ends polling`() = runTest {
@@ -58,5 +60,6 @@ class ShopOrdersViewModelTest {
         val vm = ShopOrdersViewModel(r, 1000)
         val job = launch { vm.poll() }; runCurrent(); advanceTimeBy(5000)
         assertTrue(job.isCompleted); assertEquals(1, r.reads)
+        assertEquals(UiText.Res(R.string.shop_error_forbidden), vm.state.value.error)
     }
 }

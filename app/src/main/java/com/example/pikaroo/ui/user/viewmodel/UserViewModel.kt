@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.pikaroo.R
 import com.example.pikaroo.appContainer
+import com.example.pikaroo.common.text.UiText
 import com.example.pikaroo.ui.auth.data.SessionExpiredException
 import com.example.pikaroo.ui.user.data.UserRepository
 import com.example.pikaroo.ui.user.model.UserState
@@ -29,9 +31,9 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
                 state = UserState(profile = repository.me())
             } catch (e: CancellationException) { throw e
             } catch (_: SessionExpiredException) {
-                state = UserState(error = "Inicia sesión para ver tu perfil.")
+                state = UserState(error = UiText.Res(R.string.user_profile_error_session))
             } catch (_: Exception) {
-                state = state.copy(isLoading = false, error = "No se pudo cargar tu perfil. Intenta de nuevo.")
+                state = state.copy(isLoading = false, error = UiText.Res(R.string.user_profile_error_load))
             }
         }
     }

@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import retrofit2.HttpException
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 
 data class TrackingUiState(
     val order: OrderDto? = null,
@@ -26,7 +28,7 @@ data class TrackingUiState(
     val timeline: List<TimelineStep> = emptyList(),
     val driverLocation: DriverLocationDto? = null,
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: UiText? = null
 )
 
 data class PollIntervals(
@@ -72,14 +74,14 @@ class TrackingViewModel(
     } catch (e: HttpException) {
         fail(
             when (e.code()) {
-                403 -> "No tienes acceso a este pedido"
-                404 -> "No se encontró el pedido"
-                else -> "No se pudo actualizar el pedido"
+                403 -> UiText.Res(R.string.order_error_forbidden)
+                404 -> UiText.Res(R.string.order_error_not_found)
+                else -> UiText.Res(R.string.tracking_error_update)
             }
         )
         e.code() !in listOf(403, 404)
     } catch (_: Exception) {
-        fail("Sin conexión. Reintentando…")
+        fail(UiText.Res(R.string.error_offline_retrying))
         true
     }
 
@@ -97,7 +99,7 @@ class TrackingViewModel(
         }
     }
 
-    private fun fail(message: String) {
+    private fun fail(message: UiText) {
         _state.value = _state.value.copy(isLoading = false, error = message)
     }
 

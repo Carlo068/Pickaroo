@@ -1,6 +1,7 @@
 package com.example.pikaroo.ui.products.model
 
 import com.google.gson.annotations.SerializedName
+import com.example.pikaroo.common.text.UiText
 
 data class Product(
     @SerializedName("id") val id: String,
@@ -16,11 +17,14 @@ data class ProductResponse(
     @SerializedName("products") val products: List<Product>
 )
 
+/** Stands for "every category" in the filter; the screen shows it as text from resources. */
+const val ALL_CATEGORIES = "__all__"
+
 data class ProductsState(
     val products: List<Product> = emptyList(),
     val filteredProducts: List<Product> = emptyList(),
-    val categories: List<String> = listOf("Todos"),
-    val selectedCategory: String = "Todos",
+    val categories: List<String> = listOf(ALL_CATEGORIES),
+    val selectedCategory: String = ALL_CATEGORIES,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: UiText? = null
 )
