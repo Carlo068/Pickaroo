@@ -12,6 +12,11 @@ import com.example.pikaroo.ui.auth.model.LoginState
 import com.example.pikaroo.ui.auth.model.LoginUiState
 import com.example.pikaroo.ui.auth.model.RegisterState
 import com.example.pikaroo.PikarooApp
+import com.example.pikaroo.ui.auth.model.RegisterRequest
+import com.example.pikaroo.ui.auth.model.validationError
+import com.example.pikaroo.ui.auth.model.registrationErrorMessage
+import com.example.pikaroo.common.mock.toApiError
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,6 +50,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     fun toggleTab(isLogin: Boolean) {
+        if (_uiState.value.isLoading) return
         isLoginTab = isLogin
         clearError()
     }
@@ -63,20 +69,29 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         loginState = loginState.copy(isPasswordVisible = !loginState.isPasswordVisible)
     }
 
+    fun onRegisterUsernameChange(username: String) {
+        registerState = registerState.copy(username = username)
+        clearError()
+    }
+
     fun onRegisterNameChange(name: String) {
         registerState = registerState.copy(name = name)
+        clearError()
     }
 
     fun onRegisterEmailChange(email: String) {
         registerState = registerState.copy(email = email)
+        clearError()
     }
 
     fun onRegisterPasswordChange(password: String) {
         registerState = registerState.copy(password = password)
+        clearError()
     }
 
     fun onRegisterConfirmPasswordChange(confirmPassword: String) {
         registerState = registerState.copy(confirmPassword = confirmPassword)
+        clearError()
     }
 
     fun toggleRegisterPasswordVisibility() {
@@ -92,6 +107,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
      * 5. Cualquier fallo se traduce a un mensaje para el formulario.
      */
     fun login() {
+        if (_uiState.value.isLoading) return
         val username = loginState.username.trim()
         val password = loginState.password
 
@@ -116,6 +132,32 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update {
                     it.copy(isLoading = false, error = "Sin conexión. Revisa tu internet e intenta de nuevo.")
                 }
+            }
+        }
+    }
+
+    /** El registro inicia sesión únicamente después de que el servicio crea la cuenta. */
+    fun register() {
+        if (_uiState.value.isLoading) return
+        val fields = registerState
+        fields.validationError()?.let { message ->
+            _uiState.update { it.copy(error = message) }
+            return
+        }
+        val request = RegisterRequest(fields.name.trim(), fields.username.trim(), fields.email.trim(), fields.password)
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        viewModelScope.launch {
+            try {
+                // No se reintenta el registro automáticamente: una respuesta perdida podría duplicar la petición.
+                val response = authService.register(request)
+                session.save(response)
+                registerState = RegisterState()
+                _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
+            } catch (e: CancellationException) { throw e
+            } catch (e: HttpException) {
+                _uiState.update { it.copy(isLoading = false, error = registrationErrorMessage(e.toApiError()?.code)) }
+            } catch (_: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "No se pudo conectar. Intenta de nuevo o inicia sesión si ya se creó tu cuenta.") }
             }
         }
     }
