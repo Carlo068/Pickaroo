@@ -45,17 +45,47 @@ fun ShopOrdersContent(
     otherModes: List<RoleMode>,
     onSwitchMode: (RoleMode) -> Unit,
     onLogout: () -> Unit,
-    onAdvance: (OrderDto) -> Unit,
+    onAdvance: (OrderDto, String?) -> Unit,
     onRetry: () -> Unit
 ) {
     var confirmPickup by remember { mutableStateOf<OrderDto?>(null) }
+    LaunchedEffect(confirmPickup?.id, state.orders) {
+        val id = confirmPickup?.id
+        if (id != null && state.orders.none { it.id == id && it.status == OrderStatus.READY }) confirmPickup = null
+    }
     confirmPickup?.let { order ->
+        var code by remember(order.id) { mutableStateOf("") }
+        var submitted by remember(order.id) { mutableStateOf(false) }
+        val busy = state.updatingId != null
         AlertDialog(
-            onDismissRequest = { confirmPickup = null },
+            onDismissRequest = { if (!busy) confirmPickup = null },
             title = { Text("Confirmar recogida") },
-            text = { Text("¿El cliente ya recibió el pedido #${order.number}?") },
-            confirmButton = { TextButton(onClick = { confirmPickup = null; onAdvance(order) }) { Text("Confirmar") } },
-            dismissButton = { TextButton(onClick = { confirmPickup = null }) { Text("Volver") } }
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Ingresa el código que muestra el cliente para el pedido #${order.number}.")
+                    OutlinedTextField(
+                        value = code,
+                        onValueChange = { code = it; submitted = false },
+                        label = { Text("Código de recogida") },
+                        singleLine = true,
+                        enabled = !busy,
+                        isError = submitted && state.pickupError != null,
+                        modifier = Modifier.testTag("pickup_code_input")
+                    )
+                    if (submitted) state.pickupError?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("pickup_code_error"))
+                    }
+                    state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { submitted = true; onAdvance(order, code) },
+                    enabled = code.isNotBlank() && !busy,
+                    modifier = Modifier.testTag("pickup_code_confirm")
+                ) { Text(if (busy) "Verificando…" else "Confirmar") }
+            },
+            dismissButton = { TextButton(onClick = { confirmPickup = null }, enabled = !busy) { Text("Volver") } }
         )
     }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
@@ -88,7 +118,7 @@ fun ShopOrdersContent(
                                 Text("Total: ${formatPrice(order.total)}")
                                 nextShopStatus(order.status, order.fulfilment)?.let { next ->
                                     Button(
-                                        onClick = { if (next == OrderStatus.PICKED_UP) confirmPickup = order else onAdvance(order) },
+                                        onClick = { if (next == OrderStatus.PICKED_UP) confirmPickup = order else onAdvance(order, null) },
                                         enabled = state.updatingId == null,
                                         modifier = Modifier.testTag(ShopTestTags.advance(order.id))
                                     ) {
