@@ -55,6 +55,8 @@ fun LoginView(
     LaunchedEffect(uiState.isLoggedIn) {
         if (uiState.isLoggedIn) onLoginSuccess()
     }
+    // The orange header is drawn behind the status bar.
+    LightStatusBarIcons()
 
     Column(
         modifier = Modifier
@@ -114,6 +116,9 @@ fun LoginView(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
+                // Keeps the footer link above the navigation bar; the keyboard inset (imePadding on
+                // the parent) already covers it, so nothing is added while the keyboard is open.
+                .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
