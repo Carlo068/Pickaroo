@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.pikaroo.ui.theme.PikarooOrange
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
 
 const val CART_BADGE_TAG = "cart_badge"
 
@@ -43,7 +45,7 @@ fun CartIconButton(
         ) {
             Icon(
                 imageVector = Icons.Outlined.ShoppingBag,
-                contentDescription = "Carrito",
+                contentDescription = stringResource(R.string.cart_icon_description),
                 tint = Color.Black,
                 modifier = Modifier.size(iconSize)
             )

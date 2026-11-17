@@ -1,5 +1,6 @@
 package com.example.pikaroo.ui.auth.view
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,11 +13,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.pikaroo.ui.auth.model.RoleMode
 import com.example.pikaroo.ui.navigation.NavTestTags
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
 
-fun RoleMode.switchLabel(): String = when (this) {
-    RoleMode.SHOP -> "Cambiar a modo tienda"
-    RoleMode.DRIVER -> "Cambiar a modo repartidor"
-    RoleMode.CUSTOMER -> "Cambiar a modo cliente"
+@StringRes
+fun RoleMode.switchLabelRes(): Int = when (this) {
+    RoleMode.SHOP -> R.string.mode_switch_to_shop
+    RoleMode.DRIVER -> R.string.mode_switch_to_driver
+    RoleMode.CUSTOMER -> R.string.mode_switch_to_customer
 }
 
 @Composable
@@ -34,7 +38,7 @@ fun ModeSwitchButtons(
                     .testTag(NavTestTags.switchTo(mode)),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(mode.switchLabel())
+                Text(stringResource(mode.switchLabelRes()))
             }
         }
     }

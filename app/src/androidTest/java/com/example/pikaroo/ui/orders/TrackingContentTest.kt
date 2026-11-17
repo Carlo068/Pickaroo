@@ -1,5 +1,7 @@
 package com.example.pikaroo.ui.orders
 
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
@@ -63,7 +65,7 @@ class TrackingContentTest {
     private fun show(
         order: OrderDto,
         events: List<OrderEventDto>,
-        error: String? = null,
+        error: UiText? = null,
         driverLocation: DriverLocationDto? = null,
         onBack: () -> Unit = {}
     ) {
@@ -162,7 +164,7 @@ class TrackingContentTest {
 
     @Test
     fun aTemporaryErrorKeepsTheOrderOnScreen() {
-        show(pickupOrder(READY), events(PLACED, ACCEPTED, PREPARING, READY), error = "Sin conexión. Reintentando…")
+        show(pickupOrder(READY), events(PLACED, ACCEPTED, PREPARING, READY), error = UiText.Res(R.string.error_offline_retrying))
 
         composeRule.onNodeWithTag(TrackingTestTags.ERROR).assertTextContains("Sin conexión", substring = true)
         assertStep(READY, StepState.CURRENT)
@@ -171,7 +173,7 @@ class TrackingContentTest {
     @Test
     fun withoutAnOrderTheErrorIsShownAlone() {
         composeRule.setContent {
-            TrackingContent(TrackingUiState(isLoading = false, error = "No se encontró el pedido"), onBack = {})
+            TrackingContent(TrackingUiState(isLoading = false, error = UiText.Res(R.string.order_error_not_found)), onBack = {})
         }
 
         composeRule.onNodeWithTag(TrackingTestTags.ERROR).assertTextEquals("No se encontró el pedido")

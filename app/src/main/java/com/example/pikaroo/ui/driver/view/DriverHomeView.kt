@@ -67,12 +67,17 @@ import com.example.pikaroo.ui.driver.viewmodel.DriverHomeViewModel
 import com.example.pikaroo.ui.orders.model.MapPoint
 import com.example.pikaroo.ui.orders.model.OrderDto
 import com.example.pikaroo.ui.orders.model.OrderStatus
-import com.example.pikaroo.ui.orders.model.label
+import com.example.pikaroo.ui.orders.model.labelRes
 import com.example.pikaroo.ui.orders.view.OsmMapView
 import com.example.pikaroo.ui.theme.PikarooBackground
 import com.example.pikaroo.ui.theme.PikarooLightOrange
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
+import com.example.pikaroo.common.text.asString
 
 object DriverTestTags {
     const val ONLINE_SWITCH = "driver_online_switch"
@@ -204,7 +209,7 @@ fun DriverHomeContent(
             item { MessageCard(message, onDismissMessage) }
         }
         state.error?.let { error ->
-            item { Text(error, color = PikarooTextGray, fontSize = 13.sp, modifier = Modifier.testTag(DriverTestTags.ERROR)) }
+            item { Text(error.asString(), color = PikarooTextGray, fontSize = 13.sp, modifier = Modifier.testTag(DriverTestTags.ERROR)) }
         }
 
         when {
@@ -214,7 +219,7 @@ fun DriverHomeContent(
 
             !state.isOnline -> item {
                 Text(
-                    "Estás desconectado. Activa «Disponible» para ver pedidos.",
+                    stringResource(R.string.driver_offline_hint),
                     color = PikarooTextGray,
                     modifier = Modifier.testTag(DriverTestTags.OFFLINE)
                 )
@@ -228,7 +233,7 @@ fun DriverHomeContent(
 
             state.available.isEmpty() -> item {
                 Text(
-                    "No hay pedidos disponibles por ahora",
+                    stringResource(R.string.driver_no_orders),
                     color = PikarooTextGray,
                     modifier = Modifier.testTag(DriverTestTags.EMPTY)
                 )
@@ -254,7 +259,7 @@ fun DriverHomeContent(
                 colors = ButtonDefaults.buttonColors(containerColor = PikarooOrange),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Cerrar sesión", color = Color.White)
+                Text(stringResource(R.string.common_logout), color = Color.White)
             }
         }
     }
@@ -269,11 +274,11 @@ private fun Header(
     onSimulateChange: (Boolean) -> Unit
 ) {
     Column {
-        Text("Modo repartidor", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(stringResource(R.string.driver_mode_title), fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         Text(userName, fontSize = 14.sp, color = PikarooTextGray)
         Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Disponible", modifier = Modifier.weight(1f), fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(stringResource(R.string.driver_available), modifier = Modifier.weight(1f), fontSize = 16.sp, fontWeight = FontWeight.Medium)
             Switch(
                 checked = isOnline,
                 onCheckedChange = onOnlineChange,
@@ -283,7 +288,7 @@ private fun Header(
         }
         if (tracking.showSimulateToggle) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Simular ruta (demo)", modifier = Modifier.weight(1f), fontSize = 13.sp, color = PikarooTextGray)
+                Text(stringResource(R.string.driver_simulate_route), modifier = Modifier.weight(1f), fontSize = 13.sp, color = PikarooTextGray)
                 Switch(
                     checked = tracking.simulate,
                     onCheckedChange = onSimulateChange,
@@ -296,16 +301,16 @@ private fun Header(
 }
 
 @Composable
-private fun MessageCard(message: String, onDismiss: () -> Unit) {
+private fun MessageCard(message: UiText, onDismiss: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = PikarooLightOrange)
     ) {
         Row(modifier = Modifier.padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(message, modifier = Modifier.weight(1f).testTag(DriverTestTags.MESSAGE), fontSize = 14.sp)
+            Text(message.asString(), modifier = Modifier.weight(1f).testTag(DriverTestTags.MESSAGE), fontSize = 14.sp)
             TextButton(onClick = onDismiss, modifier = Modifier.testTag(DriverTestTags.MESSAGE_DISMISS)) {
-                Text("Entendido", color = PikarooOrange)
+                Text(stringResource(R.string.driver_message_dismiss), color = PikarooOrange)
             }
         }
     }
@@ -320,17 +325,17 @@ private fun AvailableOrderCard(order: AvailableOrderDto, busy: Boolean, acceptin
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Pedido #${order.number}", modifier = Modifier.weight(1f), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Text("Ganas ${formatPrice(order.deliveryFee)}", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PikarooOrange)
+                Text(stringResource(R.string.order_number, order.number), modifier = Modifier.weight(1f), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.driver_earnings, formatPrice(order.deliveryFee)), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = PikarooOrange)
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Recoger en", fontSize = 12.sp, color = PikarooTextGray)
+            Text(stringResource(R.string.driver_pickup_at), fontSize = 12.sp, color = PikarooTextGray)
             Text("${order.shop.name} · ${order.shop.address}", fontSize = 14.sp)
             Spacer(modifier = Modifier.height(6.dp))
-            Text("Entregar en", fontSize = 12.sp, color = PikarooTextGray)
+            Text(stringResource(R.string.driver_deliver_to), fontSize = 12.sp, color = PikarooTextGray)
             Text(order.delivery.address, fontSize = 14.sp)
             Spacer(modifier = Modifier.height(6.dp))
-            Text("${order.itemsCount} productos", fontSize = 12.sp, color = PikarooTextGray)
+            Text(pluralStringResource(R.plurals.driver_items_count, order.itemsCount, order.itemsCount), fontSize = 12.sp, color = PikarooTextGray)
             Spacer(modifier = Modifier.height(12.dp))
             Button(
                 onClick = onAccept,
@@ -339,7 +344,7 @@ private fun AvailableOrderCard(order: AvailableOrderDto, busy: Boolean, acceptin
                 colors = ButtonDefaults.buttonColors(containerColor = PikarooOrange),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(if (accepting) "Aceptando…" else "Aceptar", color = Color.White)
+                Text(stringResource(if (accepting) R.string.driver_accepting else R.string.driver_accept), color = Color.White)
             }
         }
     }
@@ -383,12 +388,12 @@ private fun CurrentDeliveryCard(
                     SharingIndicator()
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-                Text("Entrega en curso", fontSize = 14.sp, color = PikarooTextGray)
-                Text("Pedido #${order.number}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(order.status.label(order.fulfilment), fontSize = 14.sp, color = PikarooOrange, fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.driver_current_delivery), fontSize = 14.sp, color = PikarooTextGray)
+                Text(stringResource(R.string.order_number, order.number), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(order.status.labelRes(order.fulfilment)), fontSize = 14.sp, color = PikarooOrange, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    if (goingToShop) "Ve a recoger el pedido a" else "Entrega el pedido en",
+                    stringResource(if (goingToShop) R.string.driver_go_to_shop else R.string.driver_deliver_at),
                     fontSize = 12.sp,
                     color = PikarooTextGray
                 )
@@ -408,9 +413,9 @@ private fun CurrentDeliveryCard(
                 ) {
                     Text(
                         text = when {
-                            acting -> "Guardando…"
-                            goingToShop -> "Recogí el pedido"
-                            else -> "Entregado"
+                            acting -> stringResource(R.string.driver_saving)
+                            goingToShop -> stringResource(R.string.driver_picked_up_button)
+                            else -> stringResource(R.string.driver_delivered_button)
                         },
                         color = Color.White
                     )
@@ -428,7 +433,7 @@ private fun SharingIndicator() {
     ) {
         Box(Modifier.size(10.dp).background(Color(0xFF43A047), CircleShape))
         Spacer(modifier = Modifier.width(8.dp))
-        Text("Compartiendo tu ubicación con el cliente", fontSize = 13.sp, color = Color(0xFF2E7D32))
+        Text(stringResource(R.string.driver_sharing_location), fontSize = 13.sp, color = Color(0xFF2E7D32))
     }
 }
 
@@ -436,7 +441,7 @@ private fun SharingIndicator() {
 private fun LocationPermissionPrompt(onRequestPermission: () -> Unit) {
     Column {
         Text(
-            "Activa tu ubicación para que el cliente vea dónde vas",
+            stringResource(R.string.driver_location_prompt),
             fontSize = 14.sp,
             modifier = Modifier.testTag(DriverTestTags.LOCATION_PERMISSION)
         )
@@ -447,7 +452,7 @@ private fun LocationPermissionPrompt(onRequestPermission: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = PikarooOrange),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Permitir ubicación", color = Color.White)
+            Text(stringResource(R.string.driver_allow_location), color = Color.White)
         }
     }
 }

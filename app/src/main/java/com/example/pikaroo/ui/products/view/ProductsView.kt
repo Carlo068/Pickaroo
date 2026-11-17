@@ -25,10 +25,15 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.pikaroo.ui.products.model.Product
+import com.example.pikaroo.ui.products.model.ALL_CATEGORIES
 import com.example.pikaroo.ui.products.viewmodel.ProductsViewModel
 import com.example.pikaroo.ui.theme.PikarooBackground
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
+import androidx.compose.ui.res.pluralStringResource
+import com.example.pikaroo.common.text.asString
 
 @Composable
 fun ProductsView(
@@ -49,13 +54,13 @@ fun ProductsView(
         // Header
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Productos",
+                text = stringResource(R.string.products_title),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
             Text(
-                text = "Encuentra todo lo que necesitas",
+                text = stringResource(R.string.products_subtitle),
                 fontSize = 16.sp,
                 color = PikarooTextGray
             )
@@ -78,7 +83,7 @@ fun ProductsView(
                     shadowElevation = if (isSelected) 4.dp else 1.dp
                 ) {
                     Text(
-                        text = category,
+                        text = if (category == ALL_CATEGORIES) stringResource(R.string.products_category_all) else category,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
                         color = if (isSelected) Color.White else Color.Black,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
@@ -92,7 +97,7 @@ fun ProductsView(
 
         // Product Counter
         Text(
-            text = "${state.filteredProducts.size} productos",
+            text = pluralStringResource(R.plurals.products_count, state.filteredProducts.size, state.filteredProducts.size),
             fontSize = 14.sp,
             color = PikarooTextGray,
             fontWeight = FontWeight.Medium
@@ -107,7 +112,7 @@ fun ProductsView(
             }
         } else if (state.error != null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = "Error: ${state.error}", color = Color.Red)
+                Text(text = stringResource(R.string.products_error, state.error.asString()), color = Color.Red)
             }
         } else {
             LazyVerticalGrid(
@@ -180,7 +185,7 @@ fun ProductCard(product: Product, onAdd: () -> Unit = {}) {
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Añadir ${product.name}",
+                    contentDescription = stringResource(R.string.product_add_description, product.name),
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )

@@ -18,21 +18,18 @@ class OnboardingViewModel(application: Application) :
     private val pages = listOf(
         OnboardingPage(
             imageRes = R.drawable.onboarding_store,
-            title = "Elige Tu\nTienda",
-            description = "Explora nuestras sucursales y selecciona la " +
-                    "tienda más cercana con los productos que buscas."
+            titleRes = R.string.onboarding_page1_title,
+            descriptionRes = R.string.onboarding_page1_description
         ),
         OnboardingPage(
             imageRes = R.drawable.onboarding_cart,
-            title = "Llena Tu\nCarrito",
-            description = "Navega el catálogo, agrega tus favoritos y " +
-                    "revisa tu pedido antes de confirmar la compra."
+            titleRes = R.string.onboarding_page2_title,
+            descriptionRes = R.string.onboarding_page2_description
         ),
         OnboardingPage(
             imageRes = R.drawable.onboarding_pickup,
-            title = "Compra\ny Recoge",
-            description = "Paga en minutos y recoge en tienda o recibe " +
-                    "tu pedido directamente en casa."
+            titleRes = R.string.onboarding_page3_title,
+            descriptionRes = R.string.onboarding_page3_description
         )
     )
 

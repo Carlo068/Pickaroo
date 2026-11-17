@@ -1,5 +1,7 @@
 package com.example.pikaroo.ui.orders.model
 
+import androidx.annotation.StringRes
+import com.example.pikaroo.R
 import com.example.pikaroo.ui.orders.model.OrderStatus.ACCEPTED
 import com.example.pikaroo.ui.orders.model.OrderStatus.CANCELLED
 import com.example.pikaroo.ui.orders.model.OrderStatus.DELIVERED
@@ -14,7 +16,7 @@ enum class StepState { DONE, CURRENT, PENDING, CANCELLED }
 
 data class TimelineStep(
     val status: OrderStatus,
-    val label: String,
+    @StringRes val labelRes: Int,
     val state: StepState,
     val at: String?
 )
@@ -22,23 +24,24 @@ data class TimelineStep(
 private val PICKUP_PATH = listOf(PLACED, ACCEPTED, PREPARING, READY, PICKED_UP)
 private val DELIVERY_PATH = listOf(PLACED, ACCEPTED, PREPARING, READY, DRIVER_ASSIGNED, OUT_FOR_DELIVERY, DELIVERED)
 
-fun OrderStatus.label(fulfilment: Fulfilment): String = when (this) {
-    PLACED -> "Pedido recibido"
-    ACCEPTED -> "Pedido aceptado"
-    PREPARING -> "Preparando tu pedido"
-    READY -> if (fulfilment == Fulfilment.PICKUP) "Listo para recoger" else "Listo, esperando repartidor"
-    PICKED_UP -> "Recogido"
-    DRIVER_ASSIGNED -> "Repartidor asignado"
-    OUT_FOR_DELIVERY -> "En camino"
-    DELIVERED -> "Entregado"
-    CANCELLED -> "Cancelado"
+@StringRes
+fun OrderStatus.labelRes(fulfilment: Fulfilment): Int = when (this) {
+    PLACED -> R.string.order_status_placed
+    ACCEPTED -> R.string.order_status_accepted
+    PREPARING -> R.string.order_status_preparing
+    READY -> if (fulfilment == Fulfilment.PICKUP) R.string.order_status_ready_pickup else R.string.order_status_ready_delivery
+    PICKED_UP -> R.string.order_status_picked_up
+    DRIVER_ASSIGNED -> R.string.order_status_driver_assigned
+    OUT_FOR_DELIVERY -> R.string.order_status_out_for_delivery
+    DELIVERED -> R.string.order_status_delivered
+    CANCELLED -> R.string.order_status_cancelled
 }
 
 /** Pasos de seguimiento del pedido; si se canceló, solo los que alcanzó y el cierre cancelado. */
 fun buildTimeline(order: OrderDto, events: List<OrderEventDto>): List<TimelineStep> {
     val firstEventAt = events.groupBy { it.status }.mapValues { (_, same) -> same.last().at }
     fun step(status: OrderStatus, state: StepState) =
-        TimelineStep(status, status.label(order.fulfilment), state, firstEventAt[status])
+        TimelineStep(status, status.labelRes(order.fulfilment), state, firstEventAt[status])
 
     if (order.status == CANCELLED) {
         val reached = events.map { it.status }.filter { it != CANCELLED }.distinct()

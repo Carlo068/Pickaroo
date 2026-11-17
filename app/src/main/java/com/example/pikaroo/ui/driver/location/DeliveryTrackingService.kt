@@ -22,6 +22,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import com.example.pikaroo.R
 
 /**
  * Servicio en primer plano que comparte la posición del repartidor mientras lleva un pedido, aunque
@@ -96,7 +97,7 @@ class DeliveryTrackingService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, "Entrega en curso", NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CHANNEL_ID, getString(R.string.driver_current_delivery), NotificationManager.IMPORTANCE_LOW)
             )
         }
         val open = PendingIntent.getActivity(
@@ -105,8 +106,8 @@ class DeliveryTrackingService : Service() {
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-            .setContentTitle("Entrega en curso")
-            .setContentText("Compartiendo tu ubicación con el cliente")
+            .setContentTitle(getString(R.string.driver_current_delivery))
+            .setContentText(getString(R.string.driver_sharing_location))
             .setContentIntent(open)
             .setOngoing(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)

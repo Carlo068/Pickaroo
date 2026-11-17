@@ -1,5 +1,7 @@
 package com.example.pikaroo.ui.orders
 
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 import com.example.pikaroo.MainDispatcherRule
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.ui.auth.data.SessionExpiredException
@@ -169,7 +171,7 @@ class TrackingViewModelTest {
         assertEquals(ACCEPTED, viewModel.state.value.order!!.status)
 
         advanceTimeBy(5_000)
-        assertEquals("Sin conexión. Reintentando…", viewModel.state.value.error)
+        assertEquals(UiText.Res(R.string.error_offline_retrying), viewModel.state.value.error)
         assertEquals(ACCEPTED, viewModel.state.value.order!!.status)
 
         advanceTimeBy(5_000)
@@ -197,8 +199,8 @@ class TrackingViewModelTest {
         forbidden.poll()
         missing.poll()
 
-        assertEquals("No tienes acceso a este pedido", forbidden.state.value.error)
-        assertEquals("No se encontró el pedido", missing.state.value.error)
+        assertEquals(UiText.Res(R.string.order_error_forbidden), forbidden.state.value.error)
+        assertEquals(UiText.Res(R.string.order_error_not_found), missing.state.value.error)
         assertEquals(1, forbiddenRepository.getCalls)
         assertEquals(1, missingRepository.getCalls)
         assertNull(forbidden.state.value.order)
@@ -255,7 +257,7 @@ class TrackingViewModelTest {
         }
 
         val viewModel = OrdersViewModel(repository)
-        assertEquals("No se pudieron cargar tus pedidos", viewModel.state.value.error)
+        assertEquals(UiText.Res(R.string.orders_error_load), viewModel.state.value.error)
 
         fail = false
         viewModel.load()

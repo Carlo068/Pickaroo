@@ -1,3 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App -->
     <string name="app_name">Pikaroo</string>
+
+    <!-- Login and registration -->
+    <string name="login_welcome">Welcome back</string>
+    <string name="login_title_register">Create account</string>
+    <string name="login_subtitle">Sign in to keep shopping</string>
+    <string name="login_subtitle_register">Sign up and start shopping</string>
+    <string name="login_full_name">Full name</string>
+    <string name="login_full_name_placeholder">Your name</string>
+    <string name="login_username">Username</string>
+    <string name="register_username">Username</string>
+    <string name="register_email">Email</string>
+    <string name="login_username_placeholder">your_username</string>
+    <string name="login_email_placeholder">email@example.com</string>
+    <string name="login_password">Password</string>
+    <string name="login_confirm_password">Confirm password</string>
+    <string name="login_forgot_password">Forgot your password?</string>
+    <string name="login_submit">Sign in</string>
+    <string name="register_submit">Create account</string>
+    <string name="login_tab_register">Sign up</string>
+    <string name="login_connecting">Connecting… the first time can take a few seconds.</string>
+    <string name="login_footer_no_account">"Don\'t have an account? "</string>
+    <string name="login_footer_has_account">"Already have an account? "</string>
+    <string name="login_footer_register_link">Sign up</string>
+    <string name="login_footer_login_link">Sign in</string>
+    <string name="login_error_empty">Enter your username and password</string>
+    <string name="login_error_server_starting">The server is starting up. Please try again.</string>
+    <string name="login_error_offline">No connection. Check your internet and try again.</string>
+    <string name="login_error_invalid_credentials">Wrong username or password</string>
+    <string name="login_error_bad_request">Check the details you entered</string>
+    <string name="login_error_generic">Couldn\'t sign in (error %1$d)</string>
+    <string name="register_error_required">Fill in all the fields</string>
+    <string name="register_error_username">Your username must be 3 to 64 characters, with no spaces</string>
+    <string name="register_error_email">Enter a valid email address</string>
+    <string name="register_error_password_short">Your password must be at least 6 characters</string>
+    <string name="register_error_password_mismatch">The passwords don\'t match</string>
+    <string name="register_error_username_taken">That username is already taken</string>
+    <string name="register_error_email_taken">That email address is already in use</string>
+    <string name="register_error_name">Enter your name</string>
+    <string name="register_error_generic">Couldn\'t create your account. Please try again.</string>
+    <string name="register_error_offline">Couldn\'t connect. Try again, or sign in if your account was already created.</string>
+
+    <!-- Role modes -->
+    <string name="mode_switch_to_shop">Switch to shop mode</string>
+    <string name="mode_switch_to_driver">Switch to driver mode</string>
+    <string name="mode_switch_to_customer">Switch to customer mode</string>
+    <string name="common_logout">Log out</string>
+
+    <!-- Shop -->
+    <string name="shop_home_title">Shop mode</string>
+    <string name="shop_orders_title">Branch orders</string>
+    <string name="shop_orders_empty">There are no orders at this branch yet</string>
+    <string name="shop_refresh">Refresh list</string>
+    <string name="shop_group_ready">Ready</string>
+    <string name="shop_group_header">%1$s (%2$d)</string>
+    <string name="shop_order_total">Total: %1$s</string>
+    <string name="shop_saving">Saving…</string>
+    <string name="shop_action_accept">Accept order</string>
+    <string name="shop_action_prepare">Start preparing</string>
+    <string name="shop_action_ready">Mark as ready</string>
+    <string name="shop_confirm_pickup">Confirm pickup</string>
+    <string name="shop_confirm_pickup_message">Has the customer received order #%1$s?</string>
+    <string name="shop_confirm">Confirm</string>
+    <string name="shop_error_changed">The order changed. Refresh the list before you continue.</string>
+    <string name="shop_error_update">Couldn\'t update the order. Please try again.</string>
+    <string name="shop_error_forbidden">You don\'t have permission to view this shop\'s orders.</string>
+    <string name="shop_error_load">Couldn\'t load the orders. Please retry.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_page1_title">Choose Your\nShop</string>
+    <string name="onboarding_page1_description">Browse our branches and pick the closest shop with the products you need.</string>
+    <string name="onboarding_page2_title">Fill Your\nCart</string>
+    <string name="onboarding_page2_description">Browse the catalog, add your favorites and review your order before you confirm.</string>
+    <string name="onboarding_page3_title">Buy\nand Collect</string>
+    <string name="onboarding_page3_description">Pay in minutes, then pick up in store or get your order delivered to your door.</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_start">Get started</string>
+    <string name="onboarding_next">Next</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_offers">Offers</string>
+    <string name="nav_order">Order</string>
+    <string name="nav_products">Products</string>
+    <string name="nav_user">Account</string>
+
+    <!-- Home -->
+    <string name="home_title">Home screen</string>
+    <string name="home_search_placeholder">Search products...</string>
+    <string name="home_portfolios">Collections</string>
+    <string name="home_categories">Categories</string>
+    <string name="home_categories_see_all">See all</string>
+    <string name="home_products">Products</string>
+    <string name="home_products_see_all">See all</string>
+    <string name="home_products_empty">No products available</string>
+    <string name="home_products_no_results">No products found</string>
+    <string name="home_products_error">Couldn\'t load the products: %1$s</string>
+    <string name="home_portfolio_weekly_title">Weekly shop</string>
+    <string name="home_portfolio_weekly_description">Ideas to stock your pantry</string>
+    <string name="home_portfolio_fresh_title">Fresh today</string>
+    <string name="home_portfolio_fresh_description">Color and variety for your table</string>
+    <string name="home_portfolio_share_title">To share</string>
+    <string name="home_portfolio_share_description">Ideas for every occasion</string>
+
+    <!-- Offers -->
+    <string name="offers_title">Offers</string>
+
+    <!-- User -->
+    <string name="user_title">User</string>
+
+    <!-- Products -->
+    <string name="products_title">Products</string>
+    <string name="products_subtitle">Find everything you need</string>
+    <string name="products_error">Error: %1$s</string>
+    <string name="products_category_all">All</string>
+    <string name="products_error_unknown">Unknown error</string>
+    <string name="product_add_description">Add %1$s</string>
+    <plurals name="products_count">
+        <item quantity="one">%1$d product</item>
+        <item quantity="other">%1$d products</item>
+    </plurals>
+
+    <!-- User profile -->
+    <string name="user_profile_loading">Loading profile…</string>
+    <string name="user_profile_placeholder">Your profile</string>
+    <string name="user_profile_retry">Retry</string>
+    <string name="user_profile_error_session">Sign in to see your profile.</string>
+    <string name="user_profile_error_load">Couldn\'t load your profile. Please try again.</string>
+    <string name="user_role_customer">Customer</string>
+    <string name="user_role_owner">Owner</string>
+    <string name="user_role_staff">Staff</string>
+    <string name="user_role_driver">Driver</string>
+    <string name="user_search_lists_placeholder">Search lists...</string>
+    <string name="user_orders_title">My orders</string>
+    <string name="user_orders_subtitle">Track the status of your orders</string>
+    <string name="user_edit_profile_title">Edit profile</string>
+    <string name="user_edit_profile_subtitle">Update your information</string>
+    <string name="user_change_password_title">Change password</string>
+    <string name="user_change_password_subtitle">Update your password</string>
+    <string name="user_change_email_title">Change email</string>
+    <string name="user_change_email_subtitle">Change your email address</string>
+    <string name="user_lists_title">My shopping lists</string>
+    <string name="user_lists_subtitle">Manage your saved lists</string>
+    <string name="user_list_weekly_name">Weekly shop</string>
+    <string name="user_list_item_apples">Red Apples</string>
+    <string name="user_list_item_bread">Whole Wheat Bread</string>
+    <string name="user_list_item_milk">Whole Milk</string>
+    <string name="user_list_category_fruit">Fruit</string>
+    <string name="user_list_category_bakery">Bakery</string>
+    <string name="user_list_category_dairy">Dairy</string>
+    <string name="user_list_total">Estimated total</string>
+    <string name="user_list_add_all">Add all to cart</string>
+    <plurals name="user_list_products_count">
+        <item quantity="one">%1$d product</item>
+        <item quantity="other">%1$d products</item>
+    </plurals>
+
+    <!-- Cart -->
+    <string name="common_back">Back</string>
+    <string name="cart_title">My cart</string>
+    <string name="cart_empty_title">Your cart is empty</string>
+    <string name="cart_empty_subtitle">Add products to start your order</string>
+    <string name="cart_remove_description">Remove %1$s</string>
+    <string name="cart_decrease_description">Remove one</string>
+    <string name="cart_increase_description">Add one</string>
+    <string name="cart_subtotal">Subtotal</string>
+    <string name="cart_delivery_fee">Delivery</string>
+    <string name="cart_total">Total</string>
+    <string name="cart_checkout">Continue to payment</string>
+    <string name="cart_icon_description">Cart</string>
+    <plurals name="cart_items_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+
+    <!-- Checkout -->
+    <string name="checkout_review_pickup">Pickup · Centro branch · Collect today</string>
+    <string name="checkout_review_delivery">Delivery · %1$s</string>
+    <string name="checkout_review_message">%1$s\nTotal: %2$s\nPayment due: %3$s</string>
+    <string name="checkout_pay_in_store">in store</string>
+    <string name="checkout_pay_on_delivery">on delivery</string>
+    <string name="checkout_review_title">Review your order</string>
+    <string name="checkout_confirm">Place order</string>
+    <string name="checkout_back_to_summary">Back to summary</string>
+    <string name="checkout_search_placeholder">Search...</string>
+    <string name="checkout_method_title">Delivery method</string>
+    <string name="checkout_method_subtitle">Choose how you want to get your order</string>
+    <string name="checkout_method_select">Select a method</string>
+    <string name="checkout_method_pickup">Pickup</string>
+    <string name="checkout_method_delivery">Delivery</string>
+    <string name="checkout_method_selected">Selected</string>
+    <string name="checkout_method_pickup_hint">Collect at the branch</string>
+    <string name="checkout_method_delivery_hint">Home delivery</string>
+    <string name="checkout_pickup_info">Pickaroo Centro · Sample time slot: within an hour</string>
+    <string name="checkout_pickup_payment">Pay in store · pending</string>
+    <string name="checkout_delivery_payment">Pay on delivery · pending</string>
+    <string name="checkout_address_label">Delivery address</string>
+    <string name="checkout_address_placeholder">Street, number, neighborhood and city</string>
+    <string name="checkout_address_required">Add an address to continue</string>
+    <string name="checkout_address_hint">Include the apartment number if there is one</string>
+    <string name="checkout_summary_title">Order summary</string>
+    <string name="checkout_cart_empty">Your cart is empty</string>
+    <string name="checkout_subtotal_line">Subtotal: %1$s</string>
+    <string name="checkout_delivery_line">Delivery: %1$s</string>
+    <string name="checkout_total_line">Total: %1$s</string>
+    <string name="checkout_saving">Saving order…</string>
+    <string name="checkout_review_button">Review order</string>
+    <string name="checkout_lookup_qr">Look up by QR</string>
+    <string name="checkout_last_order">Last order</string>
+    <string name="checkout_save_error">Couldn\'t save your order. Your cart is still there. Please try again.</string>
+
+    <!-- Common messages -->
+    <string name="error_offline_retry">No connection. Please try again.</string>
+    <string name="error_offline_retrying">No connection. Retrying…</string>
+
+    <!-- Orders and tracking -->
+    <string name="order_error_forbidden">You don\'t have access to this order</string>
+    <string name="order_error_not_found">We couldn\'t find that order</string>
+    <string name="order_number">Order #%1$s</string>
+    <string name="order_fulfilment_pickup">Pick up in store</string>
+    <string name="order_fulfilment_delivery">Home delivery</string>
+    <string name="orders_empty">You don\'t have any orders yet</string>
+    <string name="order_time_slot">Time slot: %1$s</string>
+    <string name="order_status_placed">Order received</string>
+    <string name="order_status_accepted">Order accepted</string>
+    <string name="order_status_preparing">Preparing your order</string>
+    <string name="order_status_ready_pickup">Ready for pickup</string>
+    <string name="order_status_ready_delivery">Ready, waiting for a driver</string>
+    <string name="order_status_picked_up">Picked up</string>
+    <string name="order_status_driver_assigned">Driver assigned</string>
+    <string name="order_status_out_for_delivery">On the way</string>
+    <string name="order_status_delivered">Delivered</string>
+    <string name="order_status_cancelled">Cancelled</string>
+    <string name="orders_error_forbidden">You don\'t have access to your orders</string>
+    <string name="orders_error_load">Couldn\'t load your orders</string>
+    <string name="receipt_error_load">Couldn\'t load the receipt</string>
+    <string name="receipt_error_load_retry">Couldn\'t load the receipt. Please try again.</string>
+    <string name="tracking_error_update">Couldn\'t update the order</string>
+    <string name="lookup_scan_cancelled">The QR code wasn\'t read. You can type or paste the order ID.</string>
+    <string name="lookup_invalid_id">Order not found. Check the ID or the QR code.</string>
+    <string name="lookup_not_found">Order not found</string>
+    <string name="lookup_error">Couldn\'t look up the order. Please try again.</string>
+    <string name="orders_title">My orders</string>
+    <string name="common_return">Back</string>
+    <string name="lookup_title">Look up order</string>
+    <string name="lookup_instructions">Scan the QR code or paste the ID. Orders saved on this device are searched.</string>
+    <string name="lookup_scan">Scan QR code</string>
+    <string name="order_id_label">Order ID</string>
+    <string name="lookup_searching">Searching…</string>
+    <string name="lookup_search">Find order</string>
+    <string name="lookup_scan_prompt">Scan your order\'s QR code</string>
+    <string name="tracking_title_loading">Order</string>
+    <string name="map_shop">Shop</string>
+    <string name="map_destination">Destination</string>
+    <string name="map_driver">Driver</string>
+    <string name="tracking_location_updated">Location updated %1$s</string>
+    <string name="tracking_waiting_driver">Waiting for the driver\'s location…</string>
+    <string name="tracking_pickup_code">Your pickup code</string>
+    <string name="tracking_summary">Summary</string>
+    <string name="receipt_title">Order receipt</string>
+    <string name="receipt_retry">Retry</string>
+    <string name="receipt_copy_id">Copy ID</string>
+    <string name="receipt_date">Date: %1$s</string>
+    <string name="receipt_payment_pending">Payment pending · %1$s</string>
+    <string name="receipt_payment">Payment %1$s</string>
+    <string name="receipt_qr_note">This QR code identifies your order; it doesn\'t confirm a payment.</string>
+    <string name="receipt_pickup_shop">Pickup · %1$s</string>
+    <string name="receipt_slot_tbd">To be confirmed</string>
+    <string name="receipt_pickup_code">Pickup code: %1$s</string>
+    <string name="receipt_products">Products</string>
+    <string name="receipt_track">Track order</string>
+    <string name="receipt_qr_description">Order QR code</string>
+    <string name="receipt_qr_error">Couldn\'t generate the QR code. You can use the order ID instead.</string>
+    <string name="receipt_qr_retry">Generate QR code again</string>
+
+    <!-- Driver -->
+    <string name="driver_delivery_completed">Delivery completed!</string>
+    <string name="driver_error_forbidden_list">You don\'t have permission to view deliveries</string>
+    <string name="driver_error_load">Couldn\'t load the orders</string>
+    <string name="driver_error_taken">Another driver already took this order</string>
+    <string name="driver_error_already_delivering">You already have a delivery in progress</string>
+    <string name="driver_error_order_gone">This order no longer exists</string>
+    <string name="driver_error_invalid_status">This order is no longer at that step</string>
+    <string name="driver_error_not_yours">This delivery belongs to another driver</string>
+    <string name="driver_error_forbidden_accept">You don\'t have permission to accept orders</string>
+    <string name="driver_error_action">Couldn\'t complete the action</string>
+    <string name="driver_mode_title">Driver mode</string>
+    <string name="driver_available">Available</string>
+    <string name="driver_simulate_route">Simulate route (demo)</string>
+    <string name="driver_offline_hint">You\'re offline. Turn on “Available” to see orders.</string>
+    <string name="driver_no_orders">No orders available right now</string>
+    <string name="driver_message_dismiss">Got it</string>
+    <string name="driver_earnings">You earn %1$s</string>
+    <string name="driver_pickup_at">Pick up at</string>
+    <string name="driver_deliver_to">Deliver to</string>
+    <string name="driver_accepting">Accepting…</string>
+    <string name="driver_accept">Accept</string>
+    <string name="driver_current_delivery">Delivery in progress</string>
+    <string name="driver_go_to_shop">Go pick up the order at</string>
+    <string name="driver_deliver_at">Deliver the order to</string>
+    <string name="driver_saving">Saving…</string>
+    <string name="driver_picked_up_button">I picked up the order</string>
+    <string name="driver_delivered_button">Delivered</string>
+    <string name="driver_sharing_location">Sharing your location with the customer</string>
+    <string name="driver_location_prompt">Turn on your location so the customer can see where you are</string>
+    <string name="driver_allow_location">Allow location</string>
+    <plurals name="driver_items_count">
+        <item quantity="one">%1$d product</item>
+        <item quantity="other">%1$d products</item>
+    </plurals>
 </resources>

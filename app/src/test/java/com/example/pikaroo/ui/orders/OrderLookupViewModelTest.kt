@@ -1,5 +1,7 @@
 package com.example.pikaroo.ui.orders
 
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 import com.example.pikaroo.MainDispatcherRule
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.ui.orders.data.OrdersRepository
@@ -46,7 +48,7 @@ class OrderLookupViewModelTest {
         for (error in listOf(MockErrors.notFound(), MockErrors.forbidden())) {
             repository.failure = error
             model.scanned("order_1001") { fail("Must not open a missing or foreign order") }
-            assertEquals("Orden no encontrada", model.state.value.error)
+            assertEquals(UiText.Res(R.string.lookup_not_found), model.state.value.error)
             assertFalse(model.state.value.isLoading)
         }
         assertEquals(0, repository.writes)

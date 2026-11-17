@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 
 data class DriverHomeState(
     val isOnline: Boolean = true,
@@ -27,8 +29,8 @@ data class DriverHomeState(
     val isLoading: Boolean = true,
     val acceptingId: String? = null,
     val acting: Boolean = false,
-    val message: String? = null,
-    val error: String? = null
+    val message: UiText? = null,
+    val error: UiText? = null
 )
 
 class DriverHomeViewModel(
@@ -63,7 +65,7 @@ class DriverHomeViewModel(
             } catch (e: HttpException) {
                 messageFor(e)
             } catch (_: Exception) {
-                "Sin conexión. Intenta de nuevo."
+                UiText.Res(R.string.error_offline_retry)
             }
             _state.update { it.copy(acceptingId = null, message = message) }
             refresh()
@@ -72,9 +74,9 @@ class DriverHomeViewModel(
 
     fun pickUp() = advance(successMessage = null) { repository.pickup(it) }
 
-    fun deliver() = advance(successMessage = "¡Entrega completada!") { repository.deliver(it) }
+    fun deliver() = advance(successMessage = UiText.Res(R.string.driver_delivery_completed)) { repository.deliver(it) }
 
-    private fun advance(successMessage: String?, action: suspend (String) -> Unit) {
+    private fun advance(successMessage: UiText?, action: suspend (String) -> Unit) {
         val order = _state.value.current ?: return
         if (_state.value.acting) return
         _state.update { it.copy(acting = true, message = null) }
@@ -89,7 +91,7 @@ class DriverHomeViewModel(
             } catch (e: HttpException) {
                 messageFor(e)
             } catch (_: Exception) {
-                "Sin conexión. Intenta de nuevo."
+                UiText.Res(R.string.error_offline_retry)
             }
             _state.update { it.copy(acting = false, message = message) }
             refresh()
@@ -112,24 +114,24 @@ class DriverHomeViewModel(
         false
     } catch (e: HttpException) {
         val forbidden = e.code() == 403
-        fail(if (forbidden) "No tienes permiso para ver entregas" else "No se pudieron cargar los pedidos")
+        fail(UiText.Res(if (forbidden) R.string.driver_error_forbidden_list else R.string.driver_error_load))
         !forbidden
     } catch (_: Exception) {
-        fail("Sin conexión. Reintentando…")
+        fail(UiText.Res(R.string.error_offline_retrying))
         true
     }
 
-    private fun fail(message: String) {
+    private fun fail(message: UiText) {
         _state.update { it.copy(isLoading = false, error = message) }
     }
 
-    private fun messageFor(e: HttpException): String = when (e.toApiError()?.code) {
-        "ORDER_NOT_AVAILABLE" -> "Otro repartidor ya tomó este pedido"
-        "ALREADY_DELIVERING" -> "Ya tienes una entrega en curso"
-        "ORDER_NOT_FOUND" -> "Este pedido ya no existe"
-        "INVALID_STATUS" -> "Este pedido ya no está en ese paso"
-        "NOT_YOUR_DELIVERY" -> "Esta entrega pertenece a otro repartidor"
-        else -> if (e.code() == 403) "No tienes permiso para aceptar pedidos" else "No se pudo completar la acción"
+    private fun messageFor(e: HttpException): UiText = when (e.toApiError()?.code) {
+        "ORDER_NOT_AVAILABLE" -> UiText.Res(R.string.driver_error_taken)
+        "ALREADY_DELIVERING" -> UiText.Res(R.string.driver_error_already_delivering)
+        "ORDER_NOT_FOUND" -> UiText.Res(R.string.driver_error_order_gone)
+        "INVALID_STATUS" -> UiText.Res(R.string.driver_error_invalid_status)
+        "NOT_YOUR_DELIVERY" -> UiText.Res(R.string.driver_error_not_yours)
+        else -> UiText.Res(if (e.code() == 403) R.string.driver_error_forbidden_accept else R.string.driver_error_action)
     }
 
     companion object {

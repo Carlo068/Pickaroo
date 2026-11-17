@@ -1,6 +1,7 @@
 package com.example.pikaroo.ui.auth.model
 
 import com.google.gson.annotations.SerializedName
+import com.example.pikaroo.common.text.UiText
 
 /**
  * Datos que viajan hacia y desde la API de autenticación de PickarooAPI
@@ -79,7 +80,7 @@ data class MeResponse(
  */
 data class LoginUiState(
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val error: UiText? = null,
     val isLoggedIn: Boolean = false
 )
 

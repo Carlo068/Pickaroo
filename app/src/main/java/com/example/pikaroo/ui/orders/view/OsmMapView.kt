@@ -24,6 +24,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import java.util.Locale
+import com.example.pikaroo.R
 
 const val OSM_MAP_TAG = "osm_map"
 
@@ -116,9 +117,9 @@ private class MapOverlays(context: Context, private val map: MapView) {
         outlinePaint.color = Color.parseColor("#9E9E9E")
         outlinePaint.strokeWidth = 8f
     }
-    private val shopMarker = marker(context, "Tienda", Color.parseColor("#1E88E5"))
-    private val destinationMarker = marker(context, "Destino", Color.parseColor("#43A047"))
-    private val driverMarker = marker(context, "Repartidor", Color.parseColor("#F15A24"))
+    private val shopMarker = marker(context, context.getString(R.string.map_shop), Color.parseColor("#1E88E5"))
+    private val destinationMarker = marker(context, context.getString(R.string.map_destination), Color.parseColor("#43A047"))
+    private val driverMarker = marker(context, context.getString(R.string.map_driver), Color.parseColor("#F15A24"))
 
     init {
         map.overlays.addAll(listOf(route, shopMarker, destinationMarker, driverMarker))

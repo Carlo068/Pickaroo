@@ -29,6 +29,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.auth.viewmodel.LoginViewModel
 import com.example.pikaroo.ui.theme.*
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.asString
 
 /**
  * Pantalla de inicio de sesión. Solo dibuja: el estado (carga, error, sesión
@@ -94,13 +97,13 @@ fun LoginView(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = if (isLogin) "Bienvenido" else "Crear cuenta",
+                    text = if (isLogin) stringResource(R.string.login_welcome) else stringResource(R.string.login_title_register),
                     color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = if (isLogin) "Inicia sesión para continuar comprando" else "Regístrate y empieza a comprar",
+                    text = if (isLogin) stringResource(R.string.login_subtitle) else stringResource(R.string.login_subtitle_register),
                     color = Color.White.copy(alpha = 0.8f),
                     fontSize = 14.sp
                 )
@@ -128,8 +131,8 @@ fun LoginView(
                 LoginTextField(
                     value = registerState.name,
                     onValueChange = { viewModel.onRegisterNameChange(it) },
-                    label = "Nombre completo",
-                    placeholder = "Tu nombre",
+                    label = stringResource(R.string.login_full_name),
+                    placeholder = stringResource(R.string.login_full_name_placeholder),
                     icon = Icons.Default.Person,
                     enabled = !uiState.isLoading,
                     modifier = Modifier.testTag("register_name")
@@ -138,8 +141,8 @@ fun LoginView(
                 LoginTextField(
                     value = registerState.username,
                     onValueChange = viewModel::onRegisterUsernameChange,
-                    label = "Nombre de usuario",
-                    placeholder = "tu_usuario",
+                    label = stringResource(R.string.register_username),
+                    placeholder = stringResource(R.string.login_username_placeholder),
                     icon = Icons.Default.Person,
                     enabled = !uiState.isLoading,
                     modifier = Modifier.testTag("register_username")
@@ -150,8 +153,8 @@ fun LoginView(
             LoginTextField(
                 value = if (isLogin) loginState.username else registerState.email,
                 onValueChange = { if (isLogin) viewModel.onLoginUsernameChange(it) else viewModel.onRegisterEmailChange(it) },
-                label = if (isLogin) "Usuario" else "Correo electrónico",
-                placeholder = if (isLogin) "tu_usuario" else "correo@ejemplo.com",
+                label = if (isLogin) stringResource(R.string.login_username) else stringResource(R.string.register_email),
+                placeholder = if (isLogin) stringResource(R.string.login_username_placeholder) else stringResource(R.string.login_email_placeholder),
                 icon = if (isLogin) Icons.Default.Person else Icons.Default.Email,
                 keyboardType = if (isLogin) KeyboardType.Text else KeyboardType.Email,
                 modifier = Modifier.testTag(if (isLogin) "login_username" else "register_email"),
@@ -163,7 +166,7 @@ fun LoginView(
             LoginTextField(
                 value = if (isLogin) loginState.password else registerState.password,
                 onValueChange = { if (isLogin) viewModel.onLoginPasswordChange(it) else viewModel.onRegisterPasswordChange(it) },
-                label = "Contraseña",
+                label = stringResource(R.string.login_password),
                 placeholder = ".........",
                 icon = Icons.Default.Lock,
                 isPassword = true,
@@ -178,7 +181,7 @@ fun LoginView(
                 LoginTextField(
                     value = registerState.confirmPassword,
                     onValueChange = { viewModel.onRegisterConfirmPasswordChange(it) },
-                    label = "Confirmar contraseña",
+                    label = stringResource(R.string.login_confirm_password),
                     placeholder = ".........",
                     icon = Icons.Default.Lock,
                     isPassword = true,
@@ -191,7 +194,7 @@ fun LoginView(
 
             if (isLogin) {
                 Text(
-                    text = "¿Olvidaste tu contraseña?",
+                    text = stringResource(R.string.login_forgot_password),
                     color = PikarooOrange,
                     fontSize = 14.sp,
                     modifier = Modifier
@@ -204,7 +207,7 @@ fun LoginView(
             if (uiState.error != null) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = uiState.error!!,
+                    text = uiState.error!!.asString(),
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 14.sp,
                     modifier = Modifier.fillMaxWidth().testTag("auth_error")
@@ -233,7 +236,7 @@ fun LoginView(
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = if (isLogin) "Iniciar Sesión" else "Crear Cuenta",
+                            text = if (isLogin) stringResource(R.string.login_submit) else stringResource(R.string.register_submit),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -251,7 +254,7 @@ fun LoginView(
             if (uiState.isLoading) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Conectando… la primera vez puede tardar unos segundos.",
+                    text = stringResource(R.string.login_connecting),
                     color = PikarooTextGray,
                     fontSize = 12.sp
                 )
@@ -262,12 +265,12 @@ fun LoginView(
             // Footer Link
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = if (isLogin) "¿No tienes cuenta? " else "¿Ya tienes cuenta? ",
+                    text = if (isLogin) stringResource(R.string.login_footer_no_account) else stringResource(R.string.login_footer_has_account),
                     color = PikarooTextGray,
                     fontSize = 14.sp
                 )
                 Text(
-                    text = if (isLogin) "Regístrate" else "Inicia sesión",
+                    text = if (isLogin) stringResource(R.string.login_footer_register_link) else stringResource(R.string.login_footer_login_link),
                     color = PikarooOrange,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -293,13 +296,13 @@ fun TabSelector(isLogin: Boolean, onTabSelected: (Boolean) -> Unit) {
                 .fillMaxSize()
         ) {
             TabItem(
-                text = "Iniciar Sesión",
+                text = stringResource(R.string.login_submit),
                 isSelected = isLogin,
                 onClick = { onTabSelected(true) },
                 modifier = Modifier.weight(1f)
             )
             TabItem(
-                text = "Registrarse",
+                text = stringResource(R.string.login_tab_register),
                 isSelected = !isLogin,
                 onClick = { onTabSelected(false) },
                 modifier = Modifier.weight(1f)

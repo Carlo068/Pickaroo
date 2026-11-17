@@ -38,6 +38,9 @@ import com.example.pikaroo.ui.theme.PikarooBackground
 import com.example.pikaroo.ui.theme.PikarooLightOrange
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
+import androidx.compose.ui.res.pluralStringResource
 
 object CartTestTags {
     const val EMPTY = "cart_empty"
@@ -89,10 +92,10 @@ fun CartContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
             }
             Text(
-                text = "Mi carrito",
+                text = stringResource(R.string.cart_title),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
@@ -100,7 +103,7 @@ fun CartContent(
             )
             if (!state.isEmpty) {
                 Text(
-                    text = "${state.itemCount} artículos",
+                    text = pluralStringResource(R.plurals.cart_items_count, state.itemCount, state.itemCount),
                     fontSize = 14.sp,
                     color = PikarooTextGray,
                     modifier = Modifier.padding(end = 16.dp)
@@ -155,14 +158,14 @@ private fun EmptyCart(modifier: Modifier = Modifier) {
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "Tu carrito está vacío",
+            text = stringResource(R.string.cart_empty_title),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "Agrega productos para empezar tu pedido",
+            text = stringResource(R.string.cart_empty_subtitle),
             fontSize = 14.sp,
             color = PikarooTextGray
         )
@@ -224,7 +227,7 @@ private fun CartItemRow(
                 ) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Eliminar ${item.name}",
+                        contentDescription = stringResource(R.string.cart_remove_description, item.name),
                         tint = Color(0xFFE57373)
                     )
                 }
@@ -256,7 +259,7 @@ private fun QuantityStepper(
             background = Color.Transparent,
             modifier = Modifier.testTag(CartTestTags.decrement(item.productId))
         ) {
-            Icon(Icons.Default.Remove, contentDescription = "Quitar uno", modifier = Modifier.size(16.dp))
+            Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.cart_decrease_description), modifier = Modifier.size(16.dp))
         }
         Text(
             text = item.quantity.toString(),
@@ -273,7 +276,7 @@ private fun QuantityStepper(
         ) {
             Icon(
                 Icons.Default.Add,
-                contentDescription = "Agregar uno",
+                contentDescription = stringResource(R.string.cart_increase_description),
                 tint = Color.White,
                 modifier = Modifier.size(16.dp)
             )
@@ -308,11 +311,11 @@ private fun CartSummary(state: CartUiState, onCheckout: () -> Unit) {
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            SummaryRow("Subtotal", formatPrice(state.subtotal), CartTestTags.SUBTOTAL)
+            SummaryRow(stringResource(R.string.cart_subtotal), formatPrice(state.subtotal), CartTestTags.SUBTOTAL)
             Spacer(modifier = Modifier.height(8.dp))
-            SummaryRow("Envío", formatPrice(state.deliveryFee), CartTestTags.DELIVERY_FEE)
+            SummaryRow(stringResource(R.string.cart_delivery_fee), formatPrice(state.deliveryFee), CartTestTags.DELIVERY_FEE)
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color(0xFFF0F0F0))
-            SummaryRow("Total", formatPrice(state.total), CartTestTags.TOTAL, emphasized = true)
+            SummaryRow(stringResource(R.string.cart_total), formatPrice(state.total), CartTestTags.TOTAL, emphasized = true)
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = onCheckout,
@@ -324,7 +327,7 @@ private fun CartSummary(state: CartUiState, onCheckout: () -> Unit) {
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
-                    text = "Continuar al pago",
+                    text = stringResource(R.string.cart_checkout),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White

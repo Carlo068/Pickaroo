@@ -24,12 +24,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.cart.model.formatPrice
 import com.example.pikaroo.ui.orders.model.Fulfilment
-import com.example.pikaroo.ui.orders.model.label
+import com.example.pikaroo.ui.orders.model.labelRes
 import com.example.pikaroo.ui.orders.qr.encodeOrderQr
 import com.example.pikaroo.ui.orders.viewmodel.ReceiptUiState
 import com.example.pikaroo.ui.orders.viewmodel.ReceiptViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.asString
 
 @Composable
 fun ReceiptView(orderId: String?, onBack: () -> Unit, onTracking: (String) -> Unit) {
@@ -50,51 +53,51 @@ fun ReceiptContent(
         contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver") }
-                Text("Comprobante de pedido", style = MaterialTheme.typography.titleLarge)
+                IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.common_return)) }
+                Text(stringResource(R.string.receipt_title), style = MaterialTheme.typography.titleLarge)
             }
         }
         when {
             state.isLoading -> item { CircularProgressIndicator() }
             state.order == null -> item {
-                Text(state.error ?: "No se encontró el pedido", Modifier.testTag("receipt_error"))
-                TextButton(onClick = onRetry) { Text("Reintentar") }
+                Text(state.error?.asString() ?: stringResource(R.string.order_error_not_found), Modifier.testTag("receipt_error"))
+                TextButton(onClick = onRetry) { Text(stringResource(R.string.receipt_retry)) }
             }
             else -> {
                 val order = state.order
                 item {
-                    Text("ID de la orden", style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.order_id_label), style = MaterialTheme.typography.labelLarge)
                     SelectionContainer { Text(order.id, Modifier.testTag("receipt_id")) }
-                    TextButton(onClick = { clipboard.setText(AnnotatedString(order.id)) }) { Text("Copiar ID") }
-                    Text("Fecha: ${formatTime(order.createdAt) ?: order.createdAt}")
-                    Text(order.status.label(order.fulfilment))
+                    TextButton(onClick = { clipboard.setText(AnnotatedString(order.id)) }) { Text(stringResource(R.string.receipt_copy_id)) }
+                    Text(stringResource(R.string.receipt_date, formatTime(order.createdAt) ?: order.createdAt))
+                    Text(stringResource(order.status.labelRes(order.fulfilment)))
                 }
                 item { OrderQrImage(order.id) }
                 item {
-                    val payment = if (order.fulfilment == Fulfilment.PICKUP) "en tienda" else "contra entrega"
-                    Text(if (order.paymentStatus == "PENDING") "Pago pendiente · $payment" else "Pago $payment",
+                    val payment = stringResource(if (order.fulfilment == Fulfilment.PICKUP) R.string.checkout_pay_in_store else R.string.checkout_pay_on_delivery)
+                    Text(if (order.paymentStatus == "PENDING") stringResource(R.string.receipt_payment_pending, payment) else stringResource(R.string.receipt_payment, payment),
                         fontWeight = FontWeight.SemiBold)
-                    Text("Este QR identifica tu pedido; no confirma un pago.")
+                    Text(stringResource(R.string.receipt_qr_note))
                     if (order.fulfilment == Fulfilment.PICKUP) {
-                        Text("Pickup · ${order.shop?.name ?: "Recoger en tienda"}")
-                        Text("Horario: ${formatTime(order.pickup?.slotStart) ?: "Por confirmar"}")
-                        order.pickup?.code?.let { Text("Clave de recogida: $it") }
+                        Text(stringResource(R.string.receipt_pickup_shop, order.shop?.name ?: stringResource(R.string.order_fulfilment_pickup)))
+                        Text(stringResource(R.string.order_time_slot, formatTime(order.pickup?.slotStart) ?: stringResource(R.string.receipt_slot_tbd)))
+                        order.pickup?.code?.let { Text(stringResource(R.string.receipt_pickup_code, it)) }
                     } else {
-                        Text("Domicilio")
+                        Text(stringResource(R.string.checkout_method_delivery))
                         Text(order.delivery?.address.orEmpty())
                     }
                 }
-                item { HorizontalDivider(); Text("Productos", fontWeight = FontWeight.Bold) }
+                item { HorizontalDivider(); Text(stringResource(R.string.receipt_products), fontWeight = FontWeight.Bold) }
                 items(order.items) { line ->
                     Text("${line.quantity} × ${line.name} · ${formatPrice(line.lineTotal)}")
                 }
                 item {
                     HorizontalDivider()
-                    Text("Subtotal: ${formatPrice(order.subtotal)}")
-                    Text("Envío: ${formatPrice(order.deliveryFee)}")
-                    Text("Total: ${formatPrice(order.total)}", Modifier.testTag("receipt_total"),
+                    Text(stringResource(R.string.checkout_subtotal_line, formatPrice(order.subtotal)))
+                    Text(stringResource(R.string.checkout_delivery_line, formatPrice(order.deliveryFee)))
+                    Text(stringResource(R.string.checkout_total_line, formatPrice(order.total)), Modifier.testTag("receipt_total"),
                         style = MaterialTheme.typography.headlineSmall)
-                    TextButton(onClick = { onTracking(order.id) }) { Text("Ver seguimiento") }
+                    TextButton(onClick = { onTracking(order.id) }) { Text(stringResource(R.string.receipt_track)) }
                 }
             }
         }
@@ -118,11 +121,11 @@ private fun OrderQrImage(orderId: String) {
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         when {
             result == null -> CircularProgressIndicator()
-            result!!.isSuccess -> Image(result!!.getOrThrow().asImageBitmap(), "QR de la orden",
+            result!!.isSuccess -> Image(result!!.getOrThrow().asImageBitmap(), stringResource(R.string.receipt_qr_description),
                 Modifier.size(240.dp).background(Color.White).testTag("order_qr"), filterQuality = FilterQuality.None)
             else -> Column {
-                Text("No se pudo generar el QR. Puedes usar el ID de la orden.")
-                TextButton(onClick = { attempt++ }) { Text("Generar QR de nuevo") }
+                Text(stringResource(R.string.receipt_qr_error))
+                TextButton(onClick = { attempt++ }) { Text(stringResource(R.string.receipt_qr_retry)) }
             }
         }
     }

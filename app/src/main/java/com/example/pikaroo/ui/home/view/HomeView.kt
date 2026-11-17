@@ -1,6 +1,8 @@
 package com.example.pikaroo.ui.home.view
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import com.example.pikaroo.ui.products.model.ALL_CATEGORIES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -36,6 +38,9 @@ import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
 import java.text.Normalizer
 import java.util.Locale
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.asString
 
 @Composable
 fun HomeView(
@@ -79,7 +84,7 @@ fun HomeView(
                 modifier = Modifier.weight(1f),
                 placeholder = {
                     Text(
-                        text = "Buscar productos...",
+                        text = stringResource(R.string.home_search_placeholder),
                         maxLines = 1
                     )
                 },
@@ -128,7 +133,7 @@ fun HomeView(
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
-                    text = "Portafolios",
+                    text = stringResource(R.string.home_portfolios),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.Black
@@ -149,9 +154,9 @@ fun HomeView(
 
             item(span = { GridItemSpan(maxLineSpan) }) {
                 HomeSectionHeader(
-                    title = "Categorías",
-                    action = "Ver todas",
-                    onClick = { onOpenProducts("Todos") }
+                    title = stringResource(R.string.home_categories),
+                    action = stringResource(R.string.home_categories_see_all),
+                    onClick = { onOpenProducts(ALL_CATEGORIES) }
                 )
             }
 
@@ -177,9 +182,9 @@ fun HomeView(
 
             item(span = { GridItemSpan(maxLineSpan) }) {
                 HomeSectionHeader(
-                    title = "Productos",
-                    action = "Ver todos",
-                    onClick = { onOpenProducts("Todos") }
+                    title = stringResource(R.string.home_products),
+                    action = stringResource(R.string.home_products_see_all),
+                    onClick = { onOpenProducts(ALL_CATEGORIES) }
                 )
             }
 
@@ -202,7 +207,7 @@ fun HomeView(
                 state.error != null -> {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
-                            text = "No se pudieron cargar los productos: ${state.error}",
+                            text = stringResource(R.string.home_products_error, state.error.asString()),
                             modifier = Modifier.padding(vertical = 16.dp),
                             color = MaterialTheme.colorScheme.error
                         )
@@ -213,9 +218,9 @@ fun HomeView(
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
                             text = if (query.isEmpty()) {
-                                "No hay productos disponibles"
+                                stringResource(R.string.home_products_empty)
                             } else {
-                                "No se encontraron productos"
+                                stringResource(R.string.home_products_no_results)
                             },
                             modifier = Modifier.padding(vertical = 24.dp),
                             color = PikarooTextGray
@@ -335,8 +340,8 @@ private fun inicioCategoryEmoji(category: String): String {
 
 // Contenido de ejemplo: reemplaza estos textos por tus portafolios.
 private data class HomePortfolio(
-    val title: String,
-    val description: String,
+    @StringRes val title: Int,
+    @StringRes val description: Int,
     val emoji: String,
     val startColor: Color,
     val endColor: Color
@@ -344,22 +349,22 @@ private data class HomePortfolio(
 
 private val inicioPortafolios = listOf(
     HomePortfolio(
-        title = "Compra semanal",
-        description = "Ideas para llenar tu despensa",
+        title = R.string.home_portfolio_weekly_title,
+        description = R.string.home_portfolio_weekly_description,
         emoji = "🛒",
         startColor = Color(0xFFFF6200),
         endColor = Color(0xFFFF9800)
     ),
     HomePortfolio(
-        title = "Frescos del día",
-        description = "Color y variedad para tu mesa",
+        title = R.string.home_portfolio_fresh_title,
+        description = R.string.home_portfolio_fresh_description,
         emoji = "🥑",
         startColor = Color(0xFF159957),
         endColor = Color(0xFF41BB79)
     ),
     HomePortfolio(
-        title = "Para compartir",
-        description = "Ideas para cada ocasión",
+        title = R.string.home_portfolio_share_title,
+        description = R.string.home_portfolio_share_description,
         emoji = "🥐",
         startColor = Color(0xFF7953C3),
         endColor = Color(0xFFA47BE0)
@@ -392,7 +397,7 @@ private fun HomePortfolioCard(portfolio: HomePortfolio) {
             Spacer(modifier = Modifier.height(18.dp))
 
             Text(
-                text = portfolio.title,
+                text = stringResource(portfolio.title),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 23.sp
@@ -401,7 +406,7 @@ private fun HomePortfolioCard(portfolio: HomePortfolio) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = portfolio.description,
+                text = stringResource(portfolio.description),
                 color = Color.White,
                 fontSize = 15.sp
             )
@@ -478,7 +483,7 @@ private fun HomeProductCard(product: Product, onAdd: () -> Unit) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Añadir ${product.name}",
+                            contentDescription = stringResource(R.string.product_add_description, product.name),
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )

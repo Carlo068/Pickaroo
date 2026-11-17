@@ -11,8 +11,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.pikaroo.appContainer
 import com.example.pikaroo.ui.products.data.ProductsRepository
+import com.example.pikaroo.ui.products.model.ALL_CATEGORIES
 import com.example.pikaroo.ui.products.model.ProductsState
 import kotlinx.coroutines.launch
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 
 class ProductsViewModel(private val repository: ProductsRepository) : ViewModel() {
     var state by mutableStateOf(ProductsState())
@@ -31,7 +34,7 @@ class ProductsViewModel(private val repository: ProductsRepository) : ViewModel(
                 
                 Log.d("ProductsViewModel", "Productos recibidos: ${products.size}")
                 
-                val categories = listOf("Todos") + products.map { it.category }.distinct().sorted()
+                val categories = listOf(ALL_CATEGORIES) + products.map { it.category }.distinct().sorted()
                 
                 state = state.copy(
                     products = products,
@@ -44,14 +47,14 @@ class ProductsViewModel(private val repository: ProductsRepository) : ViewModel(
                 Log.e("ProductsViewModel", "Error cargando productos", e)
                 state = state.copy(
                     isLoading = false,
-                    error = e.message ?: "Error desconocido"
+                    error = e.message?.let { UiText.Raw(it) } ?: UiText.Res(R.string.products_error_unknown)
                 )
             }
         }
     }
 
     fun selectCategory(category: String) {
-        val filtered = if (category == "Todos") {
+        val filtered = if (category == ALL_CATEGORIES) {
             state.products
         } else {
             state.products.filter { it.category == category }

@@ -14,10 +14,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.UiText
 
 data class OrderLookupUiState(
     val input: String = "", val isLoading: Boolean = false,
-    val error: String? = null, val notice: String? = null
+    val error: UiText? = null, val notice: UiText? = null
 )
 
 class OrderLookupViewModel(private val repository: OrdersRepository) : ViewModel() {
@@ -29,7 +31,7 @@ class OrderLookupViewModel(private val repository: OrdersRepository) : ViewModel
     }
 
     fun scanCancelled() {
-        _state.value = _state.value.copy(notice = "No se leyó el QR. Puedes escribir o pegar el ID del pedido.")
+        _state.value = _state.value.copy(notice = UiText.Res(R.string.lookup_scan_cancelled))
     }
 
     fun scanned(raw: String, onFound: (OrderDto) -> Unit) {
@@ -41,7 +43,7 @@ class OrderLookupViewModel(private val repository: OrdersRepository) : ViewModel
         if (_state.value.isLoading) return
         val id = parseOrderQr(_state.value.input)
         if (id == null) {
-            _state.value = _state.value.copy(error = "Orden no encontrada. Revisa el ID o el QR.", notice = null)
+            _state.value = _state.value.copy(error = UiText.Res(R.string.lookup_invalid_id), notice = null)
             return
         }
         _state.value = OrderLookupUiState(input = id, isLoading = true)
@@ -52,10 +54,10 @@ class OrderLookupViewModel(private val repository: OrdersRepository) : ViewModel
                 throw e
             } catch (e: HttpException) {
                 _state.value = _state.value.copy(isLoading = false, error = if (e.code() in listOf(403, 404))
-                    "Orden no encontrada" else "No se pudo consultar el pedido. Intenta de nuevo.")
+                    UiText.Res(R.string.lookup_not_found) else UiText.Res(R.string.lookup_error))
                 return@launch
             } catch (_: Exception) {
-                _state.value = _state.value.copy(isLoading = false, error = "No se pudo consultar el pedido. Intenta de nuevo.")
+                _state.value = _state.value.copy(isLoading = false, error = UiText.Res(R.string.lookup_error))
                 return@launch
             }
             _state.value = _state.value.copy(isLoading = false)

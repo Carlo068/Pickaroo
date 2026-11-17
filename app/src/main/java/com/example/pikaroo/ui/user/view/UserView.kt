@@ -33,6 +33,11 @@ import com.example.pikaroo.ui.user.model.UserState
 import com.example.pikaroo.ui.auth.model.MeResponse
 import com.example.pikaroo.ui.auth.model.UserDto
 import com.example.pikaroo.ui.auth.model.RoleAssignment
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
+import androidx.compose.ui.res.pluralStringResource
+import androidx.annotation.StringRes
+import com.example.pikaroo.common.text.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +88,7 @@ fun UserContent(
                     modifier = Modifier
                         .weight(1f)
                         .height(56.dp),
-                    placeholder = { Text("Buscar en listas...") },
+                    placeholder = { Text(stringResource(R.string.user_search_lists_placeholder)) },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                     shape = RoundedCornerShape(28.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -149,28 +154,22 @@ fun UserContent(
                         Text(profile.user.email, color = Color.Gray, fontSize = 14.sp, modifier = Modifier.testTag("profile_email"))
                         Text(
                             profile.roles.map { assignment ->
-                                when (assignment.role) {
-                                    "customer" -> "Cliente"
-                                    "owner" -> "Dueño"
-                                    "staff" -> "Personal"
-                                    "driver" -> "Repartidor"
-                                    else -> assignment.role
-                                }
+                                roleLabelRes(assignment.role)?.let { stringResource(it) } ?: assignment.role
                             }.distinct().joinToString(" · "),
                             color = Color.Gray,
                             fontSize = 12.sp,
                             modifier = Modifier.testTag("profile_roles")
                         )
                     } else {
-                        Text(if (state.isLoading) "Cargando perfil…" else "Tu perfil", fontSize = 20.sp)
+                        Text(stringResource(if (state.isLoading) R.string.user_profile_loading else R.string.user_profile_placeholder), fontSize = 20.sp)
                     }
                 }
             }
             if (state.isLoading) LinearProgressIndicator(Modifier.fillMaxWidth().testTag("profile_loading"))
             state.error?.let {
-                Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("profile_error"))
+                Text(it.asString(), color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("profile_error"))
                 TextButton(onClick = onRetry, enabled = !state.isLoading, modifier = Modifier.testTag("profile_retry")) {
-                    Text("Reintentar")
+                    Text(stringResource(R.string.user_profile_retry))
                 }
             }
 
@@ -180,8 +179,8 @@ fun UserContent(
             ProfileActionCard(
                 icon = Icons.Default.Receipt,
                 iconTint = Color(0xFFF15A24),
-                title = "Mis pedidos",
-                subtitle = "Sigue el estado de tus pedidos",
+                title = stringResource(R.string.user_orders_title),
+                subtitle = stringResource(R.string.user_orders_subtitle),
                 onClick = onOpenOrders,
                 modifier = Modifier.testTag("user_orders")
             )
@@ -189,22 +188,22 @@ fun UserContent(
             ProfileActionCard(
                 icon = Icons.Default.Person,
                 iconTint = Color(0xFFF15A24),
-                title = "Editar Perfil",
-                subtitle = "Actualiza tu información"
+                title = stringResource(R.string.user_edit_profile_title),
+                subtitle = stringResource(R.string.user_edit_profile_subtitle)
             )
             Spacer(modifier = Modifier.height(8.dp))
             ProfileActionCard(
                 icon = Icons.Default.Lock,
                 iconTint = Color(0xFFF15A24),
-                title = "Cambiar Contraseña",
-                subtitle = "Actualiza tu contraseña"
+                title = stringResource(R.string.user_change_password_title),
+                subtitle = stringResource(R.string.user_change_password_subtitle)
             )
             Spacer(modifier = Modifier.height(8.dp))
             ProfileActionCard(
                 icon = Icons.Default.Email,
                 iconTint = Color(0xFFF15A24),
-                title = "Cambiar Email",
-                subtitle = "Modifica tu correo electrónico"
+                title = stringResource(R.string.user_change_email_title),
+                subtitle = stringResource(R.string.user_change_email_subtitle)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -218,13 +217,13 @@ fun UserContent(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Mis Listas de Compra",
+                    text = stringResource(R.string.user_lists_title),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
             Text(
-                text = "Gestiona tus listas guardadas",
+                text = stringResource(R.string.user_lists_subtitle),
                 color = Color.Gray,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(start = 32.dp)
@@ -247,12 +246,12 @@ fun UserContent(
                     ) {
                         Column {
                             Text(
-                                text = "Compra Semanal",
+                                text = stringResource(R.string.user_list_weekly_name),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "3 productos",
+                                text = pluralStringResource(R.plurals.user_list_products_count, 3, 3),
                                 color = Color.Gray,
                                 fontSize = 12.sp
                             )
@@ -266,9 +265,9 @@ fun UserContent(
                     HorizontalDivider()
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    ShoppingListItem("Manzanas Rojas", "Frutas", "$2.99")
-                    ShoppingListItem("Pan Integral", "Panadería", "$3.50")
-                    ShoppingListItem("Leche Entera", "Lácteos", "$1.99")
+                    ShoppingListItem(stringResource(R.string.user_list_item_apples), stringResource(R.string.user_list_category_fruit), "$2.99")
+                    ShoppingListItem(stringResource(R.string.user_list_item_bread), stringResource(R.string.user_list_category_bakery), "$3.50")
+                    ShoppingListItem(stringResource(R.string.user_list_item_milk), stringResource(R.string.user_list_category_dairy), "$1.99")
 
                     Spacer(modifier = Modifier.height(16.dp))
                     HorizontalDivider()
@@ -278,7 +277,7 @@ fun UserContent(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "Total estimado", fontWeight = FontWeight.Medium)
+                        Text(text = stringResource(R.string.user_list_total), fontWeight = FontWeight.Medium)
                         Text(text = "$8.48", fontWeight = FontWeight.Bold)
                     }
 
@@ -293,7 +292,7 @@ fun UserContent(
                     ) {
                         Icon(Icons.Default.ShoppingCart, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Agregar Todo al Carrito")
+                        Text(text = stringResource(R.string.user_list_add_all))
                     }
                 }
             }
@@ -314,12 +313,22 @@ fun UserContent(
             ) {
                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Cerrar sesión", fontWeight = FontWeight.Medium)
+                Text(text = stringResource(R.string.common_logout), fontWeight = FontWeight.Medium)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
+}
+
+/** The role names shown under the profile; null for a role the app does not know (shown as sent). */
+@StringRes
+private fun roleLabelRes(role: String): Int? = when (role) {
+    "customer" -> R.string.user_role_customer
+    "owner" -> R.string.user_role_owner
+    "staff" -> R.string.user_role_staff
+    "driver" -> R.string.user_role_driver
+    else -> null
 }
 
 @Composable

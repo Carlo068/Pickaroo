@@ -35,12 +35,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.cart.model.formatPrice
 import com.example.pikaroo.ui.orders.model.Fulfilment
 import com.example.pikaroo.ui.orders.model.OrderDto
-import com.example.pikaroo.ui.orders.model.label
+import com.example.pikaroo.ui.orders.model.labelRes
 import com.example.pikaroo.ui.orders.viewmodel.OrdersUiState
 import com.example.pikaroo.ui.orders.viewmodel.OrdersViewModel
 import com.example.pikaroo.ui.theme.PikarooBackground
 import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTextGray
+import androidx.compose.ui.res.stringResource
+import com.example.pikaroo.R
+import com.example.pikaroo.common.text.asString
 
 object OrdersTestTags {
     const val EMPTY = "orders_empty"
@@ -70,9 +73,9 @@ fun OrdersContent(state: OrdersUiState, onBack: () -> Unit, onOpenOrder: (String
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Regresar")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
             }
-            Text("Mis pedidos", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+            Text(stringResource(R.string.orders_title), fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         }
 
         when {
@@ -81,11 +84,11 @@ fun OrdersContent(state: OrdersUiState, onBack: () -> Unit, onOpenOrder: (String
             }
 
             state.error != null && state.orders.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                Text(state.error, color = Color.Red, modifier = Modifier.testTag(OrdersTestTags.ERROR))
+                Text(state.error.asString(), color = Color.Red, modifier = Modifier.testTag(OrdersTestTags.ERROR))
             }
 
             state.orders.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                Text("Todavía no tienes pedidos", color = PikarooTextGray, modifier = Modifier.testTag(OrdersTestTags.EMPTY))
+                Text(stringResource(R.string.orders_empty), color = PikarooTextGray, modifier = Modifier.testTag(OrdersTestTags.EMPTY))
             }
 
             else -> LazyColumn(
@@ -112,14 +115,14 @@ private fun OrderRow(order: OrderDto, onClick: () -> Unit) {
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Pedido #${order.number}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.order_number, order.number), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 Text(
-                    text = if (order.fulfilment == Fulfilment.PICKUP) "Recoger en tienda" else "Entrega a domicilio",
+                    text = stringResource(if (order.fulfilment == Fulfilment.PICKUP) R.string.order_fulfilment_pickup else R.string.order_fulfilment_delivery),
                     fontSize = 12.sp,
                     color = PikarooTextGray
                 )
                 Text(
-                    text = order.status.label(order.fulfilment),
+                    text = stringResource(order.status.labelRes(order.fulfilment)),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = PikarooOrange
