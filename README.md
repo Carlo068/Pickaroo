@@ -1,5 +1,7 @@
 # Pickaroo
 
+> **Taking over the project?** Start with the [handover](https://github.com/Carlo068/PickarooAPI/blob/main/docs/handover/HANDOVER.md) (kept in the PickarooAPI repository): how to run the backend, the dashboard and this Android app, the working rules, what is merged, what is in flight (the language branches `codex/PIC-99-string-resources` and `codex/PIC-100-language-choice` and what they still need) and what to do next.
+
 Pickaroo is a platform that allows small businesses to easily offer pickup
 services to their customers without building complex delivery infrastructure.
 
