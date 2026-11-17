@@ -1,7 +1,6 @@
 package com.example.pikaroo.ui.user
 
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
@@ -15,6 +14,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.pikaroo.MainActivity
+import com.example.pikaroo.PikarooTestRunner
 import com.example.pikaroo.appContainer
 import com.example.pikaroo.common.locale.AppCompatLanguageStore
 import com.example.pikaroo.common.locale.AppLanguage
@@ -55,20 +55,19 @@ class LanguageChoiceTest {
         container.sessionRepository.clear()
         runBlocking { container.sessionRepository.save(container.authApi.login(LoginRequest("customer1", "demo1234"))) }
         container.sessionRepository.setActiveMode(RoleMode.CUSTOMER)
-        runOnMain { languages.set(AppLanguage.SYSTEM) }
+        PikarooTestRunner.clearAppLanguage(context)
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 
     @After
     fun tearDown() {
-        // Close first so no activity is recreated mid-teardown, then clear the app language.
+        // Close first so no activity is recreated mid-teardown, then clear the app language. With no
+        // activity left, AppCompatDelegate.setApplicationLocales would do nothing on Android 13+.
         scenario?.close()
-        runOnMain { AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList()) }
+        PikarooTestRunner.clearAppLanguage(context)
         container.sessionRepository.clear()
         preferences.putBoolean(ONBOARDING_KEY, onboardingWasCompleted)
     }
-
-    private fun runOnMain(block: () -> Unit) = instrumentation.runOnMainSync(block)
 
     private fun waitForTag(tag: String) {
         composeRule.waitUntil(10_000) { composeRule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }

@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
+import android.os.LocaleList
 import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
@@ -31,6 +32,13 @@ import java.util.Locale
  * language must put it back to `AppLanguage.SYSTEM` in its `@After`: on Android 13+ the system
  * keeps the per-app locale, even across reinstalls. As a safety net, [ClearAppLocale] clears any
  * app language before every test, so a leak from one test cannot turn the others English.
+ *
+ * Clear it with [clearAppLanguage], not with `AppCompatDelegate.setApplicationLocales`: on Android
+ * 13+ AppCompat only reaches the system's LocaleManager through a live AppCompat activity. With no
+ * activity (before `ActivityScenario.launch`, after `close`, in a RunListener) its setter does
+ * nothing and its getter returns an empty list. That is how one test's English once leaked into
+ * every later test: the teardown and the listener both ran without an activity, so neither cleared
+ * the language, and [pinActivity], which asks LocaleManager, saw a chosen language and stood down.
  *
  * Limits: Resources created later by the system for something that is not an Activity or the
  * Application (for example the foreground service's own context) still follow the device
@@ -70,34 +78,44 @@ class PikarooTestRunner : AndroidJUnitRunner() {
         pin(activity.resources)
     }
 
-    /** True when the app has its own language (anything but "System default"). Works on every API level. */
-    private fun appLanguageChosen(context: Context): Boolean =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            !context.getSystemService(LocaleManager::class.java).applicationLocales.isEmpty
-        } else {
-            !AppCompatDelegate.getApplicationLocales().isEmpty
-        }
-
-    @Suppress("DEPRECATION")
-    private fun pin(resources: Resources) {
-        val configuration = android.content.res.Configuration(resources.configuration)
-        configuration.setLocale(TEST_LOCALE)
-        resources.updateConfiguration(configuration, resources.displayMetrics)
-    }
-
     /** Runs before every test (and its @Before): puts the app language back to "System default". */
     class ClearAppLocale : RunListener() {
         override fun testStarted(description: Description) {
-            val instrumentation = InstrumentationRegistry.getInstrumentation()
-            instrumentation.runOnMainSync {
-                if (!AppCompatDelegate.getApplicationLocales().isEmpty) {
-                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
-                }
-            }
+            clearAppLanguage(InstrumentationRegistry.getInstrumentation().targetContext)
         }
     }
 
     companion object {
         val TEST_LOCALE: Locale = Locale("es")
+
+        /**
+         * Puts the app language back to "System default", with or without a running activity.
+         * On Android 13+ it goes to LocaleManager directly (see the class KDoc for why).
+         */
+        fun clearAppLanguage(context: Context) {
+            if (!appLanguageChosen(context)) return
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList.getEmptyLocaleList()
+            } else {
+                InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+                }
+            }
+        }
+
+        /** True when the app has its own language (anything but "System default"). Works on every API level. */
+        private fun appLanguageChosen(context: Context): Boolean =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                !context.getSystemService(LocaleManager::class.java).applicationLocales.isEmpty
+            } else {
+                !AppCompatDelegate.getApplicationLocales().isEmpty
+            }
+
+        @Suppress("DEPRECATION")
+        private fun pin(resources: Resources) {
+            val configuration = android.content.res.Configuration(resources.configuration)
+            configuration.setLocale(TEST_LOCALE)
+            resources.updateConfiguration(configuration, resources.displayMetrics)
+        }
     }
 }
