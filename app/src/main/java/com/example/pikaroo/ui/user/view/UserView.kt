@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -13,6 +15,9 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.semantics.Role
+import com.example.pikaroo.common.locale.AppLanguage
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pikaroo.ui.auth.model.RoleMode
 import com.example.pikaroo.ui.auth.view.ModeSwitchButtons
 import com.example.pikaroo.ui.cart.view.CartIconButton
+import com.example.pikaroo.ui.theme.PikarooOrange
 import com.example.pikaroo.ui.theme.PikarooTheme
 import com.example.pikaroo.ui.user.viewmodel.UserViewModel
 import com.example.pikaroo.ui.user.model.UserState
@@ -39,6 +45,12 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.annotation.StringRes
 import com.example.pikaroo.common.text.asString
 
+object UserTestTags {
+    const val LANGUAGE_ROW = "user_language"
+    const val LANGUAGE_DIALOG = "language_dialog"
+    fun languageOption(language: AppLanguage) = "language_option_${language.name}"
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserView(
@@ -50,9 +62,13 @@ fun UserView(
     onOpenCart: () -> Unit = {},
     viewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
 ) {
+    LaunchedEffect(Unit) { viewModel.refreshLanguage() }
     UserContent(
         state = viewModel.state,
         onRetry = viewModel::refresh,
+        onOpenLanguageDialog = viewModel::openLanguageDialog,
+        onSelectLanguage = viewModel::selectLanguage,
+        onDismissLanguageDialog = viewModel::dismissLanguageDialog,
         onLogout = onLogout,
         otherModes = otherModes,
         onSwitchMode = onSwitchMode,
@@ -67,6 +83,9 @@ fun UserView(
 fun UserContent(
     state: UserState,
     onRetry: () -> Unit = {},
+    onOpenLanguageDialog: () -> Unit = {},
+    onSelectLanguage: (AppLanguage) -> Unit = {},
+    onDismissLanguageDialog: () -> Unit = {},
     onLogout: () -> Unit = {},
     otherModes: List<RoleMode> = emptyList(),
     onSwitchMode: (RoleMode) -> Unit = {},
@@ -74,6 +93,13 @@ fun UserContent(
     cartItemCount: Int = 0,
     onOpenCart: () -> Unit = {}
 ) {
+    if (state.showLanguageDialog) {
+        LanguageDialog(
+            selected = state.language,
+            onSelect = onSelectLanguage,
+            onDismiss = onDismissLanguageDialog
+        )
+    }
     Scaffold(
         topBar = {
             Row(
@@ -206,6 +232,16 @@ fun UserContent(
                 subtitle = stringResource(R.string.user_change_email_subtitle)
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+            ProfileActionCard(
+                icon = Icons.Default.Language,
+                iconTint = Color(0xFFF15A24),
+                title = stringResource(R.string.user_language_title),
+                subtitle = stringResource(state.language.labelRes()),
+                onClick = onOpenLanguageDialog,
+                modifier = Modifier.testTag(UserTestTags.LANGUAGE_ROW)
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             // Section Header
@@ -329,6 +365,49 @@ private fun roleLabelRes(role: String): Int? = when (role) {
     "staff" -> R.string.user_role_staff
     "driver" -> R.string.user_role_driver
     else -> null
+}
+
+private fun AppLanguage.labelRes(): Int = when (this) {
+    AppLanguage.SYSTEM -> R.string.user_language_system
+    AppLanguage.SPANISH -> R.string.user_language_spanish
+    AppLanguage.ENGLISH -> R.string.user_language_english
+}
+
+@Composable
+private fun LanguageDialog(selected: AppLanguage, onSelect: (AppLanguage) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag(UserTestTags.LANGUAGE_DIALOG),
+        title = { Text(stringResource(R.string.user_language_title)) },
+        text = {
+            Column(modifier = Modifier.selectableGroup()) {
+                AppLanguage.entries.forEach { language ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(selected = language == selected, role = Role.RadioButton, onClick = { onSelect(language) })
+                            .padding(vertical = 4.dp)
+                            .testTag(UserTestTags.languageOption(language)),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = language == selected,
+                            onClick = null,
+                            colors = RadioButtonDefaults.colors(selectedColor = PikarooOrange)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(stringResource(language.labelRes()))
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = PikarooOrange)) {
+                Text(stringResource(R.string.common_cancel))
+            }
+        }
+    )
 }
 
 @Composable

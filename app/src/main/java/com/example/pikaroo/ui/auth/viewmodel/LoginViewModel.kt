@@ -185,6 +185,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private fun messageForHttp(code: Int): UiText = when (code) {
         401 -> UiText.Res(R.string.login_error_invalid_credentials)
         400 -> UiText.Res(R.string.login_error_bad_request)
-        else -> UiText.Res(R.string.login_error_generic, code)
+        else -> UiText.Res.of(R.string.login_error_generic, code)
     }
 }
