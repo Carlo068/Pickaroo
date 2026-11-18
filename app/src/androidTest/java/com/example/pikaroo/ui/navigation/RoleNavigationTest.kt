@@ -15,10 +15,13 @@ import com.example.pikaroo.appContainer
 import com.example.pikaroo.common.mock.MockErrors
 import com.example.pikaroo.common.preferences.AppPreferences
 import com.example.pikaroo.ui.auth.model.LoginRequest
+import com.example.pikaroo.ui.auth.model.LoginResponse
 import com.example.pikaroo.ui.driver.location.DeliveryTrackingService
 import com.example.pikaroo.ui.auth.model.LogoutRequest
 import com.example.pikaroo.ui.auth.model.Permission
+import com.example.pikaroo.ui.auth.model.RoleAssignment
 import com.example.pikaroo.ui.auth.model.RoleMode
+import com.example.pikaroo.ui.auth.model.UserDto
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -197,6 +200,30 @@ class RoleNavigationTest {
         composeRule.onNodeWithText("forbidden").assertDoesNotExist()
         composeRule.waitUntil(5_000) { denied == 1 }
         assertTrue(denied == 1)
+    }
+
+    @Test
+    fun customerRoleWithoutCartPermissionCanOpenCustomerHome() {
+        container.sessionRepository.save(
+            LoginResponse(
+                access = "access",
+                refresh = "refresh",
+                user = UserDto("customer-id", "cliente@demo.mx", "Cliente Demo", "cliente@demo.mx"),
+                roles = listOf(RoleAssignment("customer")),
+                permissions = emptyList()
+            )
+        )
+        var denied = 0
+
+        composeRule.setContent {
+            RequireRoleMode(container.sessionRepository, RoleMode.CUSTOMER, onDenied = { denied++ }) {
+                Text("customer home")
+            }
+        }
+
+        composeRule.onNodeWithText("customer home").assertIsDisplayed()
+        assertFalse(container.sessionRepository.can(Permission.CART_USE))
+        assertEquals(0, denied)
     }
 
     private companion object {
