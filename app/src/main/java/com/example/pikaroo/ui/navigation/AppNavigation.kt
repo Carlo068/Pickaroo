@@ -91,7 +91,7 @@ fun AppNavigation() {
 
         composable(AppRoute.Tabs.route) {
             val logoutViewModel: LogoutViewModel = viewModel()
-            RequirePermission(session, Permission.CART_USE, onDenied = { goHome(AppRoute.Tabs.route) }) {
+            RequireRoleMode(session, RoleMode.CUSTOMER, onDenied = { goHome(AppRoute.Tabs.route) }) {
                 Box(Modifier.fillMaxSize().testTag(NavTestTags.CUSTOMER_HOME)) {
                     TabsScaffold(
                         onLogout = {
